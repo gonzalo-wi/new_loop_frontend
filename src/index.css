@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  body {
+    @apply bg-zinc-50 text-zinc-900;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Scrollbar — minimal, non-intrusive */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-zinc-200;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-zinc-300;
+  }
+
+  /* Tabular numbers for all data displays */
+  table, .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Tighter focus ring that matches the design */
+  :focus-visible {
+    @apply outline-none ring-1 ring-zinc-400 ring-offset-1;
+  }
+}
+
+@layer utilities {
+  /* Used for the active sidebar indicator */
+  .sidebar-active {
+    @apply border-l-[3px] border-zinc-900;
+  }
+}
