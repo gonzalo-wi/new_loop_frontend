@@ -1,32 +1,34 @@
-import type { ID, OperationalStatus } from '@/shared/types'
-
-export type AuditEventType =
-  | 'stock_entry'
-  | 'stock_exit'
-  | 'stock_transfer'
-  | 'stock_adjustment'
-  | 'delivery_created'
-  | 'delivery_completed'
-  | 'delivery_cancelled'
-  | 'branch_created'
-  | 'branch_updated'
-  | 'product_created'
-  | 'product_updated'
-  | 'user_login'
-  | 'user_created'
-
 export type AuditLog = {
-  id: ID
-  eventType: AuditEventType
-  entityType: string
-  entityId: ID
-  entityLabel: string
+  id: string
+  userId: string | null
+  userRole: string | null
   action: string
-  description: string
-  userId: ID
-  userName: string
-  userRole: string
-  status: OperationalStatus
-  metadata?: Record<string, unknown>
+  entityName: string
+  entityId: string
+  oldValue: string | null
+  newValue: string | null
+  reason: string | null
+  source: string
+  ipAddress: string | null
   createdAt: string
+}
+
+export type AuditPage = {
+  content: AuditLog[]
+  page: {
+    size: number
+    number: number
+    totalElements: number
+    totalPages: number
+  }
+}
+
+export type AuditParams = {
+  entityName?: string
+  action?: string
+  entityId?: string
+  from?: string
+  to?: string
+  page: number
+  size: number
 }
