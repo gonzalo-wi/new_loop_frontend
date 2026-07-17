@@ -61,16 +61,22 @@ export function DeliveriesPage() {
     },
   })
 
-  const filtered = deliveries.filter((d) => {
-    const matchesSearch =
-      !debouncedSearch ||
-      d.code.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-      (d.driver ?? '').toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-      (d.truckPlate ?? '').toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-      d.branchName.toLowerCase().includes(debouncedSearch.toLowerCase())
-    const matchesStatus = !filters.status || d.status === filters.status
-    return matchesSearch && matchesStatus
-  })
+  const filtered = deliveries
+    .filter((d) => {
+      const matchesSearch =
+        !debouncedSearch ||
+        d.code.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        (d.driver ?? '').toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        (d.truckPlate ?? '').toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        d.branchName.toLowerCase().includes(debouncedSearch.toLowerCase())
+      const matchesStatus = !filters.status || d.status === filters.status
+      return matchesSearch && matchesStatus
+    })
+    // Natural sort so "rto10" lands after "rto9" instead of after "rto1"; the
+    // backend's string sort can't do this.
+    .sort((a, b) =>
+      a.code.localeCompare(b.code, undefined, { numeric: true, sensitivity: 'base' })
+    )
 
   const columns: TableColumn<Delivery>[] = [
     {
