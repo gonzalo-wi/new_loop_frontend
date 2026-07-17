@@ -332,7 +332,7 @@ export function ProductsPage() {
               <button
                 onClick={saveOrder}
                 disabled={isSaving}
-                className="flex h-9 items-center gap-2 rounded-sm bg-zinc-900 px-5 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50"
+                className="flex h-9 items-center gap-2 rounded-sm bg-blue-600 px-5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
               >
                 {isSaving && <Loader2 size={13} className="animate-spin" />}
                 {isSaving ? 'Guardando...' : 'Guardar orden'}

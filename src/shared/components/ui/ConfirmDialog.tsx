@@ -18,7 +18,7 @@ type Props = {
 const VARIANT_CONFIG: Record<Variant, { iconClass: string; confirmClass: string }> = {
   danger:  { iconClass: 'bg-red-50 text-red-500',   confirmClass: 'bg-red-600 hover:bg-red-700 text-white' },
   warning: { iconClass: 'bg-amber-50 text-amber-500', confirmClass: 'bg-amber-600 hover:bg-amber-700 text-white' },
-  info:    { iconClass: 'bg-blue-50 text-blue-500',  confirmClass: 'bg-zinc-900 hover:bg-zinc-700 text-white' },
+  info:    { iconClass: 'bg-blue-50 text-blue-500',  confirmClass: 'bg-blue-600 hover:bg-blue-700 text-white' },
 }
 
 export function ConfirmDialog({

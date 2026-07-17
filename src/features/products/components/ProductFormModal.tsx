@@ -212,7 +212,7 @@ export function ProductFormModal({ product, onClose, onSuccess }: Props) {
               <button
                 type="submit"
                 disabled={mutation.isPending}
-                className="flex h-9 items-center gap-2 rounded-sm bg-zinc-900 px-5 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50"
+                className="flex h-9 items-center gap-2 rounded-sm bg-blue-600 px-5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
               >
                 {mutation.isPending && <Loader2 size={13} className="animate-spin" />}
                 {mutation.isPending ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Crear producto'}

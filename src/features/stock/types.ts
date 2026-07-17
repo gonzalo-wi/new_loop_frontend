@@ -37,6 +37,7 @@ export type StockControl = {
   controllerId: string | null
   controlDate: string
   observations?: string
+  truckOrdered: boolean
   items: StockControlItem[]
   createdAt: string
   updatedAt: string
@@ -62,6 +63,7 @@ export type StockControlFormData = {
   controllerId?: string
   controlDate?: string
   observations?: string
+  truckOrdered?: boolean
   items: StockControlItemFormData[]
 }
 
@@ -69,6 +71,7 @@ export type StockControlUpdateData = {
   controllerId?: string
   controlDate?: string
   observations?: string
+  truckOrdered?: boolean
   items?: StockControlItemFormData[]
 }
 
@@ -80,6 +83,23 @@ export type StockControlParams = {
   to?: string
   page: number
   size: number
+}
+
+export type PendingArrivalRoute = {
+  routeId: string
+  routeCode: string
+  branchId: string
+  branchName: string
+  exitControlId: string
+  controlDate: string
+}
+
+export type PendingArrivals = {
+  date: string
+  totalExpected: number
+  arrived: number
+  pending: number
+  pendingRoutes: PendingArrivalRoute[]
 }
 
 // ── Stock Levels (existing) ───────────────────────────────────────────────────

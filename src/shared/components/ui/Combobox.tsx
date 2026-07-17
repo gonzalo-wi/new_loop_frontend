@@ -91,7 +91,7 @@ export function Combobox({
             ? 'cursor-not-allowed border-zinc-200 bg-zinc-50 text-zinc-500'
             : 'cursor-pointer border-zinc-200 bg-white text-zinc-900',
           open && !disabled
-            ? 'border-zinc-400 ring-1 ring-zinc-400'
+            ? 'border-blue-500 ring-1 ring-blue-500'
             : '',
         ].join(' ')}
       >
@@ -153,10 +153,10 @@ export function Combobox({
                   onClick={() => { onChange(o.value); setOpen(false) }}
                   className={[
                     'w-full px-3 py-2 text-left hover:bg-zinc-50',
-                    o.value === value ? 'bg-zinc-50' : '',
+                    o.value === value ? 'bg-blue-50' : '',
                   ].join(' ')}
                 >
-                  <span className={`block text-sm ${o.value === value ? 'font-semibold text-zinc-900' : 'text-zinc-700'}`}>
+                  <span className={`block text-sm ${o.value === value ? 'font-semibold text-blue-700' : 'text-zinc-700'}`}>
                     {o.label}
                   </span>
                   {o.sublabel && (

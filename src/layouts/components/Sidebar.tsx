@@ -6,20 +6,20 @@ import {
   Building2,
   ArrowDownToLine,
   ArrowUpFromLine,
-  Truck,
   Route,
-  GitCompareArrows,
   ClipboardList,
   Users,
   LogOut,
-  Boxes,
+  ShoppingBasket,
+  ClipboardCheck,
+  Droplets,
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { ROUTES } from '@/shared/constants'
 import { useAuthStore } from '@/features/auth/store/auth.store'
 import { ROLE_LABELS } from '@/shared/constants'
 import type { UserRole } from '@/shared/types'
-import { fetchDashboardMetrics } from '@/features/dashboard/services/dashboard.service'
+import { fetchPendingArrivals } from '@/features/stock/services/stock-controls.service'
 
 type NavItem = { to: string; icon: React.ElementType; label: string }
 type NavGroup = { label: string; items: NavItem[] }
@@ -35,20 +35,20 @@ const NAV_GROUPS: NavGroup[] = [
       { to: ROUTES.STOCK_ENTRIES, icon: ArrowDownToLine,  label: 'Entradas' },
       { to: ROUTES.STOCK_EXITS,   icon: ArrowUpFromLine,  label: 'Salidas' },
       { to: ROUTES.DELIVERIES,    icon: Route,            label: 'Repartos' },
-      { to: ROUTES.MOVEMENTS,     icon: GitCompareArrows, label: 'Movimientos' },
+      { to: ROUTES.ORDERS,        icon: ClipboardCheck,   label: 'Pedidos' },
+      { to: ROUTES.DISPENSERS,    icon: Droplets,         label: 'Dispensers' },
     ],
   },
   {
     label: 'Inventario',
     items: [
-      { to: ROUTES.STOCK,    icon: Boxes,   label: 'Stock' },
-      { to: ROUTES.PRODUCTS, icon: Package, label: 'Productos' },
+      { to: ROUTES.PRODUCTS,           icon: Package,        label: 'Productos' },
+      { to: ROUTES.ORDERABLE_PRODUCTS, icon: ShoppingBasket, label: 'Pedibles' },
     ],
   },
   {
     label: 'Logística',
     items: [
-      { to: ROUTES.TRUCKS,   icon: Truck,     label: 'Unidades' },
       { to: ROUTES.BRANCHES, icon: Building2, label: 'Sucursales' },
     ],
   },
@@ -65,18 +65,14 @@ export function Sidebar() {
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()
 
-  // Reads from TanStack Query cache — deduped with DashboardPage
-  const { data: metrics } = useQuery({
-    queryKey: ['dashboard', 'metrics'],
-    queryFn: fetchDashboardMetrics,
-    staleTime: 60_000,
-    refetchInterval: 60_000,
+  const { data: pendingArrivals } = useQuery({
+    queryKey: ['pending-arrivals'],
+    queryFn:  () => fetchPendingArrivals(),
+    staleTime: 30_000,
+    refetchInterval: 30_000,
   })
 
-  const delayedCount = metrics?.delayedMovements ?? 0
-  const pendingCount = metrics?.pendingMovements ?? 0
-  const movBadge     = delayedCount + pendingCount
-  const movBadgeRed  = delayedCount > 0
+  const arrivalBadge = pendingArrivals?.pending ?? 0
 
   function handleLogout() {
     logout()
@@ -84,20 +80,17 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="flex h-full w-56 shrink-0 flex-col border-r border-zinc-200 bg-white">
+    <aside className="flex h-full w-56 shrink-0 flex-col border-r border-zinc-800 bg-zinc-950">
 
       {/* ── Brand ─────────────────────────────────────────────── */}
       {/* Top accent line gives LOOP a distinctive identity marker */}
-      <div className="border-t-[3px] border-t-zinc-500 bg-zinc-950 px-4 pb-4 pt-3.5">
-        <div className="flex items-center gap-3">
-          {/* Monogram — subtle inset highlight on dark */}
-          <div className={[
-            'flex h-8 w-8 shrink-0 items-center justify-center',
-            'rounded-[3px] border border-zinc-700 bg-zinc-900',
-            'shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]',
-          ].join(' ')}>
-            <span className="font-mono text-[15px] font-black tracking-tight text-white">L</span>
-          </div>
+      <div className="border-t-[3px] border-t-blue-600 px-4 pb-4 pt-3.5">
+        <div className="flex items-center gap-2.5">
+          <img
+            src="/logoLoop.png"
+            alt="LOOP"
+            className="h-9 w-9 shrink-0 object-contain"
+          />
 
           <div className="min-w-0 leading-none">
             <div className="flex items-baseline gap-2">
@@ -117,16 +110,16 @@ export function Sidebar() {
           <div key={gi} className={cn(gi > 0 && 'mt-1')}>
             {group.label && (
               <div className={cn('flex items-center gap-2 px-4 pb-1', gi > 0 && 'pt-3')}>
-                <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-zinc-400">
+                <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-zinc-500">
                   {group.label}
                 </span>
-                <span className="flex-1 border-t border-zinc-100" />
+                <span className="flex-1 border-t border-zinc-800" />
               </div>
             )}
             <ul>
               {group.items.map((item) => {
-                const badge = item.to === ROUTES.MOVEMENTS && movBadge > 0
-                  ? { count: movBadge, red: movBadgeRed }
+                const badge = item.to === ROUTES.STOCK_ENTRIES && arrivalBadge > 0
+                  ? { count: arrivalBadge, red: false }
                   : null
 
                 return (
@@ -139,8 +132,8 @@ export function Sidebar() {
                           'flex items-center gap-2.5 py-[7px] pr-3 text-sm transition-colors',
                           'border-l-[3px]',
                           isActive
-                            ? 'border-l-zinc-900 bg-zinc-50 pl-[10px] font-semibold text-zinc-950'
-                            : 'border-l-transparent pl-[10px] text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
+                            ? 'border-l-blue-500 bg-zinc-900 pl-[10px] font-semibold text-white'
+                            : 'border-l-transparent pl-[10px] text-zinc-400 hover:bg-zinc-900 hover:text-white'
                         )
                       }
                     >
@@ -150,17 +143,14 @@ export function Sidebar() {
                             size={14}
                             className={cn(
                               'shrink-0 transition-colors',
-                              isActive ? 'text-zinc-900' : 'text-zinc-400'
+                              isActive ? 'text-blue-400' : 'text-zinc-500'
                             )}
                           />
                           <span className="flex-1 leading-none tracking-[-0.01em]">
                             {item.label}
                           </span>
                           {badge && (
-                            <span className={cn(
-                              'mr-0.5 flex h-4 min-w-[1rem] items-center justify-center rounded-[3px] px-1 text-[9px] font-bold text-white',
-                              badge.red ? 'bg-red-500' : 'bg-amber-500'
-                            )}>
+                            <span className="mr-0.5 flex h-4 min-w-[1rem] items-center justify-center rounded-[3px] bg-amber-500 px-1 text-[9px] font-bold text-white">
                               {badge.count > 9 ? '9+' : badge.count}
                             </span>
                           )}
@@ -176,31 +166,31 @@ export function Sidebar() {
       </nav>
 
       {/* ── User footer ───────────────────────────────────────── */}
-      <div className="border-t border-zinc-100">
+      <div className="border-t border-zinc-800">
         {user && (
           <div className="flex items-center gap-2.5 px-3 py-2.5">
-            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[3px] bg-zinc-900 text-[10px] font-bold uppercase text-white">
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[3px] bg-blue-600 text-[10px] font-bold uppercase text-white">
               {user.name.charAt(0)}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-semibold leading-tight text-zinc-800">
+              <p className="truncate text-xs font-semibold leading-tight text-white">
                 {user.name}
               </p>
-              <p className="mt-0.5 text-[9px] font-medium uppercase tracking-wide text-zinc-400">
+              <p className="mt-0.5 text-[9px] font-medium uppercase tracking-wide text-zinc-500">
                 {ROLE_LABELS[user.role as UserRole] ?? user.role}
               </p>
             </div>
             <button
               onClick={handleLogout}
               title="Cerrar sesión"
-              className="shrink-0 rounded p-1 text-zinc-400 transition-colors hover:text-zinc-700"
+              className="shrink-0 rounded p-1 text-zinc-500 transition-colors hover:text-white"
             >
               <LogOut size={13} />
             </button>
           </div>
         )}
-        <div className="border-t border-zinc-100 px-3 py-1.5">
-          <p className="text-[9px] font-medium uppercase tracking-widest text-zinc-300">
+        <div className="border-t border-zinc-800 px-3 py-1.5">
+          <p className="text-[9px] font-medium uppercase tracking-widest text-zinc-600">
             Producción · {new Date().getFullYear()}
           </p>
         </div>

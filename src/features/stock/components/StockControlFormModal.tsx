@@ -31,6 +31,7 @@ const schema = z.object({
   routeId:      z.string().min(1, 'Seleccionar reparto'),
   controlDate:  z.string().optional(),
   observations: z.string().max(500).optional(),
+  truckOrdered: z.boolean(),
   items:        z.array(itemSchema),
 })
 
@@ -79,11 +80,13 @@ export function StockControlFormModal({ type, control, onClose, onSuccess }: Pro
         routeId:      control.routeId,
         controlDate:  control.controlDate,
         observations: control.observations ?? '',
+        truckOrdered: control.truckOrdered,
         items:        buildItems(control.items),
       }
     }
     return {
-      branchId: '', routeId: '', controlDate: type === 'ENTRY' ? todayISO : '', observations: '',
+      branchId: '', routeId: '', controlDate: type === 'ENTRY' ? todayISO : '',
+      observations: '', truckOrdered: true,
       items:    buildItems(),
     }
   }
@@ -110,6 +113,7 @@ export function StockControlFormModal({ type, control, onClose, onSuccess }: Pro
         return updateStockControl(control.id, {
           controlDate:  data.controlDate  || undefined,
           observations: data.observations || undefined,
+          truckOrdered: data.truckOrdered,
           items: data.items,
         })
       }
@@ -119,6 +123,7 @@ export function StockControlFormModal({ type, control, onClose, onSuccess }: Pro
         routeId:      data.routeId,
         controlDate:  data.controlDate  || undefined,
         observations: data.observations || undefined,
+        truckOrdered: data.truckOrdered,
         items: data.items,
       })
     },
@@ -216,6 +221,22 @@ export function StockControlFormModal({ type, control, onClose, onSuccess }: Pro
               <FormField label="Observaciones" htmlFor="observations" error={errors.observations?.message} fullWidth>
                 <textarea id="observations" rows={2} className={textareaClassName} {...register('observations')} />
               </FormField>
+
+              {/* Truck ordered — full width, rendered outside the 2-col grid via fullWidth */}
+              <div className="sm:col-span-2">
+                <label className="flex cursor-pointer items-center gap-3 rounded-sm border border-zinc-200 bg-zinc-50 px-4 py-3 hover:bg-zinc-100 has-[:checked]:border-zinc-300 has-[:checked]:bg-white">
+                  <input
+                    id="truckOrdered"
+                    type="checkbox"
+                    className="h-4 w-4 rounded-sm border-zinc-300 accent-zinc-900"
+                    {...register('truckOrdered')}
+                  />
+                  <div>
+                    <p className="text-sm font-medium text-zinc-900">Camión ordenado</p>
+                    <p className="text-xs text-zinc-400">Indica si el camión fue solicitado para este control</p>
+                  </div>
+                </label>
+              </div>
             </FormSection>
 
             {/* Products table */}
@@ -281,7 +302,7 @@ export function StockControlFormModal({ type, control, onClose, onSuccess }: Pro
                                   '[&::-webkit-outer-spin-button]:appearance-none',
                                   rowErrors?.[fieldName]
                                     ? 'border-red-300 bg-red-50 text-red-700 focus:border-red-400 focus:ring-red-400'
-                                    : 'border-zinc-200 bg-white text-zinc-900 focus:border-zinc-400 focus:ring-zinc-400 hover:border-zinc-300',
+                                    : 'border-zinc-200 bg-white text-zinc-900 focus:border-blue-500 focus:ring-blue-500 hover:border-zinc-300',
                                 ].join(' ')}
                                 {...register(`items.${index}.${fieldName}`)}
                               />
@@ -320,7 +341,7 @@ export function StockControlFormModal({ type, control, onClose, onSuccess }: Pro
               <button
                 type="submit"
                 disabled={mutation.isPending || productsLoading}
-                className="flex h-9 items-center gap-2 rounded-sm bg-zinc-900 px-5 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50"
+                className="flex h-9 items-center gap-2 rounded-sm bg-blue-600 px-5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
               >
                 {mutation.isPending && <Loader2 size={13} className="animate-spin" />}
                 {mutation.isPending

@@ -5,6 +5,7 @@ import type {
   StockControlParams,
   StockControlFormData,
   StockControlUpdateData,
+  PendingArrivals,
 } from '../types'
 
 type ApiResponse<T> = { data: T; message: string }
@@ -50,6 +51,7 @@ export async function createStockControl(formData: StockControlFormData): Promis
       controllerId: formData.controllerId  || undefined,
       controlDate:  formData.controlDate   || undefined,
       observations: formData.observations  || undefined,
+      truckOrdered: formData.truckOrdered,
       items: formData.items.map((item) => ({
         productId:        item.productId,
         totalQuantity:    item.totalQuantity,
@@ -64,6 +66,19 @@ export async function createStockControl(formData: StockControlFormData): Promis
   }
 }
 
+export async function fetchPendingArrivals(
+  params?: { date?: string; branchId?: string }
+): Promise<PendingArrivals> {
+  const q = new URLSearchParams()
+  if (params?.date)     q.set('date', params.date)
+  if (params?.branchId) q.set('branchId', params.branchId)
+  const qs = q.toString()
+  const { data } = await api.get<ApiResponse<PendingArrivals>>(
+    `/stock-controls/pending-arrivals${qs ? `?${qs}` : ''}`
+  )
+  return data.data
+}
+
 export async function updateStockControl(
   id: string,
   payload: StockControlUpdateData
@@ -73,6 +88,7 @@ export async function updateStockControl(
       controllerId: payload.controllerId || undefined,
       controlDate:  payload.controlDate  || undefined,
       observations: payload.observations || undefined,
+      truckOrdered: payload.truckOrdered,
       items: payload.items?.map((item) => ({
         productId:        item.productId,
         totalQuantity:    item.totalQuantity,

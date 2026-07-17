@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, Pencil, PowerOff, Power } from 'lucide-react'
 import { fetchDeliveries, deactivateDelivery, activateDelivery } from '../services/deliveries.service'
+import { fetchUsers } from '@/features/users/services/users.service'
 import type { Delivery } from '../types'
 import {
   PageHeader,
@@ -34,6 +35,13 @@ export function DeliveriesPage() {
     queryKey: ['deliveries'],
     queryFn: fetchDeliveries,
   })
+
+  const { data: users = [] } = useQuery({
+    queryKey: ['users'],
+    queryFn: fetchUsers,
+  })
+
+  const userMap = Object.fromEntries(users.map((u) => [u.id, u.name]))
 
   const deactivateMutation = useMutation({
     mutationFn: (id: string) => deactivateDelivery(id),
@@ -85,14 +93,19 @@ export function DeliveriesPage() {
     {
       key: 'driver',
       header: 'Conductor / Vehículo',
-      render: (d) => (
-        <div>
-          <p className="text-sm text-zinc-800">{d.driver ?? <span className="text-zinc-300">—</span>}</p>
-          {d.truckPlate && (
-            <p className="font-mono text-xs text-zinc-400 uppercase">{d.truckPlate}</p>
-          )}
-        </div>
-      ),
+      render: (d) => {
+        const driverName = (d.driverId ? userMap[d.driverId] : undefined) ?? d.driver
+        return (
+          <div>
+            {driverName
+              ? <p className="text-sm text-zinc-800">{driverName}</p>
+              : <span className="text-zinc-300 text-sm">—</span>}
+            {d.truckPlate && (
+              <p className="font-mono text-xs text-zinc-400 uppercase">{d.truckPlate}</p>
+            )}
+          </div>
+        )
+      },
     },
     {
       key: 'observations',

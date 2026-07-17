@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-// In dev, use the Vite proxy (/api → localhost:8080) to avoid CORS.
+// In dev, use the Vite proxy (/api → 192.168.0.42:8095) to avoid CORS.
 // In prod, set VITE_API_URL to the real backend origin (e.g. https://api.loop.com).
 const BASE_URL = import.meta.env.VITE_API_URL ?? '/api'
 

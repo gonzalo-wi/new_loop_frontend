@@ -9,6 +9,7 @@ type RouteDto = {
   branchId: string
   branchName: string
   branchCode: string
+  driverId?: string
   driver?: string
   truckPlate?: string
   active: boolean
@@ -28,17 +29,18 @@ type ApiResponse<T> = { data: T; message: string }
 
 function fromDto(dto: RouteDto): Delivery {
   return {
-    id:          dto.id,
-    code:        dto.code,
-    branchId:    dto.branchId,
-    branchName:  dto.branchName,
-    branchCode:  dto.branchCode,
-    driver:      dto.driver,
-    truckPlate:  dto.truckPlate,
-    status:      dto.active ? 'active' : 'inactive',
+    id:           dto.id,
+    code:         dto.code,
+    branchId:     dto.branchId,
+    branchName:   dto.branchName,
+    branchCode:   dto.branchCode,
+    driverId:     dto.driverId,
+    driver:       dto.driver,
+    truckPlate:   dto.truckPlate,
+    status:       dto.active ? 'active' : 'inactive',
     observations: dto.observations,
-    createdAt:   dto.createdAt,
-    updatedAt:   dto.updatedAt,
+    createdAt:    dto.createdAt,
+    updatedAt:    dto.updatedAt,
   }
 }
 
@@ -46,6 +48,7 @@ function toCreateDto(data: DeliveryFormData) {
   return {
     code:         data.code,
     branchId:     data.branchId,
+    driverId:     data.driverId     || undefined,
     driver:       data.driver       || undefined,
     truckPlate:   data.truckPlate   || undefined,
     observations: data.observations || undefined,
@@ -55,6 +58,7 @@ function toCreateDto(data: DeliveryFormData) {
 function toUpdateDto(data: DeliveryFormData) {
   return {
     branchId:     data.branchId,
+    driverId:     data.driverId     || undefined,
     driver:       data.driver       || undefined,
     truckPlate:   data.truckPlate   || undefined,
     observations: data.observations || undefined,

@@ -129,7 +129,7 @@ export function DatePicker({ value, onChange, placeholder = 'Seleccionar fecha',
           disabled
             ? 'cursor-not-allowed border-zinc-200 bg-zinc-50 text-zinc-500'
             : 'cursor-pointer border-zinc-200 bg-white',
-          open && !disabled ? 'border-zinc-400 ring-1 ring-zinc-400' : '',
+          open && !disabled ? 'border-blue-500 ring-1 ring-blue-500' : '',
         ].join(' ')}
       >
         <span className={displayValue ? 'text-zinc-900' : 'text-zinc-400'}>
@@ -197,9 +197,9 @@ export function DatePicker({ value, onChange, placeholder = 'Seleccionar fecha',
                       className={[
                         'flex h-7 w-7 items-center justify-center rounded-sm text-xs font-medium transition-colors',
                         isSelected(day)
-                          ? 'bg-zinc-900 text-white'
+                          ? 'bg-blue-600 text-white'
                           : isToday(day)
-                            ? 'border border-zinc-300 text-zinc-900 hover:bg-zinc-100'
+                            ? 'border border-blue-300 text-blue-700 hover:bg-blue-50'
                             : 'text-zinc-700 hover:bg-zinc-100',
                       ].join(' ')}
                     >

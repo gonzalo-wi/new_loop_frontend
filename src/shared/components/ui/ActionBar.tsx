@@ -41,7 +41,7 @@ export function ActionButton({
         'inline-flex items-center gap-1.5 rounded-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50',
         size === 'sm' ? 'px-3 h-8 text-sm' : 'px-4 h-9 text-sm',
         variant === 'primary' &&
-          'bg-zinc-900 text-white hover:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-800 focus:ring-offset-1',
+          'bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1',
         variant === 'secondary' &&
           'border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300',
         variant === 'ghost' && 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900',

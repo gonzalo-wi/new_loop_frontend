@@ -19,6 +19,9 @@ export const ROUTES = {
   USERS: '/users',
   USERS_NEW: '/users/new',
   USERS_EDIT: '/users/:id/edit',
+  ORDERABLE_PRODUCTS: '/orderable-products',
+  ORDERS: '/orders',
+  DISPENSERS: '/dispensers',
 } as const
 
 export const ROLE_LABELS: Record<UserRole, string> = {

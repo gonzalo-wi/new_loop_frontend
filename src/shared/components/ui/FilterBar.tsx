@@ -37,7 +37,7 @@ export function FilterBar({ filters, activeFilters, onChange, onClearAll, classN
           key={group.key}
           value={activeFilters[group.key] ?? ''}
           onChange={(e) => onChange(group.key, e.target.value)}
-          className="h-8 rounded-sm border border-zinc-200 bg-white px-2.5 pr-7 text-sm text-zinc-700 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 appearance-none"
+          className="h-8 rounded-sm border border-zinc-200 bg-white px-2.5 pr-7 text-sm text-zinc-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
         >
           <option value="">{group.label}</option>
           {group.options.map((opt) => (

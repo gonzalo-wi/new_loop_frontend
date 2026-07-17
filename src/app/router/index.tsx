@@ -13,6 +13,9 @@ import { DeliveriesPage } from '@/features/deliveries/pages/DeliveriesPage'
 import { TrucksPage } from '@/features/trucks/pages/TrucksPage'
 import { AuditsPage } from '@/features/audits/pages/AuditsPage'
 import { UsersPage } from '@/features/users/pages/UsersPage'
+import { OrderableProductsPage } from '@/features/orderable-products/pages/OrderableProductsPage'
+import { OrdersPage } from '@/features/orders/pages/OrdersPage'
+import { DispenserMovementsPage } from '@/features/dispensers/pages/DispenserMovementsPage'
 import { ROUTES } from '@/shared/constants'
 
 export const router = createBrowserRouter([
@@ -31,6 +34,9 @@ export const router = createBrowserRouter([
       { path: 'trucks', element: <TrucksPage /> },
       { path: 'audits', element: <AuditsPage /> },
       { path: 'users', element: <UsersPage /> },
+      { path: 'orderable-products', element: <OrderableProductsPage /> },
+      { path: 'orders',     element: <OrdersPage /> },
+      { path: 'dispensers', element: <DispenserMovementsPage /> },
     ],
   },
   {

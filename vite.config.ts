@@ -15,7 +15,7 @@ export default defineConfig({
       // Requests to /api/* are forwarded to the backend; /api prefix is stripped.
       // This avoids browser CORS restrictions during development.
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://192.168.0.42:8095',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },

@@ -6,6 +6,7 @@ export type Delivery = {
   branchId: string
   branchName: string
   branchCode: string
+  driverId?: string
   driver?: string
   truckPlate?: string
   status: OperationalStatus
@@ -17,6 +18,7 @@ export type Delivery = {
 export type DeliveryFormData = {
   code: string
   branchId: string
+  driverId?: string
   driver?: string
   truckPlate?: string
   observations?: string

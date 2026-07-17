@@ -1,0 +1,9 @@
+services:
+  web:
+    build: .
+    image: loop-front:latest
+    ports:
+      - "8080:80"
+    environment:
+      BACKEND_URL: ${BACKEND_URL:-http://192.168.0.42:8095}
+    restart: unless-stopped

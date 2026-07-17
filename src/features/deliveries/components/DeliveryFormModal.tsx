@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { X, Loader2 } from 'lucide-react'
@@ -7,17 +7,20 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import type { Delivery, DeliveryFormData } from '../types'
 import { createDelivery, updateDelivery } from '../services/deliveries.service'
 import { fetchBranches } from '@/features/branches/services/branches.service'
+import { fetchUsers } from '@/features/users/services/users.service'
 import {
   FormSection,
   FormField,
   inputClassName,
   selectClassName,
   textareaClassName,
+  Combobox,
 } from '@/shared/components/ui'
 
 const schema = z.object({
   code:         z.string().min(1, 'Requerido').max(50),
   branchId:     z.string().min(1, 'Seleccionar una sucursal'),
+  driverId:     z.string().optional(),
   driver:       z.string().max(150).optional(),
   truckPlate:   z.string().max(20).optional(),
   observations: z.string().max(500).optional(),
@@ -39,46 +42,47 @@ export function DeliveryFormModal({ delivery, onClose, onSuccess }: Props) {
     queryFn: fetchBranches,
   })
 
+  const { data: users = [] } = useQuery({
+    queryKey: ['users'],
+    queryFn: fetchUsers,
+  })
+
   const activeBranches = branches.filter((b) => b.status === 'active')
+  const driverUsers    = users.filter((u) => u.status === 'active' && u.role === 'delivery_driver')
+
+  function buildDefaults(d: Delivery | null) {
+    return d
+      ? {
+          code:         d.code,
+          branchId:     d.branchId,
+          driverId:     d.driverId ?? '',
+          driver:       d.driver ?? '',
+          truckPlate:   d.truckPlate ?? '',
+          observations: d.observations ?? '',
+        }
+      : { code: '', branchId: '', driverId: '', driver: '', truckPlate: '', observations: '' }
+  }
 
   const {
     register,
     handleSubmit,
     reset,
+    control,
     setError,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: delivery
-      ? {
-          code:         delivery.code,
-          branchId:     delivery.branchId,
-          driver:       delivery.driver ?? '',
-          truckPlate:   delivery.truckPlate ?? '',
-          observations: delivery.observations ?? '',
-        }
-      : { code: '', branchId: '', driver: '', truckPlate: '', observations: '' },
+    defaultValues: buildDefaults(delivery),
   })
 
-  useEffect(() => {
-    reset(
-      delivery
-        ? {
-            code:         delivery.code,
-            branchId:     delivery.branchId,
-            driver:       delivery.driver ?? '',
-            truckPlate:   delivery.truckPlate ?? '',
-            observations: delivery.observations ?? '',
-          }
-        : { code: '', branchId: '', driver: '', truckPlate: '', observations: '' }
-    )
-  }, [delivery, reset])
+  useEffect(() => { reset(buildDefaults(delivery)) }, [delivery]) // eslint-disable-line
 
   const mutation = useMutation({
     mutationFn: (data: FormData) => {
       const formData: DeliveryFormData = {
         code:         data.code,
         branchId:     data.branchId,
+        driverId:     data.driverId     || undefined,
         driver:       data.driver       || undefined,
         truckPlate:   data.truckPlate   || undefined,
         observations: data.observations || undefined,
@@ -161,8 +165,38 @@ export function DeliveryFormModal({ delivery, onClose, onSuccess }: Props) {
               </FormField>
             </FormSection>
 
-            <FormSection title="Vehículo y conductor">
-              <FormField label="Conductor" htmlFor="driver" error={errors.driver?.message}>
+            <FormSection title="Conductor y vehículo">
+              <FormField
+                label="Usuario repartidor"
+                error={errors.driverId?.message}
+                hint="Vincula el reparto a un usuario del sistema"
+                fullWidth
+              >
+                <Controller
+                  control={control}
+                  name="driverId"
+                  render={({ field }) => (
+                    <Combobox
+                      value={field.value ?? ''}
+                      onChange={field.onChange}
+                      placeholder="Buscar repartidor..."
+                      searchPlaceholder="Nombre o usuario..."
+                      options={driverUsers.map((u) => ({
+                        value:    u.id,
+                        label:    u.name,
+                        sublabel: `@${u.username}`,
+                      }))}
+                    />
+                  )}
+                />
+              </FormField>
+
+              <FormField
+                label="Conductor (libre)"
+                htmlFor="driver"
+                error={errors.driver?.message}
+                hint="Nombre manual si no está en el sistema"
+              >
                 <input id="driver" className={inputClassName} {...register('driver')} />
               </FormField>
               <FormField
@@ -216,7 +250,7 @@ export function DeliveryFormModal({ delivery, onClose, onSuccess }: Props) {
               <button
                 type="submit"
                 disabled={mutation.isPending}
-                className="flex h-9 items-center gap-2 rounded-sm bg-zinc-900 px-5 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50"
+                className="flex h-9 items-center gap-2 rounded-sm bg-blue-600 px-5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
               >
                 {mutation.isPending && <Loader2 size={13} className="animate-spin" />}
                 {mutation.isPending

@@ -55,8 +55,7 @@ function toCreateDto(data: BranchFormData) {
 }
 
 function toUpdateDto(data: BranchFormData) {
-  const { code: _code, ...rest } = toCreateDto(data)
-  return rest   // code is not updatable per API spec
+  return toCreateDto(data)
 }
 
 function extractMessage(err: unknown): string {

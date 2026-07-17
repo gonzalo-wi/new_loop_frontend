@@ -12,7 +12,6 @@ import {
   inputClassName,
   selectClassName,
 } from '@/shared/components/ui'
-import { VAT_CONDITIONS } from '@/shared/constants'
 
 const schema = z.object({
   code: z.string().min(1, 'Requerido').max(20, 'Máximo 20 caracteres').toUpperCase(),
@@ -151,13 +150,14 @@ export function BranchFormModal({ branch, onClose, onSuccess }: Props) {
                 htmlFor="vatCondition"
                 required
                 error={errors.vatCondition?.message}
+                hint="Ej: 3"
               >
-                <select id="vatCondition" className={selectClassName} {...register('vatCondition')}>
-                  <option value="">Seleccionar...</option>
-                  {VAT_CONDITIONS.map((c) => (
-                    <option key={c.value} value={c.value}>{c.label}</option>
-                  ))}
-                </select>
+                <input
+                  id="vatCondition"
+                  className={inputClassName}
+                  maxLength={10}
+                  {...register('vatCondition')}
+                />
               </FormField>
             </FormSection>
 
@@ -190,7 +190,7 @@ export function BranchFormModal({ branch, onClose, onSuccess }: Props) {
               <button
                 type="submit"
                 disabled={mutation.isPending}
-                className="flex h-9 items-center gap-2 rounded-sm bg-zinc-900 px-5 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50"
+                className="flex h-9 items-center gap-2 rounded-sm bg-blue-600 px-5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
               >
                 {mutation.isPending && <Loader2 size={13} className="animate-spin" />}
                 {mutation.isPending ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Crear sucursal'}

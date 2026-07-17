@@ -15,9 +15,7 @@ export function AuthLayout() {
       <div className="hidden lg:flex lg:w-2/5 flex-col justify-between border-r border-zinc-200 bg-zinc-900 p-10">
         <div>
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-white text-zinc-900">
-              <span className="text-sm font-bold">L</span>
-            </div>
+            <img src="/logoLoop.png" alt="LOOP" className="h-10 w-10 object-contain" />
             <span className="text-lg font-semibold text-white">LOOP</span>
           </div>
           <p className="mt-2 text-sm text-zinc-400 uppercase tracking-wider">
@@ -25,7 +23,7 @@ export function AuthLayout() {
           </p>
         </div>
         <div>
-          <blockquote className="border-l-2 border-zinc-700 pl-4">
+          <blockquote className="border-l-2 border-blue-600 pl-4">
             <p className="text-sm text-zinc-400 leading-relaxed">
               Sistema integrado de control de mercadería, stock, repartos y auditoría operativa.
             </p>

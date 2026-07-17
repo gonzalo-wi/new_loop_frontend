@@ -1,4 +1,4 @@
-import { X } from 'lucide-react'
+import { X, Truck } from 'lucide-react'
 import type { StockControl, StockControlType } from '../types'
 import { formatDateTime } from '@/shared/lib/utils'
 
@@ -74,6 +74,15 @@ export function StockControlDetail({ control, onClose }: Props) {
             <div>
               <p className="text-zinc-400">Registrado</p>
               <p className="font-medium text-zinc-800">{formatDateTime(control.createdAt)}</p>
+            </div>
+            <div>
+              <p className="text-zinc-400">Camión ordenado</p>
+              <p className="flex items-center gap-1.5 font-medium">
+                <Truck size={13} className={control.truckOrdered ? 'text-emerald-600' : 'text-zinc-400'} />
+                <span className={control.truckOrdered ? 'text-emerald-700' : 'text-zinc-500'}>
+                  {control.truckOrdered ? 'Sí' : 'No'}
+                </span>
+              </p>
             </div>
             {control.observations && (
               <div className="col-span-2">

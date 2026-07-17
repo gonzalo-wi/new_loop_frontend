@@ -105,7 +105,7 @@ export function Topbar() {
         {/* User */}
         {user && (
           <div className="flex items-center gap-2.5 pl-4">
-            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[3px] bg-zinc-900 text-[9px] font-bold uppercase text-white">
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[3px] bg-blue-600 text-[9px] font-bold uppercase text-white">
               {user.name.charAt(0)}
             </div>
             <div className="hidden leading-tight sm:block">

@@ -51,9 +51,7 @@ export function LoginPage() {
     <div>
       <div className="mb-7">
         <div className="mb-4 flex items-center gap-2 lg:hidden">
-          <div className="flex h-7 w-7 items-center justify-center rounded-sm bg-zinc-900 text-white">
-            <span className="text-xs font-bold">L</span>
-          </div>
+          <img src="/logoLoop.png" alt="LOOP" className="h-8 w-8 object-contain" />
           <span className="text-base font-semibold text-zinc-900">LOOP</span>
         </div>
         <h1 className="text-xl font-semibold text-zinc-900">Iniciar sesión</h1>
@@ -111,7 +109,7 @@ export function LoginPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex h-9 w-full items-center justify-center gap-2 rounded-sm bg-zinc-900 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex h-9 w-full items-center justify-center gap-2 rounded-sm bg-blue-600 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting && <Loader2 size={14} className="animate-spin" />}
           {isSubmitting ? 'Verificando...' : 'Ingresar'}
