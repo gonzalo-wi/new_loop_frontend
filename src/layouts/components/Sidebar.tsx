@@ -13,6 +13,7 @@ import {
   ShoppingBasket,
   ClipboardCheck,
   Droplets,
+  Smartphone,
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { ROUTES } from '@/shared/constants'
@@ -21,7 +22,7 @@ import { ROLE_LABELS } from '@/shared/constants'
 import type { UserRole } from '@/shared/types'
 import { fetchPendingArrivals } from '@/features/stock/services/stock-controls.service'
 
-type NavItem = { to: string; icon: React.ElementType; label: string }
+type NavItem = { to: string; icon: React.ElementType; label: string; adminOnly?: boolean }
 type NavGroup = { label: string; items: NavItem[] }
 
 const NAV_GROUPS: NavGroup[] = [
@@ -59,6 +60,12 @@ const NAV_GROUPS: NavGroup[] = [
       { to: ROUTES.USERS,  icon: Users,         label: 'Usuarios' },
     ],
   },
+  {
+    label: 'Sistema',
+    items: [
+      { to: ROUTES.APP_VERSION, icon: Smartphone, label: 'App móvil', adminOnly: true },
+    ],
+  },
 ]
 
 export function Sidebar() {
@@ -73,6 +80,12 @@ export function Sidebar() {
   })
 
   const arrivalBadge = pendingArrivals?.pending ?? 0
+
+  // Hide admin-only items (and any group left empty) from non-admin roles.
+  const isAdmin = user?.role === 'admin'
+  const visibleGroups = NAV_GROUPS
+    .map((group) => ({ ...group, items: group.items.filter((i) => !i.adminOnly || isAdmin) }))
+    .filter((group) => group.items.length > 0)
 
   function handleLogout() {
     logout()
@@ -106,7 +119,7 @@ export function Sidebar() {
 
       {/* ── Navigation ────────────────────────────────────────── */}
       <nav className="flex-1 overflow-y-auto pb-2 pt-1.5">
-        {NAV_GROUPS.map((group, gi) => (
+        {visibleGroups.map((group, gi) => (
           <div key={gi} className={cn(gi > 0 && 'mt-1')}>
             {group.label && (
               <div className={cn('flex items-center gap-2 px-4 pb-1', gi > 0 && 'pt-3')}>

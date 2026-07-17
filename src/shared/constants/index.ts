@@ -22,6 +22,7 @@ export const ROUTES = {
   ORDERABLE_PRODUCTS: '/orderable-products',
   ORDERS: '/orders',
   DISPENSERS: '/dispensers',
+  APP_VERSION: '/app-version',
 } as const
 
 export const ROLE_LABELS: Record<UserRole, string> = {

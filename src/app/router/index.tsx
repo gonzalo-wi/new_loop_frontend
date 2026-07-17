@@ -16,6 +16,7 @@ import { UsersPage } from '@/features/users/pages/UsersPage'
 import { OrderableProductsPage } from '@/features/orderable-products/pages/OrderableProductsPage'
 import { OrdersPage } from '@/features/orders/pages/OrdersPage'
 import { DispenserMovementsPage } from '@/features/dispensers/pages/DispenserMovementsPage'
+import { AppVersionPage } from '@/features/app-version/pages/AppVersionPage'
 import { ROUTES } from '@/shared/constants'
 
 export const router = createBrowserRouter([
@@ -37,6 +38,7 @@ export const router = createBrowserRouter([
       { path: 'orderable-products', element: <OrderableProductsPage /> },
       { path: 'orders',     element: <OrdersPage /> },
       { path: 'dispensers', element: <DispenserMovementsPage /> },
+      { path: 'app-version', element: <AppVersionPage /> },
     ],
   },
   {
