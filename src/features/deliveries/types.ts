@@ -23,3 +23,17 @@ export type DeliveryFormData = {
   truckPlate?: string
   observations?: string
 }
+
+// Real-time truck position from Powerfleet, keyed by license plate.
+export type FleetLocation = {
+  licensePlate: string
+  lat: number
+  lng: number
+  address: string
+  speed: number
+  engineOn: boolean
+  stateIcon: string
+  driver: string
+  gpsDateTime: string
+  direction: number
+}

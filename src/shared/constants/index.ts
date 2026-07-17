@@ -69,3 +69,9 @@ export const PRODUCT_TYPES = [
   { value: 'returnable', label: 'Retornable' },
   { value: 'disposable', label: 'Descartable' },
 ] as const
+
+// Fallback map center (Buenos Aires) used when a truck reports no valid GPS fix.
+export const DEFAULT_MAP_CENTER = {
+  lat: Number(import.meta.env.VITE_DEFAULT_LAT) || -34.6037,
+  lng: Number(import.meta.env.VITE_DEFAULT_LNG) || -58.3816,
+}

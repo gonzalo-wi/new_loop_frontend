@@ -14,6 +14,7 @@ export default defineConfig({
     proxy: {
       // Requests to /api/* are forwarded to the backend; /api prefix is stripped.
       // This avoids browser CORS restrictions during development.
+      //http://192.168.0.42:8095 produccion - http://localhost:8080 
       '/api': {
         target: 'http://192.168.0.42:8095',
         changeOrigin: true,

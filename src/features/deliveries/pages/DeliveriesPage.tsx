@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Pencil, PowerOff, Power } from 'lucide-react'
+import { Plus, Pencil, PowerOff, Power, MapPin } from 'lucide-react'
 import { fetchDeliveries, deactivateDelivery, activateDelivery } from '../services/deliveries.service'
 import { fetchUsers } from '@/features/users/services/users.service'
 import type { Delivery } from '../types'
@@ -18,6 +18,7 @@ import type { TableColumn } from '@/shared/types'
 import { formatDate } from '@/shared/lib/utils'
 import { useDebounce } from '@/shared/hooks/useDebounce'
 import { DeliveryFormModal } from '../components/DeliveryFormModal'
+import { TruckLocationModal } from '../components/TruckLocationModal'
 
 type ConfirmTarget = { delivery: Delivery; action: 'activate' | 'deactivate' }
 
@@ -27,6 +28,7 @@ export function DeliveriesPage() {
   const [filters, setFilters]         = useState<Record<string, string>>({ status: '' })
   const [selectedDelivery, setSelectedDelivery] = useState<Delivery | null>(null)
   const [showForm, setShowForm]       = useState(false)
+  const [trackTarget, setTrackTarget] = useState<Delivery | null>(null)
   const [confirmTarget, setConfirmTarget] = useState<ConfirmTarget | null>(null)
 
   const debouncedSearch = useDebounce(search)
@@ -140,6 +142,16 @@ export function DeliveriesPage() {
           <button
             onClick={(e) => {
               e.stopPropagation()
+              setTrackTarget(d)
+            }}
+            className="rounded p-1 text-zinc-400 hover:bg-blue-50 hover:text-blue-600"
+            title={d.truckPlate ? 'Ver ubicación en el mapa' : 'Sin patente cargada'}
+          >
+            <MapPin size={13} />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
               setSelectedDelivery(d)
               setShowForm(true)
             }}
@@ -246,6 +258,13 @@ export function DeliveriesPage() {
           }
         />
       </div>
+
+      {trackTarget && (
+        <TruckLocationModal
+          delivery={trackTarget}
+          onClose={() => setTrackTarget(null)}
+        />
+      )}
 
       {showForm && (
         <DeliveryFormModal
