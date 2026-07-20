@@ -13,7 +13,10 @@ server {
     gzip_min_length 1024;
     gzip_types      text/plain text/css application/javascript application/json image/svg+xml;
 
-    client_max_body_size 10m;
+    # Must fit the largest APK uploaded from the admin panel (POST /app/version).
+    # Too small and nginx rejects the upload itself with a 413 before the
+    # backend ever sees it.
+    client_max_body_size ${MAX_UPLOAD_SIZE};
 
     location = /healthz {
         access_log off;
@@ -33,8 +36,10 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
 
         proxy_connect_timeout 10s;
-        proxy_send_timeout    30s;
-        proxy_read_timeout    30s;
+        # Generous enough for a large APK upload to finish streaming upstream
+        # and for the backend to store it before responding.
+        proxy_send_timeout    300s;
+        proxy_read_timeout    300s;
     }
 
     # Content-hashed filenames, so they can never go stale.

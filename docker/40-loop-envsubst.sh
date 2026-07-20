@@ -9,8 +9,12 @@ set -eu
 BACKEND_URL="${BACKEND_URL%/}"
 export BACKEND_URL
 
-envsubst '${BACKEND_URL}' \
+# Sized for APK uploads from the admin panel; raise if builds outgrow it.
+MAX_UPLOAD_SIZE="${MAX_UPLOAD_SIZE:-256m}"
+export MAX_UPLOAD_SIZE
+
+envsubst '${BACKEND_URL} ${MAX_UPLOAD_SIZE}' \
   < /etc/nginx/loop-templates/default.conf.template \
   > /etc/nginx/conf.d/default.conf
 
-echo "[loop] proxying /api -> ${BACKEND_URL}"
+echo "[loop] proxying /api -> ${BACKEND_URL} (max upload ${MAX_UPLOAD_SIZE})"
