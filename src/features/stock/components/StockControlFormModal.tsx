@@ -44,8 +44,17 @@ type Props = {
   onSuccess: () => void
 }
 
+type QuantityField = 'totalQuantity' | 'fullQuantity' | 'exchangeQuantity'
+
 export function StockControlFormModal({ type, control, onClose, onSuccess }: Props) {
   const isEditing = !!control
+
+  // Exits only track the total; full/exchange are an entry-side concept and are
+  // sent as 0 so the backend contract stays unchanged.
+  const isExit = type === 'EXIT'
+  const quantityFields: readonly QuantityField[] = isExit
+    ? ['totalQuantity']
+    : ['totalQuantity', 'fullQuantity', 'exchangeQuantity']
 
   const { data: branches   = [] } = useQuery({ queryKey: ['branches'],   queryFn: fetchBranches })
   const { data: deliveries = [] } = useQuery({ queryKey: ['deliveries'], queryFn: fetchDeliveries })
@@ -109,12 +118,20 @@ export function StockControlFormModal({ type, control, onClose, onSuccess }: Pro
 
   const mutation = useMutation({
     mutationFn: (data: FormData) => {
+      // On exits the hidden fields are always zeroed, even when editing a
+      // control that was created before this rule.
+      const items = data.items.map((item) => ({
+        ...item,
+        fullQuantity:     isExit ? 0 : item.fullQuantity,
+        exchangeQuantity: isExit ? 0 : item.exchangeQuantity,
+      }))
+
       if (isEditing) {
         return updateStockControl(control.id, {
           controlDate:  data.controlDate  || undefined,
           observations: data.observations || undefined,
           truckOrdered: data.truckOrdered,
-          items: data.items,
+          items,
         })
       }
       return createStockControl({
@@ -124,7 +141,7 @@ export function StockControlFormModal({ type, control, onClose, onSuccess }: Pro
         controlDate:  data.controlDate  || undefined,
         observations: data.observations || undefined,
         truckOrdered: data.truckOrdered,
-        items: data.items,
+        items,
       })
     },
     onSuccess,
@@ -246,7 +263,9 @@ export function StockControlFormModal({ type, control, onClose, onSuccess }: Pro
                   Cantidades por producto
                 </h3>
                 <p className="mt-0.5 text-xs text-zinc-400">
-                  Ingresá las cantidades para cada producto. Los que no se carguen quedan en 0.
+                  {isExit
+                    ? 'Ingresá el total por producto. Los que no se carguen quedan en 0.'
+                    : 'Ingresá las cantidades para cada producto. Los que no se carguen quedan en 0.'}
                 </p>
               </div>
 
@@ -263,15 +282,19 @@ export function StockControlFormModal({ type, control, onClose, onSuccess }: Pro
                     <tr className="border-b border-zinc-200 bg-zinc-50">
                       <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Producto</th>
                       <th className="w-24 px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Total</th>
-                      <th className="w-24 px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Llenos</th>
-                      <th className="w-24 px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Recambios</th>
+                      {!isExit && (
+                        <>
+                          <th className="w-24 px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Llenos</th>
+                          <th className="w-24 px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Recambios</th>
+                        </>
+                      )}
                     </tr>
                   </thead>
                   <tbody>
                     {fields.map((field, index) => {
                       const product   = activeProducts[index]
                       const rowErrors = errors.items?.[index]
-                      const hasError  = !!(rowErrors?.totalQuantity || rowErrors?.fullQuantity || rowErrors?.exchangeQuantity)
+                      const hasError  = quantityFields.some((f) => !!rowErrors?.[f])
 
                       return (
                         <tr
@@ -288,7 +311,7 @@ export function StockControlFormModal({ type, control, onClose, onSuccess }: Pro
                             </p>
                             <p className="font-mono text-[10px] text-zinc-400">{product?.code}</p>
                           </td>
-                          {(['totalQuantity', 'fullQuantity', 'exchangeQuantity'] as const).map((fieldName) => (
+                          {quantityFields.map((fieldName) => (
                             <td key={fieldName} className="px-2 py-3">
                               <input
                                 type="number"

@@ -16,6 +16,7 @@ import { formatDate } from '@/shared/lib/utils'
 import { useDebounce } from '@/shared/hooks/useDebounce'
 import { StockControlFormModal } from './StockControlFormModal'
 import { StockControlDetail } from './StockControlDetail'
+import { RemitoActions } from './RemitoActions'
 
 const PAGE_SIZE = 20
 
@@ -326,7 +327,7 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
               <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 w-20 text-center">Camión</th>
               <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 w-16 text-right">Items</th>
               <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 w-28">Registrado</th>
-              <th className="px-4 py-2.5 w-20" />
+              <th className="px-4 py-2.5 w-32" />
             </tr>
           </thead>
           <tbody>
@@ -416,6 +417,8 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
                           <Pencil size={13} />
                         </button>
                       )}
+                      {/* Remitos only exist for exits */}
+                      {c.type === 'EXIT' && <RemitoActions controlId={c.id} />}
                     </div>
                   </td>
                 </tr>

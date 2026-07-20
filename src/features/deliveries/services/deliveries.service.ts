@@ -57,6 +57,7 @@ function toCreateDto(data: DeliveryFormData) {
 
 function toUpdateDto(data: DeliveryFormData) {
   return {
+    code:         data.code,
     branchId:     data.branchId,
     driverId:     data.driverId     || undefined,
     driver:       data.driver       || undefined,

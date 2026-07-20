@@ -79,6 +79,41 @@ export async function fetchPendingArrivals(
   return data.data
 }
 
+// With responseType 'blob' the error body arrives as a Blob too, so the JSON
+// message has to be read out of it. Known statuses get a friendlier Spanish
+// message than the backend's English one.
+async function extractRemitoMessage(err: unknown): Promise<string> {
+  const response = (err as { response?: { status?: number; data?: unknown } })?.response
+
+  if (response?.status === 404) {
+    return 'No se encontró el remito para este control.'
+  }
+  if (response?.status === 409) {
+    return 'Este control todavía no tiene remito. Se genera cuando la salida se confirma con Aguas.'
+  }
+
+  if (response?.data instanceof Blob) {
+    try {
+      const parsed = JSON.parse(await response.data.text()) as { message?: string }
+      if (parsed.message) return parsed.message
+    } catch {
+      // Body wasn't JSON — fall through to the generic message.
+    }
+  }
+  return 'No se pudo obtener el remito.'
+}
+
+export async function fetchRemitoPdf(controlId: string): Promise<Blob> {
+  try {
+    const { data } = await api.get<Blob>(`/stock-controls/${controlId}/remito`, {
+      responseType: 'blob',
+    })
+    return data
+  } catch (err) {
+    throw new Error(await extractRemitoMessage(err))
+  }
+}
+
 export async function updateStockControl(
   id: string,
   payload: StockControlUpdateData

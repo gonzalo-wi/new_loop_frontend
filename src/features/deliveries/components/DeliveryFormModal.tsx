@@ -18,7 +18,13 @@ import {
 } from '@/shared/components/ui'
 
 const schema = z.object({
-  code:         z.string().min(1, 'Requerido').max(50),
+  // Numbers only: the code becomes the delivery_id sent to Aguas, and Aguas
+  // rejects anything with letters (legacy codes like "rto1" must be migrated).
+  code: z
+    .string()
+    .min(1, 'Requerido')
+    .max(50)
+    .regex(/^\d+$/, 'Solo números, sin letras (ej: 1, 2, 9). Aguas rechaza códigos con letras.'),
   branchId:     z.string().min(1, 'Seleccionar una sucursal'),
   driverId:     z.string().optional(),
   driver:       z.string().max(150).optional(),
@@ -131,13 +137,13 @@ export function DeliveryFormModal({ delivery, onClose, onSuccess }: Props) {
                 htmlFor="code"
                 required
                 error={errors.code?.message}
-                hint={isEditing ? 'No se puede modificar' : undefined}
+                hint="Solo números (ej: 1, 2, 9). Debe ser único."
               >
                 <input
                   id="code"
                   className={inputClassName}
-                  readOnly={isEditing}
-                  disabled={isEditing}
+                  inputMode="numeric"
+                  placeholder="1"
                   {...register('code')}
                 />
               </FormField>

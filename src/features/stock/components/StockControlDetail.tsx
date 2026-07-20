@@ -1,6 +1,7 @@
 import { X, Truck } from 'lucide-react'
 import type { StockControl, StockControlType } from '../types'
 import { formatDateTime } from '@/shared/lib/utils'
+import { RemitoActions } from './RemitoActions'
 
 const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
   CONTROLLED:              { label: 'Controlado',       cls: 'text-blue-700 bg-blue-50 border-blue-200' },
@@ -55,6 +56,16 @@ export function StockControlDetail({ control, onClose }: Props) {
           </button>
         </div>
 
+        {/* Remito toolbar — exits only */}
+        {!isEntry && (
+          <div className="flex items-center gap-2 border-b border-zinc-100 bg-zinc-50 px-6 py-2.5">
+            <RemitoActions controlId={control.id} variant="button" />
+            <span className="ml-auto text-[11px] text-zinc-400">
+              Remito de carga
+            </span>
+          </div>
+        )}
+
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
           {/* Meta */}
@@ -102,8 +113,13 @@ export function StockControlDetail({ control, onClose }: Props) {
                 <tr className="border-b border-zinc-200 bg-zinc-50">
                   <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Producto</th>
                   <th className="px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-wide text-zinc-500 w-16">Total</th>
-                  <th className="px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-wide text-zinc-500 w-16">Llenos</th>
-                  <th className="px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-wide text-zinc-500 w-20">Recambios</th>
+                  {/* Exits only track the total — full/exchange are always 0 there */}
+                  {isEntry && (
+                    <>
+                      <th className="px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-wide text-zinc-500 w-16">Llenos</th>
+                      <th className="px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-wide text-zinc-500 w-20">Recambios</th>
+                    </>
+                  )}
                   {isEntry && (
                     <th className="px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-wide text-zinc-500 w-20">Diferencia</th>
                   )}
@@ -120,8 +136,12 @@ export function StockControlDetail({ control, onClose }: Props) {
                       )}
                     </td>
                     <td className="px-3 py-2.5 text-right font-mono text-sm text-zinc-700">{item.totalQuantity}</td>
-                    <td className="px-3 py-2.5 text-right font-mono text-sm text-zinc-700">{item.fullQuantity}</td>
-                    <td className="px-3 py-2.5 text-right font-mono text-sm text-zinc-700">{item.exchangeQuantity}</td>
+                    {isEntry && (
+                      <>
+                        <td className="px-3 py-2.5 text-right font-mono text-sm text-zinc-700">{item.fullQuantity}</td>
+                        <td className="px-3 py-2.5 text-right font-mono text-sm text-zinc-700">{item.exchangeQuantity}</td>
+                      </>
+                    )}
                     {isEntry && (
                       <td className="px-3 py-2.5 text-right font-mono text-sm">
                         {item.differenceQuantity !== null ? (
