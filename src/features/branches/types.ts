@@ -9,6 +9,8 @@ export type Branch = {
   province: string
   cuit: string
   vatCondition: string
+  companyName?: string   // razón social — encabezado del remito PDF
+  phone?: string         // teléfono de contacto — encabezado del remito PDF
   status: OperationalStatus
   createdAt: string
   updatedAt: string
@@ -22,5 +24,7 @@ export type BranchFormData = {
   province: string
   cuit: string
   vatCondition: string
+  companyName?: string
+  phone?: string
   status: 'active' | 'inactive'
 }

@@ -12,6 +12,8 @@ type BranchDto = {
   province: string
   cuit: string
   vatCondition: string
+  companyName?: string | null
+  phone?: string | null
   active: boolean      // API uses boolean, frontend uses OperationalStatus
   createdAt: string
   updatedAt: string
@@ -36,6 +38,8 @@ function fromDto(dto: BranchDto): Branch {
     province:     dto.province ?? '',
     cuit:         dto.cuit ?? '',
     vatCondition: dto.vatCondition ?? '',
+    companyName:  dto.companyName ?? undefined,
+    phone:        dto.phone ?? undefined,
     status:       dto.active ? 'active' : 'inactive',
     createdAt:    dto.createdAt,
     updatedAt:    dto.updatedAt,
@@ -51,6 +55,8 @@ function toCreateDto(data: BranchFormData) {
     province:     data.province,
     cuit:         data.cuit,
     vatCondition: data.vatCondition,
+    companyName:  data.companyName || undefined,
+    phone:        data.phone || undefined,
   }
 }
 

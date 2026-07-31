@@ -23,6 +23,8 @@ const schema = z.object({
     .string()
     .regex(/^\d{11}$/, 'CUIT debe tener 11 dígitos (sin guiones)'),
   vatCondition: z.string().min(1, 'Requerido'),
+  companyName: z.string().max(150).optional(),
+  phone: z.string().max(50).optional(),
   status: z.enum(['active', 'inactive']),
 })
 
@@ -54,6 +56,8 @@ export function BranchFormModal({ branch, onClose, onSuccess }: Props) {
           province: branch.province,
           cuit: branch.cuit.replace(/\D/g, ''),
           vatCondition: branch.vatCondition,
+          companyName: branch.companyName ?? '',
+          phone: branch.phone ?? '',
           status: branch.status as 'active' | 'inactive',
         }
       : { status: 'active' },
@@ -70,6 +74,8 @@ export function BranchFormModal({ branch, onClose, onSuccess }: Props) {
             province: branch.province,
             cuit: branch.cuit.replace(/\D/g, ''),
             vatCondition: branch.vatCondition,
+            companyName: branch.companyName ?? '',
+            phone: branch.phone ?? '',
             status: branch.status as 'active' | 'inactive',
           }
         : { status: 'active' }
@@ -157,6 +163,32 @@ export function BranchFormModal({ branch, onClose, onSuccess }: Props) {
                   className={inputClassName}
                   maxLength={10}
                   {...register('vatCondition')}
+                />
+              </FormField>
+              <FormField
+                label="Razón social"
+                htmlFor="companyName"
+                error={errors.companyName?.message}
+                hint="Aparece en el encabezado del remito. Ej: El Jumillano S.A."
+              >
+                <input
+                  id="companyName"
+                  className={inputClassName}
+                  placeholder="El Jumillano S.A."
+                  {...register('companyName')}
+                />
+              </FormField>
+              <FormField
+                label="Teléfono"
+                htmlFor="phone"
+                error={errors.phone?.message}
+                hint="Contacto de la sucursal. Ej: 0800-333-3090"
+              >
+                <input
+                  id="phone"
+                  className={inputClassName}
+                  placeholder="0800-333-3090"
+                  {...register('phone')}
                 />
               </FormField>
             </FormSection>
