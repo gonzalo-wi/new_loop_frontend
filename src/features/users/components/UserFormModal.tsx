@@ -3,9 +3,11 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { X, Loader2, Eye, EyeOff } from 'lucide-react'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import type { User, UserFormData } from '../types'
+import { BRANCH_REQUIRED_ROLES } from '../types'
 import { createUser, updateUser } from '../services/users.service'
+import { fetchBranches } from '@/features/branches/services/branches.service'
 import {
   FormSection,
   FormField,
@@ -23,12 +25,25 @@ const ROLE_OPTIONS = (Object.entries(ROLE_LABELS) as [UserRole, string][]).map(
   ([value, label]) => ({ value, label })
 )
 
-const schema = z.object({
-  name:     z.string().min(2, 'Mínimo 2 caracteres').max(150),
-  username: z.string().min(2, 'Mínimo 2 caracteres').max(100),
-  password: z.string().optional(),
-  role:     z.enum(USER_ROLES),
-})
+const schema = z
+  .object({
+    name:     z.string().min(2, 'Mínimo 2 caracteres').max(150),
+    username: z.string().min(2, 'Mínimo 2 caracteres').max(100),
+    password: z.string().optional(),
+    role:     z.enum(USER_ROLES),
+    branchId: z.string().optional(),
+  })
+  // Controller/picker must have a branch; enforced here for immediate feedback
+  // (the backend also returns 400 if it's missing).
+  .superRefine((data, ctx) => {
+    if (BRANCH_REQUIRED_ROLES.includes(data.role as UserRole) && !data.branchId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['branchId'],
+        message: 'Requerida para este rol',
+      })
+    }
+  })
 
 type FormData = z.infer<typeof schema>
 
@@ -42,27 +57,44 @@ export function UserFormModal({ user, onClose, onSuccess }: Props) {
   const isEditing = !!user
   const [showPassword, setShowPassword] = useState(false)
 
+  const { data: branches = [], isLoading: branchesLoading } = useQuery({
+    queryKey: ['branches'],
+    queryFn: fetchBranches,
+  })
+  const activeBranches = branches.filter((b) => b.status === 'active')
+
   const {
     register,
     handleSubmit,
     reset,
+    watch,
     setError,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: user
-      ? { name: user.name, username: user.username, role: user.role, password: '' }
-      : { role: 'controller', password: '' },
+      ? { name: user.name, username: user.username, role: user.role, branchId: user.branchId ?? '', password: '' }
+      : { role: 'controller', branchId: '', password: '' },
   })
 
   useEffect(() => {
     reset(
       user
-        ? { name: user.name, username: user.username, role: user.role, password: '' }
-        : { role: 'controller', password: '' }
+        ? { name: user.name, username: user.username, role: user.role, branchId: user.branchId ?? '', password: '' }
+        : { role: 'controller', branchId: '', password: '' }
     )
     setShowPassword(false)
   }, [user, reset])
+
+  const selectedRole  = watch('role') as UserRole
+  const branchRequired = BRANCH_REQUIRED_ROLES.includes(selectedRole)
+
+  // Keep a stale/inactive branch visible when editing a user already assigned to
+  // one, so it doesn't silently drop out of the select.
+  const branchOptions =
+    user?.branchId && !activeBranches.some((b) => b.id === user.branchId)
+      ? [...activeBranches, { id: user.branchId, name: user.branchName ?? 'Sucursal asignada', code: '' }]
+      : activeBranches
 
   const mutation = useMutation({
     mutationFn: (data: FormData) => {
@@ -70,6 +102,7 @@ export function UserFormModal({ user, onClose, onSuccess }: Props) {
         name:     data.name,
         username: data.username,
         role:     data.role as UserRole,
+        branchId: data.branchId || undefined,
         status:   'active',
         password: data.password || undefined,
       }
@@ -157,6 +190,34 @@ export function UserFormModal({ user, onClose, onSuccess }: Props) {
                   {ROLE_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
                       {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </FormField>
+
+              <FormField
+                label="Sucursal"
+                htmlFor="branchId"
+                required={branchRequired}
+                error={errors.branchId?.message}
+                hint={
+                  branchRequired
+                    ? 'Obligatoria para controladores y pickers'
+                    : 'Opcional para este rol'
+                }
+              >
+                <select
+                  id="branchId"
+                  className={selectClassName}
+                  disabled={branchesLoading}
+                  {...register('branchId')}
+                >
+                  <option value="">
+                    {branchesLoading ? 'Cargando...' : 'Sin sucursal'}
+                  </option>
+                  {branchOptions.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.name}{b.code ? ` (${b.code})` : ''}
                     </option>
                   ))}
                 </select>

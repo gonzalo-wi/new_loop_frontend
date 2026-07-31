@@ -10,6 +10,8 @@ type UserDto = {
   name: string
   username: string
   role: string     // e.g. "ADMIN", "CONTROLADOR"
+  branchId?: string | null
+  branchName?: string | null
   active: boolean
   createdAt: string
   updatedAt: string
@@ -26,13 +28,15 @@ type ApiResponse<T> = { data: T; message: string }
 
 function fromDto(dto: UserDto): User {
   return {
-    id:        dto.id,
-    name:      dto.name,
-    username:  dto.username,
-    role:      (BACKEND_ROLE_MAP[dto.role] ?? 'controller') as UserRole,
-    status:    dto.active ? 'active' : 'inactive',
-    createdAt: dto.createdAt,
-    updatedAt: dto.updatedAt,
+    id:         dto.id,
+    name:       dto.name,
+    username:   dto.username,
+    role:       (BACKEND_ROLE_MAP[dto.role] ?? 'controller') as UserRole,
+    branchId:   dto.branchId   ?? undefined,
+    branchName: dto.branchName ?? undefined,
+    status:     dto.active ? 'active' : 'inactive',
+    createdAt:  dto.createdAt,
+    updatedAt:  dto.updatedAt,
   }
 }
 
@@ -42,15 +46,17 @@ function toCreateDto(data: UserFormData) {
     username: data.username,
     password: data.password,
     role:     FRONTEND_ROLE_MAP[data.role],
+    branchId: data.branchId || undefined,
   }
 }
 
 function toUpdateDto(data: UserFormData) {
-  const payload: { name?: string; password?: string; role?: string } = {
+  const payload: { name?: string; password?: string; role?: string; branchId?: string } = {
     name: data.name,
     role: FRONTEND_ROLE_MAP[data.role],
   }
   if (data.password) payload.password = data.password
+  if (data.branchId) payload.branchId = data.branchId
   return payload
 }
 

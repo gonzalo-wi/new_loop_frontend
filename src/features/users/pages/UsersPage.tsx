@@ -91,6 +91,17 @@ export function UsersPage() {
       ),
     },
     {
+      key: 'branch',
+      header: 'Sucursal',
+      width: '150px',
+      render: (u) =>
+        u.branchName ? (
+          <span className="text-sm text-zinc-700">{u.branchName}</span>
+        ) : (
+          <span className="text-sm text-zinc-300">—</span>
+        ),
+    },
+    {
       key: 'status',
       header: 'Estado',
       width: '90px',
