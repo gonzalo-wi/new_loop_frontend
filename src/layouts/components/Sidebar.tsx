@@ -22,26 +22,39 @@ import { ROLE_LABELS } from '@/shared/constants'
 import type { UserRole } from '@/shared/types'
 import { fetchPendingArrivals } from '@/features/stock/services/stock-controls.service'
 
-type NavItem = { to: string; icon: React.ElementType; label: string; adminOnly?: boolean }
-type NavGroup = { label: string; items: NavItem[] }
+// Roles allowed to see the item; defaults to the enclosing group's `roles`
+// when omitted. Omit on both group and item to allow every role with panel
+// access (currently everyone except delivery_driver, who has no admin panel
+// access at all).
+type NavItem = { to: string; icon: React.ElementType; label: string; roles?: UserRole[] }
+type NavGroup = { label: string; roles?: UserRole[]; items: NavItem[] }
+
+// Controller, loader (dispenser loader) and picker only operate the floor —
+// they only need Entradas, Salidas, Pedidos and Dispensers plus the Dashboard.
+// BACK_OFFICE_ROLES is a subset of OPERATIONAL_ROLES (admin/supervisor see both tiers).
+const OPERATIONAL_ROLES: UserRole[] = ['admin', 'supervisor', 'controller', 'loader', 'picker']
+const BACK_OFFICE_ROLES: UserRole[] = ['admin', 'supervisor']
 
 const NAV_GROUPS: NavGroup[] = [
   {
     label: '',
+    roles: OPERATIONAL_ROLES,
     items: [{ to: ROUTES.DASHBOARD, icon: LayoutDashboard, label: 'Dashboard' }],
   },
   {
     label: 'Operaciones',
+    roles: OPERATIONAL_ROLES,
     items: [
       { to: ROUTES.STOCK_ENTRIES, icon: ArrowDownToLine,  label: 'Entradas' },
       { to: ROUTES.STOCK_EXITS,   icon: ArrowUpFromLine,  label: 'Salidas' },
-      { to: ROUTES.DELIVERIES,    icon: Route,            label: 'Repartos' },
+      { to: ROUTES.DELIVERIES,    icon: Route,            label: 'Repartos', roles: BACK_OFFICE_ROLES },
       { to: ROUTES.ORDERS,        icon: ClipboardCheck,   label: 'Pedidos' },
       { to: ROUTES.DISPENSERS,    icon: Droplets,         label: 'Dispensers' },
     ],
   },
   {
     label: 'Inventario',
+    roles: BACK_OFFICE_ROLES,
     items: [
       { to: ROUTES.PRODUCTS,           icon: Package,        label: 'Productos' },
       { to: ROUTES.ORDERABLE_PRODUCTS, icon: ShoppingBasket, label: 'Pedibles' },
@@ -49,12 +62,14 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: 'Logística',
+    roles: BACK_OFFICE_ROLES,
     items: [
       { to: ROUTES.BRANCHES, icon: Building2, label: 'Sucursales' },
     ],
   },
   {
     label: 'Control',
+    roles: BACK_OFFICE_ROLES,
     items: [
       { to: ROUTES.AUDITS, icon: ClipboardList, label: 'Auditoría' },
       { to: ROUTES.USERS,  icon: Users,         label: 'Usuarios' },
@@ -62,8 +77,9 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: 'Sistema',
+    roles: ['admin'],
     items: [
-      { to: ROUTES.APP_VERSION, icon: Smartphone, label: 'App móvil', adminOnly: true },
+      { to: ROUTES.APP_VERSION, icon: Smartphone, label: 'App móvil' },
     ],
   },
 ]
@@ -81,10 +97,12 @@ export function Sidebar() {
 
   const arrivalBadge = pendingArrivals?.pending ?? 0
 
-  // Hide admin-only items (and any group left empty) from non-admin roles.
-  const isAdmin = user?.role === 'admin'
+  // Hide items the current role isn't allowed to see (and any group left empty).
+  // An item's own `roles` wins; otherwise it inherits the group's `roles`.
+  const role = user?.role
+  const canSee = (roles?: UserRole[]) => !roles || (!!role && roles.includes(role))
   const visibleGroups = NAV_GROUPS
-    .map((group) => ({ ...group, items: group.items.filter((i) => !i.adminOnly || isAdmin) }))
+    .map((group) => ({ ...group, items: group.items.filter((i) => canSee(i.roles ?? group.roles)) }))
     .filter((group) => group.items.length > 0)
 
   function handleLogout() {

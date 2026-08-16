@@ -200,8 +200,11 @@ Antes de crear un componente nuevo, revisá `shared/components/ui/index.ts`. Ya 
   `REPARTIDOR`, `PICKER`, `CARGADOR_DISPENSERS`, `SUPERVISOR`). El front los mapea a
   valores internos en minúscula/inglés vía `BACKEND_ROLE_MAP` / `FRONTEND_ROLE_MAP`
   (`shared/constants/index.ts`). Si agregás un rol, tocá **los dos** mapas.
-- **Gating por rol en UI:** el Sidebar oculta ítems marcados `adminOnly` a los no-admin
-  (hoy sólo "App móvil"). El filtro es `user?.role === 'admin'`.
+- **Gating por rol en UI:** cada `NavGroup`/`NavItem` del Sidebar tiene un `roles?: UserRole[]`
+  opcional (un ítem sin `roles` hereda el de su grupo); si ninguno de los dos lo define, el
+  ítem es visible para cualquier rol autenticado. Admin ve todo; Supervisor ve todo menos
+  "App móvil"; Controlador/Cargador de dispenser/Picker sólo ven Dashboard, Entradas, Salidas,
+  Pedidos y Dispensers. Sigue siendo sólo gating de menú (ver limitación en §12), no de rutas.
 
 ---
 
