@@ -1,17 +1,24 @@
 import { useState, useMemo } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Plus, Pencil, Eye, Truck, Clock, CheckCircle2, AlertCircle } from 'lucide-react'
+import {
+  Plus, Pencil, Eye, Truck, Clock, CheckCircle2, AlertCircle, AlertTriangle,
+  ClipboardList, ArrowDownToLine, ArrowUpFromLine,
+} from 'lucide-react'
 import { fetchStockControls, fetchPendingArrivals } from '../services/stock-controls.service'
 import type { StockControl, StockControlType } from '../types'
+import { STOCK_CONTROL_STATUS_CONFIG, STOCK_CONTROL_STATUS_OPTIONS } from '../constants'
 import {
   PageHeader,
   ActionBar,
   ActionButton,
   SearchInput,
   DatePicker,
-  selectClassName,
+  FilterBar,
+  DataTable,
+  MetricBlock,
   Combobox,
 } from '@/shared/components/ui'
+import type { TableColumn } from '@/shared/types'
 import { formatDate } from '@/shared/lib/utils'
 import { useDebounce } from '@/shared/hooks/useDebounce'
 import { StockControlFormModal } from './StockControlFormModal'
@@ -19,19 +26,6 @@ import { StockControlDetail } from './StockControlDetail'
 import { RemitoActions } from './RemitoActions'
 
 const PAGE_SIZE = 20
-
-const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
-  CONTROLLED:              { label: 'Controlado',       cls: 'text-blue-700 bg-blue-50 border-blue-200' },
-  PENDING_DRIVER_APPROVAL: { label: 'Pendiente chofer', cls: 'text-amber-700 bg-amber-50 border-amber-200' },
-  ACCEPTED_BY_DRIVER:      { label: 'Aprobado',         cls: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
-  REJECTED_BY_DRIVER:      { label: 'Rechazado',        cls: 'text-red-700 bg-red-50 border-red-200' },
-  WITH_DIFFERENCES:        { label: 'Con diferencias',  cls: 'text-orange-700 bg-orange-50 border-orange-200' },
-  SENT_TO_AGUAS:           { label: 'Enviado a Aguas',  cls: 'text-green-700 bg-green-50 border-green-200' },
-  AGUAS_ERROR:             { label: 'Error Aguas',      cls: 'text-red-700 bg-red-50 border-red-200' },
-  CANCELLED:               { label: 'Cancelado',        cls: 'text-zinc-500 bg-zinc-100 border-zinc-200' },
-}
-
-const STATUS_OPTIONS = Object.entries(STATUS_CONFIG).map(([value, { label }]) => ({ value, label }))
 
 type Props = {
   type: StockControlType
@@ -111,11 +105,106 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
       })
     : controls
 
+  const differencesCount  = filtered.filter((c) => c.status === 'WITH_DIFFERENCES').length
+  const truckOrderedCount = filtered.filter((c) => c.truckOrdered).length
+
   function handleFormSuccess() {
     queryClient.invalidateQueries({ queryKey: ['stock-controls', type] })
     setShowForm(false)
     setSelectedControl(null)
   }
+
+  const TypeIcon = type === 'EXIT' ? ArrowUpFromLine : ArrowDownToLine
+
+  const columns: TableColumn<StockControl>[] = [
+    {
+      key: 'controlDate',
+      header: 'Fecha',
+      width: '110px',
+      render: (c) => (
+        <span className="text-xs font-medium tabular-nums text-zinc-700">{formatDate(c.controlDate)}</span>
+      ),
+    },
+    {
+      key: 'routeCode',
+      header: 'Reparto',
+      width: '110px',
+      render: (c) => <span className="font-mono text-xs font-medium text-zinc-600">{c.routeCode}</span>,
+    },
+    {
+      key: 'branchName',
+      header: 'Sucursal',
+      render: (c) => <span className="text-sm text-zinc-800">{c.branchName}</span>,
+    },
+    {
+      key: 'status',
+      header: 'Estado',
+      width: '150px',
+      render: (c) => {
+        const cfg = STOCK_CONTROL_STATUS_CONFIG[c.status] ?? { label: c.status, cls: 'text-zinc-600 bg-zinc-100 border-zinc-200' }
+        return (
+          <span className={`inline-flex items-center rounded-sm border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${cfg.cls}`}>
+            {cfg.label}
+          </span>
+        )
+      },
+    },
+    {
+      key: 'truckOrdered',
+      header: 'Camión',
+      width: '70px',
+      align: 'center',
+      render: (c) => (
+        <span title={c.truckOrdered ? 'Camión ordenado' : 'Camión no ordenado'}>
+          <Truck size={14} className={c.truckOrdered ? 'mx-auto text-emerald-500' : 'mx-auto text-zinc-300'} />
+        </span>
+      ),
+    },
+    {
+      key: 'items',
+      header: 'Items',
+      width: '70px',
+      align: 'right',
+      render: (c) => <span className="text-xs tabular-nums text-zinc-500">{c.items.length}</span>,
+    },
+    {
+      key: 'createdAt',
+      header: 'Registrado',
+      width: '110px',
+      render: (c) => <span className="text-xs text-zinc-400">{formatDate(c.createdAt)}</span>,
+    },
+    {
+      key: 'actions',
+      header: '',
+      width: '110px',
+      align: 'right',
+      render: (c) => {
+        const canEdit = c.status === 'CONTROLLED'
+        return (
+          <div className="flex items-center justify-end gap-1">
+            <button
+              onClick={(e) => { e.stopPropagation(); setDetailControl(c) }}
+              className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+              title="Ver detalle"
+            >
+              <Eye size={13} />
+            </button>
+            {canEdit && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setSelectedControl(c); setShowForm(true) }}
+                className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+                title="Editar"
+              >
+                <Pencil size={13} />
+              </button>
+            )}
+            {/* Remitos only exist for exits */}
+            {c.type === 'EXIT' && <RemitoActions controlId={c.id} />}
+          </div>
+        )
+      },
+    },
+  ]
 
   return (
     <div>
@@ -133,11 +222,45 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
         }
       />
 
+      {/* Metrics */}
+      <div className="grid grid-cols-3 gap-3 border-b border-zinc-200 bg-zinc-50 p-4">
+        <MetricBlock
+          label="Registros"
+          icon={ClipboardList}
+          accent="blue"
+          value={meta?.totalElements ?? controls.length}
+          note={`${filtered.length} en esta página`}
+        />
+        <MetricBlock
+          label="Con diferencias"
+          icon={AlertTriangle}
+          accent={differencesCount > 0 ? 'red' : 'default'}
+          value={differencesCount}
+          note="en esta página"
+        />
+        {type === 'ENTRY' ? (
+          <MetricBlock
+            label="Repartos pendientes"
+            icon={Clock}
+            accent={pendingArrivals ? (pendingArrivals.pending > 0 ? 'amber' : 'green') : 'default'}
+            value={pendingArrivals ? pendingArrivals.pending : '—'}
+            note={pendingArrivals ? `de ${pendingArrivals.totalExpected} esperados hoy` : 'Cargando...'}
+          />
+        ) : (
+          <MetricBlock
+            label="Camión ordenado"
+            icon={Truck}
+            accent="blue"
+            value={truckOrderedCount}
+            note="en esta página"
+          />
+        )}
+      </div>
+
       {/* Pending arrivals panel — ENTRY only */}
-      {type === 'ENTRY' && pendingArrivals && (
-        <div className="border-b border-zinc-200 bg-zinc-50">
-          {/* Header row */}
-          <div className="flex flex-wrap items-center gap-4 px-6 py-3">
+      {type === 'ENTRY' && pendingArrivals && pendingArrivals.pendingRoutes.length > 0 && (
+        <div className="mx-6 mt-4 overflow-hidden rounded-md border border-zinc-200 bg-white shadow-sm">
+          <div className="flex flex-wrap items-center gap-4 border-b border-zinc-200 bg-amber-50/40 px-5 py-3">
             <div className="flex items-center gap-2">
               {pendingArrivals.pending === 0 ? (
                 <CheckCircle2 size={15} className="shrink-0 text-emerald-500" />
@@ -145,287 +268,145 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
                 <Clock size={15} className="shrink-0 text-amber-500" />
               )}
               <span className="text-sm text-zinc-800">
-                {pendingArrivals.pending === 0 ? (
-                  <span className="font-semibold text-emerald-600">Todos los repartos llegaron</span>
-                ) : (
-                  <>
-                    <span className="font-bold text-zinc-900">{pendingArrivals.pending}</span>
-                    <span className="text-zinc-500"> de </span>
-                    <span className="font-semibold text-zinc-700">{pendingArrivals.totalExpected}</span>
-                    <span className="text-zinc-500"> repartos pendientes de llegada</span>
-                  </>
-                )}
+                <span className="font-bold text-zinc-900">{pendingArrivals.pending}</span>
+                <span className="text-zinc-500"> de </span>
+                <span className="font-semibold text-zinc-700">{pendingArrivals.totalExpected}</span>
+                <span className="text-zinc-500"> repartos pendientes de llegada</span>
               </span>
             </div>
 
-            {/* Branch filter — only when there are pending routes */}
-            {pendingArrivals.pendingRoutes.length > 0 && (
-              <div className="flex items-center gap-2">
-                <Combobox
-                  value={pendingBranchId}
-                  onChange={setPendingBranchId}
-                  placeholder="Ver por sucursal..."
-                  searchPlaceholder="Buscar sucursal..."
-                  className="w-52"
-                  options={branchOptions}
-                />
-                {pendingBranchId && (
-                  <button
-                    onClick={() => setPendingBranchId('')}
-                    className="text-xs text-zinc-400 hover:text-zinc-700 underline"
-                  >
-                    Ver todas
-                  </button>
-                )}
-              </div>
-            )}
+            <div className="ml-auto flex items-center gap-2">
+              <Combobox
+                value={pendingBranchId}
+                onChange={setPendingBranchId}
+                placeholder="Ver por sucursal..."
+                searchPlaceholder="Buscar sucursal..."
+                className="w-52"
+                options={branchOptions}
+              />
+              {pendingBranchId && (
+                <button
+                  onClick={() => setPendingBranchId('')}
+                  className="text-xs text-zinc-400 hover:text-zinc-700 underline"
+                >
+                  Ver todas
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Table — grouped by branch (default) or routes for selected branch */}
-          {pendingArrivals.pendingRoutes.length > 0 && (
-            <div className="border-t border-zinc-200">
-              {!pendingBranchId ? (
-                /* Grouped by branch */
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="border-b border-zinc-200 bg-white">
-                      <th className="px-6 py-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Sucursal</th>
-                      <th className="px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-400 w-28 text-right">Pendientes</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-100">
-                    {branchGroups.map((b) => (
-                      <tr
-                        key={b.branchId}
-                        className="cursor-pointer bg-white hover:bg-amber-50/40"
-                        onClick={() => setPendingBranchId(b.branchId)}
-                        title="Ver repartos de esta sucursal"
-                      >
-                        <td className="px-6 py-2.5">
-                          <span className="flex items-center gap-2">
-                            <AlertCircle size={11} className="shrink-0 text-amber-500" />
-                            <span className="text-sm text-zinc-800">{b.branchName}</span>
-                          </span>
-                        </td>
-                        <td className="px-4 py-2.5 text-right">
-                          <span className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-[3px] bg-amber-100 px-1.5 font-mono text-xs font-bold text-amber-700">
-                            {b.count}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : (
-                /* Individual routes for selected branch */
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="border-b border-zinc-200 bg-white">
-                      <th className="px-6 py-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-400 w-32">Reparto</th>
-                      <th className="px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Sucursal</th>
-                      <th className="px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-400 w-32">Fecha control</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-100">
-                    {filteredRoutes.map((r) => (
-                      <tr key={r.routeId} className="bg-white hover:bg-zinc-50">
-                        <td className="px-6 py-2.5">
-                          <span className="font-mono text-xs font-semibold text-zinc-700">{r.routeCode}</span>
-                        </td>
-                        <td className="px-4 py-2.5 text-sm text-zinc-600">{r.branchName}</td>
-                        <td className="px-4 py-2.5 font-mono text-xs text-zinc-400">{r.controlDate}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
+          {!pendingBranchId ? (
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-zinc-100 bg-zinc-50">
+                  <th className="px-5 py-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Sucursal</th>
+                  <th className="px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-400 w-28 text-right">Pendientes</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100">
+                {branchGroups.map((b) => (
+                  <tr
+                    key={b.branchId}
+                    className="cursor-pointer bg-white transition-colors hover:bg-amber-50/40"
+                    onClick={() => setPendingBranchId(b.branchId)}
+                    title="Ver repartos de esta sucursal"
+                  >
+                    <td className="px-5 py-2.5">
+                      <span className="flex items-center gap-2">
+                        <AlertCircle size={11} className="shrink-0 text-amber-500" />
+                        <span className="text-sm text-zinc-800">{b.branchName}</span>
+                      </span>
+                    </td>
+                    <td className="px-4 py-2.5 text-right">
+                      <span className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-[3px] bg-amber-100 px-1.5 font-mono text-xs font-bold text-amber-700">
+                        {b.count}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-zinc-100 bg-zinc-50">
+                  <th className="px-5 py-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-400 w-32">Reparto</th>
+                  <th className="px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Sucursal</th>
+                  <th className="px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-400 w-32">Fecha control</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100">
+                {filteredRoutes.map((r) => (
+                  <tr key={r.routeId} className="bg-white hover:bg-zinc-50">
+                    <td className="px-5 py-2.5">
+                      <span className="font-mono text-xs font-semibold text-zinc-700">{r.routeCode}</span>
+                    </td>
+                    <td className="px-4 py-2.5 text-sm text-zinc-600">{r.branchName}</td>
+                    <td className="px-4 py-2.5 font-mono text-xs text-zinc-400">{r.controlDate}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
       )}
 
-      {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3 border-b border-zinc-200 bg-white px-6 py-3">
-        {/* Estado */}
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Estado</span>
-          <select
-            value={statusFilter}
-            onChange={(e) => resetPage(setStatus)(e.target.value)}
-            className={`${selectClassName} h-8 w-48 text-xs`}
-          >
-            <option value="">Todos</option>
-            {STATUS_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Separador */}
-        <div className="h-8 w-px self-end bg-zinc-100" />
-
-        {/* Desde */}
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Desde</span>
-          <DatePicker
-            value={from}
-            onChange={resetPage(setFrom)}
-            placeholder="Fecha inicio"
-            className="w-40"
-          />
-        </div>
-
-        {/* Hasta */}
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Hasta</span>
-          <DatePicker
-            value={to}
-            onChange={resetPage(setTo)}
-            placeholder="Fecha fin"
-            className="w-40"
-          />
-        </div>
-
-        {/* Limpiar */}
-        {(statusFilter || from || to) && (
-          <button
-            onClick={() => { resetPage(setStatus)(''); setFrom(''); setTo('') }}
-            className="self-end h-8 rounded-sm border border-zinc-200 bg-white px-3 text-xs text-zinc-500 hover:border-zinc-300 hover:text-zinc-800"
-          >
-            Limpiar filtros
-          </button>
-        )}
-
-        <span className="ml-auto self-end pb-0.5 text-xs text-zinc-400">
-          {meta ? `${meta.totalElements} registro${meta.totalElements !== 1 ? 's' : ''}` : ''}
-        </span>
-      </div>
-
-      <ActionBar>
+      <ActionBar className="mt-4 flex-wrap">
         <SearchInput
           value={search}
           onChange={setSearch}
           placeholder="Buscar por reparto, sucursal o fecha..."
           className="w-72"
         />
-        <span className="text-xs text-zinc-400">
-          {filtered.length !== controls.length
-            ? `${filtered.length} de ${controls.length} en esta página`
-            : `${controls.length} en esta página`}
+        <FilterBar
+          filters={[{ key: 'status', label: 'Estado', options: STOCK_CONTROL_STATUS_OPTIONS }]}
+          activeFilters={{ status: statusFilter }}
+          onChange={(_key, value) => resetPage(setStatus)(value)}
+          onClearAll={() => resetPage(setStatus)('')}
+        />
+        <div className="flex items-center gap-1.5 border-l border-zinc-200 pl-3">
+          <DatePicker value={from} onChange={resetPage(setFrom)} placeholder="Desde" className="w-32" />
+          <span className="text-xs text-zinc-300">–</span>
+          <DatePicker value={to} onChange={resetPage(setTo)} placeholder="Hasta" className="w-32" />
+        </div>
+        <span className="ml-auto text-xs text-zinc-400">
+          {meta ? `${meta.totalElements} registro${meta.totalElements !== 1 ? 's' : ''}` : ''}
         </span>
       </ActionBar>
 
       {/* Table */}
       <div className="border-b border-zinc-200">
-        <table className="w-full text-left">
-          <thead>
-            <tr className="border-b border-zinc-200 bg-zinc-50">
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 w-28">Fecha</th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 w-28">Reparto</th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Sucursal</th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 w-36">Estado</th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 w-20 text-center">Camión</th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 w-16 text-right">Items</th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 w-28">Registrado</th>
-              <th className="px-4 py-2.5 w-32" />
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading && (
-              <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-sm text-zinc-400">Cargando...</td>
-              </tr>
-            )}
-            {isError && (
-              <tr>
-                <td colSpan={8} className="px-4 py-8 text-center">
-                  <p className="text-sm text-zinc-500">No se pudieron cargar los registros.</p>
-                  <button onClick={() => refetch()} className="mt-2 text-xs text-zinc-400 underline hover:text-zinc-700">
-                    Reintentar
-                  </button>
-                </td>
-              </tr>
-            )}
-            {!isLoading && !isError && filtered.length === 0 && (
-              <tr>
-                <td colSpan={8} className="px-4 py-10 text-center">
-                  <p className="text-sm text-zinc-500">Sin registros.</p>
-                  <button
-                    onClick={() => { setSelectedControl(null); setShowForm(true) }}
-                    className="mt-2 text-xs text-zinc-400 underline hover:text-zinc-700"
-                  >
-                    Registrar {type === 'EXIT' ? 'salida' : 'entrada'}
-                  </button>
-                </td>
-              </tr>
-            )}
-            {filtered.map((c) => {
-              const statusCfg = STATUS_CONFIG[c.status] ?? { label: c.status, cls: 'text-zinc-600 bg-zinc-100 border-zinc-200' }
-              const canEdit   = c.status === 'CONTROLLED'
-
-              return (
-                <tr
-                  key={c.id}
-                  className="cursor-pointer border-b border-zinc-100 bg-white transition-colors hover:bg-zinc-50"
-                  onClick={() => setDetailControl(c)}
-                >
-                  <td className="px-4 py-3">
-                    <span className="text-xs font-medium tabular-nums text-zinc-700">{c.controlDate}</span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="font-mono text-xs font-medium text-zinc-600">{c.routeCode}</span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="text-sm text-zinc-800">{c.branchName}</span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex items-center rounded-sm border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${statusCfg.cls}`}
-                    >
-                      {statusCfg.label}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <span title={c.truckOrdered ? 'Camión ordenado' : 'Camión no ordenado'}>
-                      <Truck
-                        size={14}
-                        className={c.truckOrdered ? 'text-emerald-500' : 'text-zinc-300'}
-                      />
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <span className="text-xs tabular-nums text-zinc-500">{c.items.length}</span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="text-xs text-zinc-400">{formatDate(c.createdAt)}</span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); setDetailControl(c) }}
-                        className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
-                        title="Ver detalle"
-                      >
-                        <Eye size={13} />
-                      </button>
-                      {canEdit && (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setSelectedControl(c); setShowForm(true) }}
-                          className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
-                          title="Editar"
-                        >
-                          <Pencil size={13} />
-                        </button>
-                      )}
-                      {/* Remitos only exist for exits */}
-                      {c.type === 'EXIT' && <RemitoActions controlId={c.id} />}
-                    </div>
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+        <DataTable
+          columns={columns}
+          data={filtered}
+          isLoading={isLoading}
+          isError={isError}
+          onRetry={refetch}
+          onRowClick={(c) => setDetailControl(c)}
+          getRowKey={(c) => c.id}
+          rowClassName={(c) =>
+            c.status === 'WITH_DIFFERENCES'
+              ? 'border-l-2 border-l-orange-400'
+              : c.status === 'REJECTED_BY_DRIVER' || c.status === 'AGUAS_ERROR'
+                ? 'border-l-2 border-l-red-400'
+                : undefined
+          }
+          emptyTitle="Sin registros"
+          emptyDescription={`No hay ${type === 'EXIT' ? 'salidas' : 'entradas'} que coincidan con los filtros.`}
+          emptyAction={
+            !debouncedSearch && !statusFilter ? (
+              <ActionButton
+                variant="primary"
+                size="sm"
+                icon={<Plus size={13} />}
+                onClick={() => { setSelectedControl(null); setShowForm(true) }}
+              >
+                {createLabel}
+              </ActionButton>
+            ) : undefined
+          }
+        />
       </div>
 
       {/* Pagination */}
@@ -438,9 +419,10 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
           >
             ← Anterior
           </button>
-          <span className="text-xs text-zinc-500">
+          <span className="flex items-center gap-2 text-xs text-zinc-500">
+            <TypeIcon size={12} className="text-zinc-300" />
             Página {meta.number + 1} de {meta.totalPages}
-            <span className="ml-2 text-zinc-400">({meta.totalElements} registros)</span>
+            <span className="text-zinc-400">({meta.totalElements} registros)</span>
           </span>
           <button
             onClick={() => setPage((p) => Math.min(meta.totalPages - 1, p + 1))}

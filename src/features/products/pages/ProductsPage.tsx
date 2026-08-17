@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Pencil, PowerOff, Power, GripVertical, ArrowUpDown, Loader2 } from 'lucide-react'
+import { Plus, Pencil, PowerOff, Power, GripVertical, ArrowUpDown, Loader2, Package, Recycle, Trash2 } from 'lucide-react'
 import {
   DndContext,
   closestCenter,
@@ -32,6 +32,7 @@ import {
   DataTable,
   StatusBadge,
   ConfirmDialog,
+  MetricBlock,
 } from '@/shared/components/ui'
 import type { TableColumn } from '@/shared/types'
 import { formatDate } from '@/shared/lib/utils'
@@ -130,6 +131,10 @@ export function ProductsPage() {
     queryKey: ['products'],
     queryFn: fetchProducts,
   })
+
+  const activeCount     = products.filter((p) => p.status === 'active').length
+  const returnableCount = products.filter((p) => p.type === 'returnable').length
+  const disposableCount = products.filter((p) => p.type === 'disposable').length
 
   const deactivateMutation = useMutation({
     mutationFn: (id: string) => deleteProduct(id),
@@ -419,6 +424,28 @@ export function ProductsPage() {
           </div>
         }
       />
+
+      <div className="grid grid-cols-3 gap-3 border-b border-zinc-200 bg-zinc-50 p-4">
+        <MetricBlock
+          label="Productos activos"
+          icon={Package}
+          accent={activeCount > 0 ? 'green' : 'default'}
+          value={activeCount}
+          note={`de ${products.length} en total`}
+        />
+        <MetricBlock
+          label="Retornables"
+          icon={Recycle}
+          accent="blue"
+          value={returnableCount}
+        />
+        <MetricBlock
+          label="Descartables"
+          icon={Trash2}
+          accent="default"
+          value={disposableCount}
+        />
+      </div>
 
       <ActionBar>
         <SearchInput

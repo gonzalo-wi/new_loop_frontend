@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Pencil, PowerOff, Power, MapPin } from 'lucide-react'
+import { Plus, Pencil, PowerOff, Power, MapPin, Route, UserX } from 'lucide-react'
 import { fetchDeliveries, deactivateDelivery, activateDelivery } from '../services/deliveries.service'
 import { fetchUsers } from '@/features/users/services/users.service'
 import type { Delivery } from '../types'
@@ -13,6 +13,7 @@ import {
   DataTable,
   StatusBadge,
   ConfirmDialog,
+  MetricBlock,
 } from '@/shared/components/ui'
 import type { TableColumn } from '@/shared/types'
 import { formatDate } from '@/shared/lib/utils'
@@ -44,6 +45,10 @@ export function DeliveriesPage() {
   })
 
   const userMap = Object.fromEntries(users.map((u) => [u.id, u.name]))
+
+  const activeCount     = deliveries.filter((d) => d.status === 'active').length
+  const withPlateCount  = deliveries.filter((d) => !!d.truckPlate?.trim()).length
+  const unassignedCount = deliveries.filter((d) => d.status === 'active' && !d.driverId && !d.driver).length
 
   const deactivateMutation = useMutation({
     mutationFn: (id: string) => deactivateDelivery(id),
@@ -104,13 +109,26 @@ export function DeliveriesPage() {
       render: (d) => {
         const driverName = (d.driverId ? userMap[d.driverId] : undefined) ?? d.driver
         return (
-          <div>
-            {driverName
-              ? <p className="text-sm text-zinc-800">{driverName}</p>
-              : <span className="text-zinc-300 text-sm">—</span>}
-            {d.truckPlate && (
-              <p className="font-mono text-xs text-zinc-400 uppercase">{d.truckPlate}</p>
+          <div className="flex items-center gap-2.5">
+            {driverName ? (
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-[10px] font-bold uppercase text-white">
+                {driverName.charAt(0)}
+              </span>
+            ) : (
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-300">
+                <UserX size={11} />
+              </span>
             )}
+            <div className="min-w-0">
+              {driverName
+                ? <p className="truncate text-sm text-zinc-800">{driverName}</p>
+                : <span className="text-sm text-zinc-300">Sin asignar</span>}
+              {d.truckPlate && (
+                <span className="inline-flex items-center rounded-[3px] border border-zinc-200 bg-zinc-50 px-1 font-mono text-[10px] uppercase text-zinc-500">
+                  {d.truckPlate}
+                </span>
+              )}
+            </div>
           </div>
         )
       },
@@ -212,6 +230,30 @@ export function DeliveriesPage() {
           </ActionButton>
         }
       />
+
+      <div className="grid grid-cols-3 gap-3 border-b border-zinc-200 bg-zinc-50 p-4">
+        <MetricBlock
+          label="Repartos activos"
+          icon={Route}
+          accent={activeCount > 0 ? 'green' : 'default'}
+          value={activeCount}
+          note={`de ${deliveries.length} en total`}
+        />
+        <MetricBlock
+          label="Con GPS cargado"
+          icon={MapPin}
+          accent="blue"
+          value={withPlateCount}
+          note="patente asociada a la flota"
+        />
+        <MetricBlock
+          label="Sin conductor asignado"
+          icon={UserX}
+          accent={unassignedCount > 0 ? 'amber' : 'default'}
+          value={unassignedCount}
+          note="entre los activos"
+        />
+      </div>
 
       <ActionBar>
         <SearchInput

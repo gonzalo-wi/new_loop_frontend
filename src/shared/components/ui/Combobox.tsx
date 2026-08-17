@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { ChevronDown, Search, X } from 'lucide-react'
+import { Check, ChevronDown, Search, X } from 'lucide-react'
 
 export type ComboboxOption = { value: string; label: string; sublabel?: string }
 
@@ -86,12 +86,12 @@ export function Combobox({
         ref={triggerRef}
         onClick={openDropdown}
         className={[
-          'flex h-9 items-center justify-between rounded-sm border px-3 text-sm select-none',
+          'flex h-10 items-center justify-between rounded-md border px-3.5 text-sm select-none transition-all duration-150',
           disabled
-            ? 'cursor-not-allowed border-zinc-200 bg-zinc-50 text-zinc-500'
-            : 'cursor-pointer border-zinc-200 bg-white text-zinc-900',
+            ? 'cursor-not-allowed border-zinc-200 bg-zinc-100 text-zinc-400'
+            : 'cursor-pointer border-zinc-200 bg-zinc-50/60 text-zinc-900 hover:border-zinc-300',
           open && !disabled
-            ? 'border-blue-500 ring-1 ring-blue-500'
+            ? '!border-blue-500 !bg-white ring-4 ring-blue-500/10'
             : '',
         ].join(' ')}
       >
@@ -120,11 +120,11 @@ export function Combobox({
         <div
           ref={containerRef}
           style={style}
-          className="rounded-sm border border-zinc-200 bg-white shadow-lg"
+          className="overflow-hidden rounded-md border border-zinc-200 bg-white shadow-lg ring-1 ring-black/5"
         >
           {/* Search */}
           <div className="border-b border-zinc-100 p-2">
-            <div className="flex items-center gap-2 rounded-sm border border-zinc-200 bg-zinc-50 px-2.5">
+            <div className="flex items-center gap-2 rounded-sm bg-zinc-50 px-2.5 ring-1 ring-inset ring-zinc-200 focus-within:ring-1 focus-within:ring-blue-500">
               <Search size={12} className="shrink-0 text-zinc-400" />
               <input
                 autoFocus
@@ -142,7 +142,7 @@ export function Combobox({
           </div>
 
           {/* List */}
-          <div className="max-h-56 overflow-y-auto">
+          <div className="max-h-56 overflow-y-auto p-1">
             {filtered.length === 0 ? (
               <p className="px-3 py-3 text-xs text-zinc-400">Sin resultados para "{search}"</p>
             ) : (
@@ -152,16 +152,19 @@ export function Combobox({
                   type="button"
                   onClick={() => { onChange(o.value); setOpen(false) }}
                   className={[
-                    'w-full px-3 py-2 text-left hover:bg-zinc-50',
-                    o.value === value ? 'bg-blue-50' : '',
+                    'flex w-full items-center justify-between gap-2 rounded-sm px-2.5 py-2 text-left transition-colors',
+                    o.value === value ? 'bg-blue-50' : 'hover:bg-zinc-50',
                   ].join(' ')}
                 >
-                  <span className={`block text-sm ${o.value === value ? 'font-semibold text-blue-700' : 'text-zinc-700'}`}>
-                    {o.label}
+                  <span className="min-w-0">
+                    <span className={`block truncate text-sm ${o.value === value ? 'font-semibold text-blue-700' : 'text-zinc-700'}`}>
+                      {o.label}
+                    </span>
+                    {o.sublabel && (
+                      <span className="block truncate text-xs text-zinc-400">{o.sublabel}</span>
+                    )}
                   </span>
-                  {o.sublabel && (
-                    <span className="block text-xs text-zinc-400">{o.sublabel}</span>
-                  )}
+                  {o.value === value && <Check size={14} className="shrink-0 text-blue-600" />}
                 </button>
               ))
             )}

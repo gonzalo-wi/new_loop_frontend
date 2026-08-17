@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, Building2 } from 'lucide-react'
 import { fetchBranches, deleteBranch } from '../services/branches.service'
 import type { Branch } from '../types'
 import {
@@ -12,6 +12,7 @@ import {
   DataTable,
   StatusBadge,
   ConfirmDialog,
+  MetricBlock,
 } from '@/shared/components/ui'
 import type { TableColumn } from '@/shared/types'
 import { formatDate, formatCuit } from '@/shared/lib/utils'
@@ -38,6 +39,9 @@ export function BranchesPage() {
     queryFn: fetchBranches,
   })
 
+  const activeCount   = branches.filter((b) => b.status === 'active').length
+  const inactiveCount = branches.length - activeCount
+
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteBranch(id),
     onSuccess: () => {
@@ -61,14 +65,23 @@ export function BranchesPage() {
       key: 'code',
       header: 'Código',
       render: (b) => (
-        <span className="font-mono text-xs font-medium text-zinc-600">{b.code}</span>
+        <span className="inline-flex items-center rounded-[3px] border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 font-mono text-xs font-medium text-zinc-600">
+          {b.code}
+        </span>
       ),
       width: '100px',
     },
     {
       key: 'name',
       header: 'Sucursal',
-      render: (b) => <span className="font-medium text-zinc-900">{b.name}</span>,
+      render: (b) => (
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-[10px] font-bold uppercase text-white">
+            {b.name.charAt(0)}
+          </span>
+          <span className="font-medium text-zinc-900">{b.name}</span>
+        </div>
+      ),
     },
     {
       key: 'location',
@@ -149,6 +162,28 @@ export function BranchesPage() {
           </ActionButton>
         }
       />
+
+      <div className="grid grid-cols-3 gap-3 border-b border-zinc-200 bg-zinc-50 p-4">
+        <MetricBlock
+          label="Sucursales activas"
+          icon={Building2}
+          accent={activeCount > 0 ? 'green' : 'default'}
+          value={activeCount}
+          note={`de ${branches.length} en total`}
+        />
+        <MetricBlock
+          label="Inactivas"
+          icon={Building2}
+          accent={inactiveCount > 0 ? 'amber' : 'default'}
+          value={inactiveCount}
+        />
+        <MetricBlock
+          label="Total registradas"
+          icon={Building2}
+          accent="default"
+          value={branches.length}
+        />
+      </div>
 
       <ActionBar>
         <SearchInput

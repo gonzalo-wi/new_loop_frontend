@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useMutation } from '@tanstack/react-query'
-import { X, Loader2, UploadCloud, FileArchive } from 'lucide-react'
+import { X, Loader2, UploadCloud, FileArchive, Smartphone, Info } from 'lucide-react'
 import type { AppVersion } from '../types'
 import { publishAppVersion } from '../services/app-version.service'
 import { FormSection, FormField, inputClassName, textareaClassName } from '@/shared/components/ui'
@@ -68,20 +68,25 @@ export function AppVersionFormModal({ onClose, onSuccess }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-end">
-      <div className="absolute inset-0 bg-black/20" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/25" onClick={onClose} />
       <div className="relative flex h-full w-full max-w-lg flex-col bg-white shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-zinc-200 px-6 py-4">
-          <div>
-            <h2 className="text-sm font-semibold text-zinc-900">Publicar nueva versión</h2>
-            <p className="mt-0.5 text-xs text-zinc-500">
-              Subí el APK que recibirán los repartidores en la app móvil.
-            </p>
+        <div className="flex items-center justify-between border-b border-zinc-200 bg-zinc-50/60 px-6 py-4">
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-zinc-900 text-white">
+              <Smartphone size={16} />
+            </span>
+            <div>
+              <h2 className="text-sm font-semibold text-zinc-900">Publicar nueva versión</h2>
+              <p className="mt-0.5 text-xs text-zinc-500">
+                Subí el APK que recibirán los repartidores en la app móvil.
+              </p>
+            </div>
           </div>
           <button
             onClick={onClose}
             disabled={mutation.isPending}
-            className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 disabled:opacity-40"
+            className="rounded-sm p-1.5 text-zinc-400 hover:bg-zinc-200/60 hover:text-zinc-700 disabled:opacity-40"
           >
             <X size={16} />
           </button>
@@ -93,7 +98,7 @@ export function AppVersionFormModal({ onClose, onSuccess }: Props) {
           className="flex flex-1 flex-col overflow-hidden"
         >
           <div className="flex-1 space-y-6 overflow-y-auto px-6 py-5">
-            <FormSection title="Datos de la versión">
+            <FormSection title="Datos de la versión" icon={Info}>
               <FormField
                 label="Versión"
                 htmlFor="version"
@@ -139,7 +144,7 @@ export function AppVersionFormModal({ onClose, onSuccess }: Props) {
               </FormField>
             </FormSection>
 
-            <FormSection title="Archivo APK">
+            <FormSection title="Archivo APK" icon={FileArchive}>
               <FormField label="Archivo" fullWidth required error={errors.file?.message}>
                 <label
                   className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-dashed px-4 py-6 text-center transition-colors ${
@@ -194,7 +199,7 @@ export function AppVersionFormModal({ onClose, onSuccess }: Props) {
           </div>
 
           {/* Footer */}
-          <div className="border-t border-zinc-200 px-6 py-4">
+          <div className="border-t border-zinc-200 bg-zinc-50/60 px-6 py-4">
             {errors.root && (
               <p className="mb-3 rounded-sm border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
                 {errors.root.message}
@@ -212,7 +217,7 @@ export function AppVersionFormModal({ onClose, onSuccess }: Props) {
               <button
                 type="submit"
                 disabled={mutation.isPending}
-                className="flex h-9 items-center gap-2 rounded-sm bg-blue-600 px-5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                className="flex h-9 items-center gap-2 rounded-sm bg-blue-600 px-5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 hover:shadow disabled:opacity-50"
               >
                 {mutation.isPending && <Loader2 size={13} className="animate-spin" />}
                 {mutation.isPending ? 'Publicando…' : 'Publicar versión'}

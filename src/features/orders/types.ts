@@ -20,6 +20,12 @@ export type Order = {
   orderDate: string
   observations?: string
   items: OrderItem[]
+  startedBy: string | null
+  startedByName: string | null
+  startedAt: string | null
+  completedBy: string | null
+  completedByName: string | null
+  completedAt: string | null
   createdAt: string
   updatedAt: string
 }

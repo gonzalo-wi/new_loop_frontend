@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Pencil, Power, PowerOff } from 'lucide-react'
+import { Plus, Pencil, Power, PowerOff, ShoppingBasket, Boxes, Package2, Check, X as XIcon } from 'lucide-react'
 import {
   fetchOrderableProducts,
   activateOrderableProduct,
@@ -13,24 +13,40 @@ import {
   ActionBar,
   ActionButton,
   SearchInput,
+  FilterBar,
+  DataTable,
+  StatusBadge,
   ConfirmDialog,
+  MetricBlock,
 } from '@/shared/components/ui'
+import type { TableColumn } from '@/shared/types'
 import { formatDate } from '@/shared/lib/utils'
 import { useDebounce } from '@/shared/hooks/useDebounce'
 
 type ConfirmTarget = { product: OrderableProduct; action: 'activate' | 'deactivate' }
 
-const STATUS_FILTER_OPTIONS = [
-  { value: '',       label: 'Todos' },
-  { value: 'active', label: 'Activos' },
-  { value: 'inactive', label: 'Inactivos' },
+const STATUS_FILTER = [
+  { value: 'active',   label: 'Activo' },
+  { value: 'inactive', label: 'Inactivo' },
 ]
+
+function YesNo({ value }: { value: boolean }) {
+  return value ? (
+    <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600">
+      <Check size={12} /> Sí
+    </span>
+  ) : (
+    <span className="inline-flex items-center gap-1 text-xs text-zinc-300">
+      <XIcon size={12} /> No
+    </span>
+  )
+}
 
 export function OrderableProductsPage() {
   const queryClient = useQueryClient()
 
   const [search, setSearch]           = useState('')
-  const [statusFilter, setStatus]     = useState('active')
+  const [filters, setFilters]         = useState<Record<string, string>>({ status: '' })
   const [selectedProduct, setSelected] = useState<OrderableProduct | null>(null)
   const [showForm, setShowForm]       = useState(false)
   const [confirmTarget, setConfirm]   = useState<ConfirmTarget | null>(null)
@@ -42,8 +58,11 @@ export function OrderableProductsPage() {
     queryFn:  fetchOrderableProducts,
   })
 
+  const activeCount = products.filter((p) => p.status === 'active').length
+  const bulkCount    = products.filter((p) => p.allowsBulk).length
+
   const filtered = products.filter((p) => {
-    const matchStatus = !statusFilter || p.status === statusFilter
+    const matchStatus = !filters.status || p.status === filters.status
     const matchSearch =
       !debouncedSearch ||
       p.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
@@ -69,8 +88,107 @@ export function OrderableProductsPage() {
     setSelected(null)
   }
 
-  const selectClass =
-    'h-8 rounded-sm border border-zinc-200 bg-white px-2.5 text-xs text-zinc-700 focus:border-zinc-400 focus:outline-none'
+  const columns: TableColumn<OrderableProduct>[] = [
+    {
+      key: 'code',
+      header: 'Código',
+      width: '120px',
+      render: (p) => (
+        <span className="font-mono text-xs font-medium text-zinc-600">{p.code}</span>
+      ),
+    },
+    {
+      key: 'name',
+      header: 'Nombre',
+      render: (p) => (
+        <div>
+          <p className="text-sm font-medium text-zinc-900">{p.name}</p>
+          {p.description && (
+            <p className="mt-0.5 max-w-xs truncate text-xs text-zinc-400">{p.description}</p>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'allowsUnit',
+      header: 'Por unidad',
+      width: '100px',
+      align: 'center',
+      render: (p) => <YesNo value={p.allowsUnit} />,
+    },
+    {
+      key: 'allowsBulk',
+      header: 'Por bulto',
+      width: '100px',
+      align: 'center',
+      render: (p) => <YesNo value={p.allowsBulk} />,
+    },
+    {
+      key: 'unitsPerBulk',
+      header: 'U/bulto',
+      width: '80px',
+      align: 'center',
+      render: (p) => (
+        <span className="font-mono text-xs text-zinc-500">{p.unitsPerBulk ?? '—'}</span>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Estado',
+      width: '90px',
+      render: (p) => <StatusBadge status={p.status} />,
+    },
+    {
+      key: 'updatedAt',
+      header: 'Actualizado',
+      width: '120px',
+      render: (p) => <span className="text-xs text-zinc-400">{formatDate(p.updatedAt)}</span>,
+    },
+    {
+      key: 'actions',
+      header: '',
+      align: 'right',
+      width: '80px',
+      render: (p) => (
+        <div className="flex items-center justify-end gap-1">
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setSelected(p)
+              setShowForm(true)
+            }}
+            className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+            title="Editar"
+          >
+            <Pencil size={13} />
+          </button>
+          {p.status === 'active' ? (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setConfirm({ product: p, action: 'deactivate' })
+              }}
+              className="rounded p-1 text-zinc-400 hover:bg-red-50 hover:text-red-600"
+              title="Desactivar"
+            >
+              <PowerOff size={13} />
+            </button>
+          ) : (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setConfirm({ product: p, action: 'activate' })
+              }}
+              className="rounded p-1 text-zinc-400 hover:bg-emerald-50 hover:text-emerald-600"
+              title="Activar"
+            >
+              <Power size={13} />
+            </button>
+          )}
+        </div>
+      ),
+    },
+  ]
 
   return (
     <div>
@@ -88,6 +206,28 @@ export function OrderableProductsPage() {
         }
       />
 
+      <div className="grid grid-cols-3 gap-3 border-b border-zinc-200 bg-zinc-50 p-4">
+        <MetricBlock
+          label="Pedibles activos"
+          icon={ShoppingBasket}
+          accent={activeCount > 0 ? 'green' : 'default'}
+          value={activeCount}
+          note={`de ${products.length} en total`}
+        />
+        <MetricBlock
+          label="Habilitados por bulto"
+          icon={Boxes}
+          accent="blue"
+          value={bulkCount}
+        />
+        <MetricBlock
+          label="Solo por unidad"
+          icon={Package2}
+          accent="default"
+          value={products.length - bulkCount}
+        />
+      </div>
+
       <ActionBar>
         <SearchInput
           value={search}
@@ -95,129 +235,41 @@ export function OrderableProductsPage() {
           placeholder="Buscar por código o nombre..."
           className="w-64"
         />
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatus(e.target.value)}
-          className={selectClass}
-        >
-          {STATUS_FILTER_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
-        <span className="text-xs text-zinc-400">{filtered.length} productos</span>
+        <FilterBar
+          filters={[{ key: 'status', label: 'Estado', options: STATUS_FILTER }]}
+          activeFilters={filters}
+          onChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
+          onClearAll={() => setFilters({ status: '' })}
+        />
+        <span className="ml-auto text-xs text-zinc-400">
+          {filtered.length} producto{filtered.length !== 1 ? 's' : ''}
+        </span>
       </ActionBar>
 
-      <table className="w-full text-left">
-        <thead>
-          <tr className="border-b border-zinc-200 bg-zinc-50">
-            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 w-32">Código</th>
-            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Nombre</th>
-            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 w-24 text-center">Por unidad</th>
-            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 w-24 text-center">Por bulto</th>
-            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 w-20 text-center">U/bulto</th>
-            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 w-20">Estado</th>
-            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 w-28">Actualizado</th>
-            <th className="px-4 py-2.5 w-20" />
-          </tr>
-        </thead>
-        <tbody>
-          {isLoading && (
-            <tr>
-              <td colSpan={8} className="px-4 py-8 text-center text-sm text-zinc-400">Cargando...</td>
-            </tr>
-          )}
-          {isError && (
-            <tr>
-              <td colSpan={8} className="px-4 py-8 text-center">
-                <p className="text-sm text-zinc-500">No se pudieron cargar los productos.</p>
-                <button onClick={() => refetch()} className="mt-2 text-xs text-zinc-400 underline hover:text-zinc-700">Reintentar</button>
-              </td>
-            </tr>
-          )}
-          {!isLoading && !isError && filtered.length === 0 && (
-            <tr>
-              <td colSpan={8} className="px-4 py-10 text-center">
-                <p className="text-sm text-zinc-500">Sin productos pedibles.</p>
-                <button
-                  onClick={() => { setSelected(null); setShowForm(true) }}
-                  className="mt-2 text-xs text-zinc-400 underline hover:text-zinc-700"
-                >
-                  Crear el primero
-                </button>
-              </td>
-            </tr>
-          )}
-          {filtered.map((p) => (
-            <tr key={p.id} className="border-b border-zinc-100 bg-white hover:bg-zinc-50">
-              <td className="px-4 py-3">
-                <span className="font-mono text-xs font-medium text-zinc-600">{p.code}</span>
-              </td>
-              <td className="px-4 py-3">
-                <p className="text-sm font-medium text-zinc-900">{p.name}</p>
-                {p.description && (
-                  <p className="text-xs text-zinc-400 truncate max-w-xs">{p.description}</p>
-                )}
-              </td>
-              <td className="px-4 py-3 text-center">
-                <span className={`text-xs font-medium ${p.allowsUnit ? 'text-emerald-600' : 'text-zinc-300'}`}>
-                  {p.allowsUnit ? 'Sí' : 'No'}
-                </span>
-              </td>
-              <td className="px-4 py-3 text-center">
-                <span className={`text-xs font-medium ${p.allowsBulk ? 'text-emerald-600' : 'text-zinc-300'}`}>
-                  {p.allowsBulk ? 'Sí' : 'No'}
-                </span>
-              </td>
-              <td className="px-4 py-3 text-center">
-                <span className="font-mono text-xs text-zinc-500">
-                  {p.unitsPerBulk ?? '—'}
-                </span>
-              </td>
-              <td className="px-4 py-3">
-                <span className={[
-                  'inline-flex items-center rounded-sm border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide',
-                  p.status === 'active'
-                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                    : 'border-zinc-200 bg-zinc-100 text-zinc-500',
-                ].join(' ')}>
-                  {p.status === 'active' ? 'Activo' : 'Inactivo'}
-                </span>
-              </td>
-              <td className="px-4 py-3">
-                <span className="text-xs text-zinc-400">{formatDate(p.updatedAt)}</span>
-              </td>
-              <td className="px-4 py-3">
-                <div className="flex items-center justify-end gap-1">
-                  <button
-                    onClick={() => { setSelected(p); setShowForm(true) }}
-                    className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
-                    title="Editar"
-                  >
-                    <Pencil size={13} />
-                  </button>
-                  {p.status === 'active' ? (
-                    <button
-                      onClick={() => setConfirm({ product: p, action: 'deactivate' })}
-                      className="rounded p-1 text-zinc-400 hover:bg-red-50 hover:text-red-600"
-                      title="Desactivar"
-                    >
-                      <PowerOff size={13} />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => setConfirm({ product: p, action: 'activate' })}
-                      className="rounded p-1 text-zinc-400 hover:bg-emerald-50 hover:text-emerald-600"
-                      title="Activar"
-                    >
-                      <Power size={13} />
-                    </button>
-                  )}
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="border-b border-zinc-200">
+        <DataTable
+          columns={columns}
+          data={filtered}
+          isLoading={isLoading}
+          isError={isError}
+          onRetry={refetch}
+          getRowKey={(p) => p.id}
+          emptyTitle="Sin productos pedibles"
+          emptyDescription="No hay productos que coincidan con los filtros."
+          emptyAction={
+            !debouncedSearch && !filters.status ? (
+              <ActionButton
+                variant="primary"
+                size="sm"
+                icon={<Plus size={13} />}
+                onClick={() => { setSelected(null); setShowForm(true) }}
+              >
+                Nuevo producto
+              </ActionButton>
+            ) : undefined
+          }
+        />
+      </div>
 
       {showForm && (
         <OrderableProductFormModal
@@ -227,26 +279,24 @@ export function OrderableProductsPage() {
         />
       )}
 
-      {confirmTarget && (
-        <ConfirmDialog
-          open
-          variant={confirmTarget.action === 'deactivate' ? 'danger' : 'info'}
-          title={confirmTarget.action === 'deactivate' ? 'Desactivar producto' : 'Activar producto'}
-          description={
-            confirmTarget.action === 'deactivate'
-              ? `"${confirmTarget.product.name}" dejará de estar disponible para pedidos.`
-              : `"${confirmTarget.product.name}" volverá a estar disponible para pedidos.`
-          }
-          confirmLabel={confirmTarget.action === 'deactivate' ? 'Desactivar' : 'Activar'}
-          isLoading={deactivateMutation.isPending || activateMutation.isPending}
-          onConfirm={() =>
-            confirmTarget.action === 'deactivate'
-              ? deactivateMutation.mutate(confirmTarget.product.id)
-              : activateMutation.mutate(confirmTarget.product.id)
-          }
-          onClose={() => setConfirm(null)}
-        />
-      )}
+      <ConfirmDialog
+        open={!!confirmTarget}
+        onClose={() => setConfirm(null)}
+        onConfirm={() =>
+          confirmTarget?.action === 'deactivate'
+            ? deactivateMutation.mutate(confirmTarget.product.id)
+            : confirmTarget && activateMutation.mutate(confirmTarget.product.id)
+        }
+        isLoading={deactivateMutation.isPending || activateMutation.isPending}
+        title={confirmTarget?.action === 'deactivate' ? 'Desactivar producto' : 'Activar producto'}
+        description={
+          confirmTarget?.action === 'deactivate'
+            ? `"${confirmTarget?.product.name}" dejará de estar disponible para pedidos.`
+            : `"${confirmTarget?.product.name}" volverá a estar disponible para pedidos.`
+        }
+        confirmLabel={confirmTarget?.action === 'deactivate' ? 'Desactivar' : 'Activar'}
+        variant={confirmTarget?.action === 'deactivate' ? 'danger' : 'info'}
+      />
     </div>
   )
 }

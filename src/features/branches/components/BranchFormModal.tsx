@@ -1,17 +1,16 @@
 import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { X, Loader2 } from 'lucide-react'
+import { X, Loader2, Building2, MapPin, Landmark, CircleDot, Hash, CheckCircle2, XCircle } from 'lucide-react'
 import { useMutation } from '@tanstack/react-query'
 import type { Branch, BranchFormData } from '../types'
 import { createBranch, updateBranch } from '../services/branches.service'
-import {
-  FormSection,
-  FormField,
-  inputClassName,
-  selectClassName,
-} from '@/shared/components/ui'
+import { FormSection, FormField } from '@/shared/components/ui'
+
+// Premium input treatment — same language introduced in the Deliveries modal.
+const fancyInput =
+  'h-10 w-full rounded-md border border-zinc-200 bg-zinc-50/60 px-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 transition-all duration-150 hover:border-zinc-300 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 disabled:bg-zinc-100 disabled:text-zinc-400'
 
 const schema = z.object({
   code: z.string().min(1, 'Requerido').max(20, 'Máximo 20 caracteres').toUpperCase(),
@@ -43,6 +42,7 @@ export function BranchFormModal({ branch, onClose, onSuccess }: Props) {
     register,
     handleSubmit,
     reset,
+    control,
     setError,
     formState: { errors },
   } = useForm<FormData>({
@@ -98,21 +98,26 @@ export function BranchFormModal({ branch, onClose, onSuccess }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-end">
-      <div className="absolute inset-0 bg-black/20" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/25" onClick={onClose} />
       <div className="relative flex h-full w-full max-w-xl flex-col bg-white shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-zinc-200 px-6 py-4">
-          <div>
-            <h2 className="text-sm font-semibold text-zinc-900">
-              {isEditing ? 'Editar sucursal' : 'Nueva sucursal'}
-            </h2>
-            <p className="text-xs text-zinc-500 mt-0.5">
-              {isEditing ? `Modificando ${branch.name}` : 'Complete los datos de la nueva sucursal'}
-            </p>
+        <div className="flex items-center justify-between border-b border-zinc-200 bg-zinc-50/60 px-6 py-4">
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-zinc-900 text-white">
+              <Building2 size={16} />
+            </span>
+            <div>
+              <h2 className="text-sm font-semibold text-zinc-900">
+                {isEditing ? 'Editar sucursal' : 'Nueva sucursal'}
+              </h2>
+              <p className="mt-0.5 text-xs text-zinc-500">
+                {isEditing ? `Modificando ${branch.name}` : 'Complete los datos de la nueva sucursal'}
+              </p>
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="text-zinc-400 hover:text-zinc-700 rounded p-1 hover:bg-zinc-100"
+            className="rounded-sm p-1.5 text-zinc-400 hover:bg-zinc-200/60 hover:text-zinc-700"
           >
             <X size={16} />
           </button>
@@ -121,35 +126,38 @@ export function BranchFormModal({ branch, onClose, onSuccess }: Props) {
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col overflow-hidden">
           <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
-            <FormSection title="Identificación">
+            <FormSection title="Identificación" icon={Building2}>
               <FormField label="Código de sucursal" htmlFor="code" required error={errors.code?.message}>
-                <input id="code" className={inputClassName} {...register('code')} />
+                <div className="relative">
+                  <Hash size={14} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                  <input id="code" className={`${fancyInput} pl-9`} {...register('code')} />
+                </div>
               </FormField>
               <FormField label="Nombre" htmlFor="name" required error={errors.name?.message} fullWidth>
-                <input id="name" className={inputClassName} {...register('name')} />
+                <input id="name" className={fancyInput} {...register('name')} />
               </FormField>
             </FormSection>
 
-            <FormSection title="Ubicación">
+            <FormSection title="Ubicación" icon={MapPin}>
               <FormField label="Dirección" htmlFor="address" required error={errors.address?.message} fullWidth>
-                <input id="address" className={inputClassName} {...register('address')} />
+                <input id="address" className={fancyInput} {...register('address')} />
               </FormField>
               <FormField label="Ciudad" htmlFor="city" required error={errors.city?.message}>
-                <input id="city" className={inputClassName} {...register('city')} />
+                <input id="city" className={fancyInput} {...register('city')} />
               </FormField>
               <FormField label="Provincia" htmlFor="province" required error={errors.province?.message}>
-                <input id="province" className={inputClassName} {...register('province')} />
+                <input id="province" className={fancyInput} {...register('province')} />
               </FormField>
             </FormSection>
 
-            <FormSection title="Datos fiscales">
+            <FormSection title="Datos fiscales" icon={Landmark}>
               <FormField
                 label="CUIT (11 dígitos sin guiones)"
                 htmlFor="cuit"
                 required
                 error={errors.cuit?.message}
               >
-                <input id="cuit" className={inputClassName} maxLength={11} {...register('cuit')} />
+                <input id="cuit" className={`${fancyInput} font-mono tracking-wider`} maxLength={11} {...register('cuit')} />
               </FormField>
               <FormField
                 label="Condición IVA"
@@ -160,7 +168,7 @@ export function BranchFormModal({ branch, onClose, onSuccess }: Props) {
               >
                 <input
                   id="vatCondition"
-                  className={inputClassName}
+                  className={fancyInput}
                   maxLength={10}
                   {...register('vatCondition')}
                 />
@@ -173,7 +181,7 @@ export function BranchFormModal({ branch, onClose, onSuccess }: Props) {
               >
                 <input
                   id="companyName"
-                  className={inputClassName}
+                  className={fancyInput}
                   placeholder="El Jumillano S.A."
                   {...register('companyName')}
                 />
@@ -186,25 +194,53 @@ export function BranchFormModal({ branch, onClose, onSuccess }: Props) {
               >
                 <input
                   id="phone"
-                  className={inputClassName}
+                  className={fancyInput}
                   placeholder="0800-333-3090"
                   {...register('phone')}
                 />
               </FormField>
             </FormSection>
 
-            <FormSection title="Estado operativo">
-              <FormField label="Estado" htmlFor="status" required error={errors.status?.message}>
-                <select id="status" className={selectClassName} {...register('status')}>
-                  <option value="active">Activa</option>
-                  <option value="inactive">Inactiva</option>
-                </select>
+            <FormSection title="Estado operativo" icon={CircleDot}>
+              <FormField label="Estado" required error={errors.status?.message} fullWidth>
+                <Controller
+                  control={control}
+                  name="status"
+                  render={({ field }) => (
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => field.onChange('active')}
+                        className={`flex items-center gap-2.5 rounded-md border px-3.5 py-2.5 text-sm font-medium transition-all ${
+                          field.value === 'active'
+                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700 ring-4 ring-emerald-500/10'
+                            : 'border-zinc-200 bg-zinc-50/60 text-zinc-600 hover:border-zinc-300'
+                        }`}
+                      >
+                        <CheckCircle2 size={15} className={field.value === 'active' ? 'text-emerald-600' : 'text-zinc-400'} />
+                        Activa
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => field.onChange('inactive')}
+                        className={`flex items-center gap-2.5 rounded-md border px-3.5 py-2.5 text-sm font-medium transition-all ${
+                          field.value === 'inactive'
+                            ? 'border-zinc-400 bg-zinc-100 text-zinc-700 ring-4 ring-zinc-400/10'
+                            : 'border-zinc-200 bg-zinc-50/60 text-zinc-600 hover:border-zinc-300'
+                        }`}
+                      >
+                        <XCircle size={15} className={field.value === 'inactive' ? 'text-zinc-500' : 'text-zinc-400'} />
+                        Inactiva
+                      </button>
+                    </div>
+                  )}
+                />
               </FormField>
             </FormSection>
           </div>
 
           {/* Footer */}
-          <div className="border-t border-zinc-200 px-6 py-4">
+          <div className="border-t border-zinc-200 bg-zinc-50/60 px-6 py-4">
             {errors.root && (
               <p className="mb-3 rounded-sm border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
                 {errors.root.message}
@@ -222,7 +258,7 @@ export function BranchFormModal({ branch, onClose, onSuccess }: Props) {
               <button
                 type="submit"
                 disabled={mutation.isPending}
-                className="flex h-9 items-center gap-2 rounded-sm bg-blue-600 px-5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                className="flex h-9 items-center gap-2 rounded-sm bg-blue-600 px-5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 hover:shadow disabled:opacity-50"
               >
                 {mutation.isPending && <Loader2 size={13} className="animate-spin" />}
                 {mutation.isPending ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Crear sucursal'}

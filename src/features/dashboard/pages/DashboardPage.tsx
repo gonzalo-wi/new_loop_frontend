@@ -10,10 +10,11 @@ import {
   CheckCircle2,
   ArrowRight,
   ClipboardCheck,
+  Building2,
   Loader2,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { PageHeader } from '@/shared/components/ui'
+import { PageHeader, MetricBlock } from '@/shared/components/ui'
 import { ROUTES } from '@/shared/constants'
 import { cn } from '@/shared/lib/utils'
 import { fetchPendingArrivals } from '@/features/stock/services/stock-controls.service'
@@ -41,51 +42,15 @@ function QuickAction({
     <Link
       to={to}
       className={cn(
-        'flex items-center gap-1.5 rounded-[3px] border px-3 py-[7px] text-xs font-semibold transition-colors',
+        'flex items-center gap-1.5 rounded-sm border px-3 py-[7px] text-xs font-semibold transition-all',
         variant === 'primary'
-          ? 'border-blue-600 bg-blue-600 text-white hover:bg-blue-700'
+          ? 'border-blue-600 bg-blue-600 text-white shadow-sm hover:bg-blue-700 hover:shadow'
           : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-900'
       )}
     >
       <Icon size={11} strokeWidth={2.5} />
       {label}
     </Link>
-  )
-}
-
-// ── Metric cell ───────────────────────────────────────────────────────────────
-
-function MetricCell({
-  label,
-  value,
-  note,
-  status = 'neutral',
-  loading = false,
-}: {
-  label: string
-  value: string | number
-  note?: string
-  status?: 'critical' | 'warning' | 'success' | 'info' | 'neutral'
-  loading?: boolean
-}) {
-  const valueColor = {
-    critical: 'text-red-600',
-    warning:  'text-amber-600',
-    success:  'text-emerald-600',
-    info:     'text-blue-600',
-    neutral:  'text-zinc-950',
-  }[status]
-
-  const bg = status === 'critical' ? 'bg-red-50/60' : status === 'warning' ? 'bg-amber-50/40' : ''
-
-  return (
-    <div className={cn('flex min-w-0 flex-col gap-1 px-6 py-5 transition-colors', bg)}>
-      <dt className="text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-400">{label}</dt>
-      <dd className={cn('text-3xl font-bold tabular-nums leading-none', valueColor)}>
-        {loading ? <Loader2 size={18} className="animate-spin text-zinc-300" /> : value}
-      </dd>
-      {note && <span className="text-[10px] text-zinc-400">{note}</span>}
-    </div>
   )
 }
 
@@ -203,33 +168,32 @@ export function DashboardPage() {
       </div>
 
       {/* ── Metrics strip ──────────────────────────────────────────────── */}
-      <div className="border-b border-zinc-200 bg-white">
-        <dl className="flex divide-x divide-zinc-100">
-          <MetricCell
-            label="Faltan llegar hoy"
-            value={loadingArrivals ? '—' : `${pendingArrCount} / ${totalExpected}`}
-            status={pendingArrCount > 0 ? 'warning' : 'success'}
-            note={pendingArrCount === 0 ? 'todos llegaron' : `${pendingArrivals?.arrived ?? 0} ya volvieron`}
-            loading={loadingArrivals}
-          />
-          <MetricCell
-            label="Repartos activos"
-            value={loadingDeliveries ? '—' : activeDeliveries}
-            loading={loadingDeliveries}
-          />
-          <MetricCell
-            label="Pedidos en proceso"
-            value={loadingInProgress ? '—' : inProgressCount}
-            status={inProgressCount > 0 ? 'info' : 'neutral'}
-            loading={loadingInProgress}
-          />
-          <MetricCell
-            label="Sucursales activas"
-            value={loadingBranches ? '—' : activeBranches}
-            loading={loadingBranches}
-          />
-          <div className="flex-1" />
-        </dl>
+      <div className="grid grid-cols-2 gap-3 border-b border-zinc-200 bg-zinc-50 p-4 xl:grid-cols-4">
+        <MetricBlock
+          label="Faltan llegar hoy"
+          icon={Clock}
+          accent={pendingArrCount > 0 ? 'amber' : 'green'}
+          value={loadingArrivals ? <Loader2 size={18} className="animate-spin text-zinc-300" /> : `${pendingArrCount} / ${totalExpected}`}
+          note={pendingArrCount === 0 ? 'todos llegaron' : `${pendingArrivals?.arrived ?? 0} ya volvieron`}
+        />
+        <MetricBlock
+          label="Repartos activos"
+          icon={Route}
+          accent="default"
+          value={loadingDeliveries ? <Loader2 size={18} className="animate-spin text-zinc-300" /> : activeDeliveries}
+        />
+        <MetricBlock
+          label="Pedidos en proceso"
+          icon={ClipboardCheck}
+          accent={inProgressCount > 0 ? 'blue' : 'default'}
+          value={loadingInProgress ? <Loader2 size={18} className="animate-spin text-zinc-300" /> : inProgressCount}
+        />
+        <MetricBlock
+          label="Sucursales activas"
+          icon={Building2}
+          accent="default"
+          value={loadingBranches ? <Loader2 size={18} className="animate-spin text-zinc-300" /> : activeBranches}
+        />
       </div>
 
       {/* ── Body ────────────────────────────────────────────────────────── */}

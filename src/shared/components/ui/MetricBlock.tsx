@@ -5,7 +5,7 @@ type Accent = 'default' | 'green' | 'amber' | 'red' | 'blue'
 
 type Props = {
   label: string
-  value: string | number
+  value: React.ReactNode
   unit?: string
   note?: string
   icon?: LucideIcon
@@ -29,6 +29,14 @@ const ACCENT_VALUE: Record<Accent, string> = {
   blue:    'text-blue-700',
 }
 
+const ACCENT_ICON: Record<Accent, string> = {
+  default: 'bg-zinc-100 text-zinc-400',
+  green:   'bg-emerald-50 text-emerald-600',
+  amber:   'bg-amber-50 text-amber-600',
+  red:     'bg-red-50 text-red-600',
+  blue:    'bg-blue-50 text-blue-600',
+}
+
 export function MetricBlock({
   label,
   value,
@@ -41,16 +49,20 @@ export function MetricBlock({
   return (
     <div
       className={cn(
-        'border border-zinc-200 border-l-[3px] bg-white px-4 py-3.5',
+        'rounded-md border border-zinc-200 border-l-[3px] bg-white px-4 py-3.5 transition-shadow hover:shadow-sm',
         ACCENT_BORDER[accent],
         className
       )}
     >
       <div className="flex items-start justify-between gap-2">
         <p className="text-[9px] font-bold uppercase tracking-[0.1em] text-zinc-400">{label}</p>
-        {Icon && <Icon size={13} className="mt-0.5 shrink-0 text-zinc-300" />}
+        {Icon && (
+          <span className={cn('flex h-6 w-6 shrink-0 items-center justify-center rounded-sm', ACCENT_ICON[accent])}>
+            <Icon size={13} />
+          </span>
+        )}
       </div>
-      <div className="mt-2 flex items-end gap-1.5">
+      <div className="mt-2.5 flex items-end gap-1.5">
         <span className={cn('text-2xl font-bold tabular-nums leading-none', ACCENT_VALUE[accent])}>
           {value}
         </span>

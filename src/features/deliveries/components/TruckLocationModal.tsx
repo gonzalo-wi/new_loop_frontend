@@ -58,12 +58,12 @@ export function TruckLocationModal({ delivery, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/25" onClick={onClose} />
       <div className="relative flex h-[80vh] w-full max-w-4xl flex-col overflow-hidden rounded-md bg-white shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-zinc-200 px-6 py-4">
+        <div className="flex items-center justify-between border-b border-zinc-200 bg-zinc-50/60 px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-sm bg-zinc-100 text-zinc-500">
+            <div className="flex h-9 w-9 items-center justify-center rounded-sm bg-zinc-900 text-white">
               <MapPin size={16} />
             </div>
             <div>
@@ -84,14 +84,14 @@ export function TruckLocationModal({ delivery, onClose }: Props) {
           </div>
           <div className="flex items-center gap-3">
             {isFetching && plate && (
-              <span className="flex items-center gap-1.5 text-xs text-zinc-400">
+              <span className="flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
                 Actualizando
               </span>
             )}
             <button
               onClick={onClose}
-              className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+              className="rounded-sm p-1.5 text-zinc-400 hover:bg-zinc-200/60 hover:text-zinc-700"
             >
               <X size={16} />
             </button>
@@ -241,39 +241,41 @@ function truckIcon(direction: number, engineOn: boolean): google.maps.Symbol {
 
 function InfoPanel({ location }: { location: FleetLocation }) {
   return (
-    <div className="w-full shrink-0 space-y-4 overflow-y-auto border-t border-zinc-200 bg-white p-5 md:w-72 md:border-l md:border-t-0">
+    <div className="w-full shrink-0 space-y-5 overflow-y-auto border-t border-zinc-200 bg-white p-5 md:w-72 md:border-l md:border-t-0">
       <div className="flex items-center justify-between">
-        <span className="font-mono text-sm font-semibold uppercase text-zinc-900">
+        <span className="rounded-sm border border-zinc-200 bg-zinc-50 px-2 py-1 font-mono text-sm font-semibold uppercase text-zinc-900">
           {location.licensePlate}
         </span>
         {location.engineOn ? (
-          <span className="flex items-center gap-1 rounded-sm bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+          <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
             <Power size={11} /> En marcha
           </span>
         ) : (
-          <span className="flex items-center gap-1 rounded-sm bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-500">
+          <span className="flex items-center gap-1.5 rounded-full bg-zinc-100 px-2.5 py-1 text-[11px] font-semibold text-zinc-500 ring-1 ring-inset ring-zinc-200">
             <PowerOff size={11} /> Detenido
           </span>
         )}
       </div>
 
-      <InfoRow icon={MapPin} label="Dirección">
-        {location.address || '—'}
-      </InfoRow>
-      <InfoRow icon={Gauge} label="Velocidad">
-        {location.speed} km/h
-      </InfoRow>
-      <InfoRow icon={Navigation} label="Rumbo">
-        {location.direction}°
-      </InfoRow>
-      <InfoRow icon={User} label="Conductor (flota)">
-        {location.driver || '—'}
-      </InfoRow>
-      <InfoRow icon={Clock} label="Último reporte GPS">
-        <span title={formatDateTime(location.gpsDateTime)}>
-          {timeAgo(location.gpsDateTime)}
-        </span>
-      </InfoRow>
+      <div className="space-y-4">
+        <InfoRow icon={MapPin} label="Dirección">
+          {location.address || '—'}
+        </InfoRow>
+        <InfoRow icon={Gauge} label="Velocidad">
+          {location.speed} km/h
+        </InfoRow>
+        <InfoRow icon={Navigation} label="Rumbo">
+          {location.direction}°
+        </InfoRow>
+        <InfoRow icon={User} label="Conductor (flota)">
+          {location.driver || '—'}
+        </InfoRow>
+        <InfoRow icon={Clock} label="Último reporte GPS">
+          <span title={formatDateTime(location.gpsDateTime)}>
+            {timeAgo(location.gpsDateTime)}
+          </span>
+        </InfoRow>
+      </div>
 
       <p className="border-t border-zinc-100 pt-3 text-[11px] leading-relaxed text-zinc-400">
         La ubicación se actualiza automáticamente cada {REFRESH_MS / 1000} segundos.
@@ -292,10 +294,12 @@ function InfoRow({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex gap-2.5">
-      <Icon size={14} className="mt-0.5 shrink-0 text-zinc-400" />
-      <div className="min-w-0">
-        <p className="text-[11px] uppercase tracking-wide text-zinc-400">{label}</p>
+    <div className="flex gap-3">
+      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm bg-zinc-100 text-zinc-500">
+        <Icon size={13} />
+      </span>
+      <div className="min-w-0 pt-0.5">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">{label}</p>
         <p className="text-sm text-zinc-800">{children}</p>
       </div>
     </div>

@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { X, Loader2, Plus, Trash2 } from 'lucide-react'
+import { X, Loader2, Plus, Trash2, Droplets, ArrowLeftRight, ClipboardList, Settings2, Hash } from 'lucide-react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { DispenserMovement, DispenserMovementFormData, DispenserMovementType } from '../types'
 import {
@@ -159,18 +159,23 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 pt-16">
       <div className="w-full max-w-xl rounded-sm border border-zinc-200 bg-white shadow-lg">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-3.5">
-          <div>
-            <h2 className="text-sm font-semibold text-zinc-900">
-              {isEditing ? 'Editar movimiento' : 'Nuevo movimiento'}
-            </h2>
-            <p className="mt-0.5 text-[11px] text-zinc-400">
-              {isEditing ? 'Corrección — cancela el anterior en Aguas' : 'Carga o descarga de dispensers'}
-            </p>
+        <div className="flex items-center justify-between border-b border-zinc-200 bg-zinc-50/60 px-5 py-3.5">
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-zinc-900 text-white">
+              <Droplets size={16} />
+            </span>
+            <div>
+              <h2 className="text-sm font-semibold text-zinc-900">
+                {isEditing ? 'Editar movimiento' : 'Nuevo movimiento'}
+              </h2>
+              <p className="mt-0.5 text-[11px] text-zinc-400">
+                {isEditing ? 'Corrección — cancela el anterior en Aguas' : 'Carga o descarga de dispensers'}
+              </p>
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="rounded p-1 text-zinc-400 hover:text-zinc-700"
+            className="rounded-sm p-1.5 text-zinc-400 hover:bg-zinc-200/60 hover:text-zinc-700"
           >
             <X size={16} />
           </button>
@@ -180,7 +185,7 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
           <div className="max-h-[70vh] overflow-y-auto px-5 py-4 space-y-5">
 
             {/* Type toggle */}
-            <FormSection title="Tipo de movimiento">
+            <FormSection title="Tipo de movimiento" icon={ArrowLeftRight}>
               <Controller
                 control={control}
                 name="type"
@@ -209,7 +214,7 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
             </FormSection>
 
             {/* Route & Technician */}
-            <FormSection title="Datos del movimiento">
+            <FormSection title="Datos del movimiento" icon={ClipboardList}>
               <div className="grid grid-cols-2 gap-3">
                 <FormField label="Código de reparto" error={errors.routeCode?.message}>
                   <input
@@ -245,7 +250,7 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
             </FormSection>
 
             {/* Location & State from Aguas */}
-            <FormSection title="Configuración Aguas">
+            <FormSection title="Configuración Aguas" icon={Settings2}>
               <div className="grid grid-cols-2 gap-3">
                 <FormField label="Ubicación" error={errors.locationId?.message}>
                   <select
@@ -284,7 +289,7 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
             </FormSection>
 
             {/* Serials */}
-            <FormSection title="Seriales">
+            <FormSection title="Seriales" icon={Hash}>
               <div className="space-y-2">
                 <div className="flex gap-2">
                   <input
@@ -343,7 +348,7 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
             </div>
           )}
 
-          <div className="flex justify-end gap-2 border-t border-zinc-200 px-5 py-3.5">
+          <div className="flex justify-end gap-2 border-t border-zinc-200 bg-zinc-50/60 px-5 py-3.5">
             <button
               type="button"
               onClick={onClose}
@@ -354,7 +359,7 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
             <button
               type="submit"
               disabled={isPending}
-              className="flex h-8 items-center gap-1.5 rounded-sm bg-blue-600 px-4 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              className="flex h-8 items-center gap-1.5 rounded-sm bg-blue-600 px-4 text-xs font-medium text-white shadow-sm hover:bg-blue-700 hover:shadow disabled:opacity-50"
             >
               {isPending && <Loader2 size={12} className="animate-spin" />}
               {isEditing ? 'Guardar corrección' : 'Registrar'}

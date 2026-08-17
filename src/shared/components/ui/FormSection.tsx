@@ -1,18 +1,27 @@
+import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 
 type Props = {
   title: string
   description?: string
+  icon?: LucideIcon
   children: React.ReactNode
   className?: string
 }
 
-export function FormSection({ title, description, children, className }: Props) {
+export function FormSection({ title, description, icon: Icon, children, className }: Props) {
   return (
     <div className={cn('', className)}>
-      <div className="border-b border-zinc-100 pb-3 mb-4">
-        <h3 className="text-sm font-semibold text-zinc-800">{title}</h3>
-        {description && <p className="mt-0.5 text-xs text-zinc-500">{description}</p>}
+      <div className="mb-4 flex items-center gap-2 border-b border-zinc-100 pb-3">
+        {Icon && (
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-sm bg-zinc-100 text-zinc-500">
+            <Icon size={13} />
+          </span>
+        )}
+        <div>
+          <h3 className="text-sm font-semibold text-zinc-800">{title}</h3>
+          {description && <p className="mt-0.5 text-xs text-zinc-500">{description}</p>}
+        </div>
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">{children}</div>
     </div>
@@ -61,7 +70,7 @@ export const inputClassName =
   'h-9 w-full rounded-sm border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-zinc-50 disabled:text-zinc-500'
 
 export const selectClassName =
-  'h-9 w-full rounded-sm border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-zinc-50 disabled:text-zinc-500 appearance-none'
+  'select-chevron h-9 w-full rounded-sm border border-zinc-200 bg-white pl-3 pr-8 text-sm text-zinc-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-zinc-50 disabled:text-zinc-500 appearance-none'
 
 export const textareaClassName =
   'w-full rounded-sm border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-zinc-50 disabled:text-zinc-500 resize-none'

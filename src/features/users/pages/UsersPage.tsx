@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Pencil, UserX, UserCheck } from 'lucide-react'
+import { Plus, Pencil, UserX, UserCheck, Users, ShieldCheck, AlertTriangle } from 'lucide-react'
 import { fetchUsers, deleteUser, activateUser } from '../services/users.service'
 import type { User } from '../types'
+import { BRANCH_REQUIRED_ROLES } from '../types'
 import {
   PageHeader,
   ActionBar,
@@ -12,6 +13,7 @@ import {
   DataTable,
   StatusBadge,
   ConfirmDialog,
+  MetricBlock,
 } from '@/shared/components/ui'
 import type { TableColumn } from '@/shared/types'
 import { ROLE_LABELS } from '@/shared/constants'
@@ -37,6 +39,12 @@ export function UsersPage() {
     queryKey: ['users'],
     queryFn: fetchUsers,
   })
+
+  const activeCount     = users.filter((u) => u.status === 'active').length
+  const adminCount      = users.filter((u) => u.role === 'admin').length
+  const missingBranchCount = users.filter(
+    (u) => u.status === 'active' && BRANCH_REQUIRED_ROLES.includes(u.role as UserRole) && !u.branchId
+  ).length
 
   const deactivateMutation = useMutation({
     mutationFn: (id: string) => deleteUser(id),
@@ -184,6 +192,29 @@ export function UsersPage() {
           </ActionButton>
         }
       />
+
+      <div className="grid grid-cols-3 gap-3 border-b border-zinc-200 bg-zinc-50 p-4">
+        <MetricBlock
+          label="Usuarios activos"
+          icon={Users}
+          accent={activeCount > 0 ? 'green' : 'default'}
+          value={activeCount}
+          note={`de ${users.length} en total`}
+        />
+        <MetricBlock
+          label="Administradores"
+          icon={ShieldCheck}
+          accent="blue"
+          value={adminCount}
+        />
+        <MetricBlock
+          label="Sin sucursal asignada"
+          icon={AlertTriangle}
+          accent={missingBranchCount > 0 ? 'amber' : 'default'}
+          value={missingBranchCount}
+          note="controladores/pickers activos"
+        />
+      </div>
 
       <ActionBar>
         <SearchInput

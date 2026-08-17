@@ -1,4 +1,4 @@
-import { Filter, X } from 'lucide-react'
+import { ChevronDown, Filter, X } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 
 type FilterOption = {
@@ -33,19 +33,24 @@ export function FilterBar({ filters, activeFilters, onChange, onClearAll, classN
       </span>
 
       {filters.map((group) => (
-        <select
-          key={group.key}
-          value={activeFilters[group.key] ?? ''}
-          onChange={(e) => onChange(group.key, e.target.value)}
-          className="h-8 rounded-sm border border-zinc-200 bg-white px-2.5 pr-7 text-sm text-zinc-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
-        >
-          <option value="">{group.label}</option>
-          {group.options.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
+        <div key={group.key} className="relative">
+          <select
+            value={activeFilters[group.key] ?? ''}
+            onChange={(e) => onChange(group.key, e.target.value)}
+            className="h-8 appearance-none rounded-sm border border-zinc-200 bg-white pl-2.5 pr-7 text-sm text-zinc-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          >
+            <option value="">{group.label}</option>
+            {group.options.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <ChevronDown
+            size={12}
+            className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400"
+          />
+        </div>
       ))}
 
       {hasActiveFilters && (

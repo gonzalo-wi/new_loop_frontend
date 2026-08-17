@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Loader2, User, Lock, AlertCircle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { loginService } from '../services/auth.service'
 import { useAuthStore } from '../store/auth.store'
@@ -50,12 +50,12 @@ export function LoginPage() {
   return (
     <div>
       <div className="mb-7">
-        <div className="mb-4 flex items-center gap-2 lg:hidden">
+        <div className="mb-5 flex items-center gap-2 lg:hidden">
           <img src="/logoLoop.png" alt="LOOP" className="h-8 w-8 object-contain" />
           <span className="text-base font-semibold text-zinc-900">LOOP</span>
         </div>
         <h1 className="text-xl font-semibold text-zinc-900">Iniciar sesión</h1>
-        <p className="mt-1 text-sm text-zinc-500">Acceso restringido al personal autorizado.</p>
+        <p className="mt-1 text-sm text-zinc-500">Ingresá tus credenciales para continuar.</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
@@ -63,13 +63,17 @@ export function LoginPage() {
           <label htmlFor="username" className="mb-1 block text-xs font-medium text-zinc-700">
             Usuario
           </label>
-          <input
-            id="username"
-            type="text"
-            autoComplete="username"
-            className={inputClassName}
-            {...register('username')}
-          />
+          <div className="relative">
+            <User size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+            <input
+              id="username"
+              type="text"
+              autoComplete="username"
+              placeholder="usuario"
+              className={inputClassName + ' pl-9'}
+              {...register('username')}
+            />
+          </div>
           {errors.username && (
             <p className="mt-1 text-xs text-red-500">{errors.username.message}</p>
           )}
@@ -80,16 +84,19 @@ export function LoginPage() {
             Contraseña
           </label>
           <div className="relative">
+            <Lock size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input
               id="password"
               type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
-              className={inputClassName + ' pr-9'}
+              placeholder="••••••••"
+              className={inputClassName + ' pl-9 pr-9'}
               {...register('password')}
             />
             <button
               type="button"
               onClick={() => setShowPassword((p) => !p)}
+              tabIndex={-1}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700"
             >
               {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -101,8 +108,9 @@ export function LoginPage() {
         </div>
 
         {serverError && (
-          <div className="rounded-sm border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-600">
-            {serverError}
+          <div className="flex items-start gap-2 rounded-sm border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-600">
+            <AlertCircle size={15} className="mt-0.5 shrink-0" />
+            <span>{serverError}</span>
           </div>
         )}
 

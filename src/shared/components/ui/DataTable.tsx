@@ -37,12 +37,12 @@ export function DataTable<T>({
     <div className={cn('overflow-x-auto', className)}>
       <table className="w-full min-w-full table-auto border-collapse">
         <thead>
-          <tr className="border-b border-zinc-200 bg-zinc-50">
+          <tr className="sticky top-0 z-10 border-b border-zinc-200 bg-zinc-50 shadow-[0_1px_0_0_rgba(0,0,0,0.02)]">
             {columns.map((col) => (
               <th
                 key={col.key}
                 className={cn(
-                  'px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-wide text-zinc-500 whitespace-nowrap',
+                  'whitespace-nowrap px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-zinc-500',
                   col.align === 'center' && 'text-center',
                   col.align === 'right' && 'text-right',
                   col.width

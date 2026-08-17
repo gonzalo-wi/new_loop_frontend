@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Bell, ChevronRight } from 'lucide-react'
+import { Bell } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/features/auth/store/auth.store'
 import { ROLE_LABELS } from '@/shared/constants'
@@ -55,57 +55,44 @@ export function Topbar() {
   const now = useLiveClock()
 
   return (
-    <header className="flex h-10 shrink-0 items-center justify-between border-b border-zinc-200 bg-white px-5">
+    <header className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-200 bg-white px-6 shadow-[0_1px_2px_0_rgba(0,0,0,0.02)]">
 
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-1 text-xs">
-        <span className="font-mono text-[11px] font-semibold tracking-[0.08em] text-zinc-400">
-          LOOP
-        </span>
-        {title && (
-          <>
-            <ChevronRight size={11} className="mx-0.5 text-zinc-300" />
-            <span className="font-semibold text-zinc-700">{title}</span>
-          </>
-        )}
+      {/* Page title */}
+      <div className="flex items-center gap-1.5">
+        <h1 className="text-[15px] font-bold tracking-tight text-zinc-900">{title || 'LOOP'}</h1>
       </div>
 
       {/* Right: datetime · status · notifications · user */}
-      <div className="flex items-center divide-x divide-zinc-100">
+      <div className="flex items-center gap-1">
 
-        {/* Live clock */}
-        <div className="hidden pr-4 sm:block">
-          <span className="font-mono text-[11px] tabular-nums text-zinc-400">
+        {/* Live clock + status, grouped as a single quiet segment */}
+        <div className="hidden items-center gap-2.5 rounded-sm border border-zinc-100 bg-zinc-50/60 px-3 py-1.5 sm:flex">
+          <span className="font-mono text-[11px] tabular-nums text-zinc-500">
             {formatClock(now)}
           </span>
-        </div>
-
-        {/* System status */}
-        <div className="hidden items-center gap-2 px-4 sm:flex">
+          <span className="h-3 w-px bg-zinc-200" />
           <span className="relative flex h-[7px] w-[7px]">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-50" />
             <span className="relative inline-flex h-[7px] w-[7px] rounded-full bg-emerald-500" />
           </span>
-          <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-zinc-400">
+          <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-zinc-500">
             En línea
           </span>
         </div>
 
         {/* Notifications */}
-        <div className="px-4">
-          <button
-            className="relative text-zinc-400 hover:text-zinc-700 transition-colors"
-            title="Notificaciones"
-          >
-            <Bell size={15} />
-            <span className="absolute -right-0.5 -top-0.5 h-[6px] w-[6px] rounded-full bg-amber-500" />
-          </button>
-        </div>
+        <button
+          className="relative ml-1 rounded-sm p-2 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
+          title="Notificaciones"
+        >
+          <Bell size={16} />
+          <span className="absolute right-1.5 top-1.5 h-[6px] w-[6px] rounded-full bg-amber-500 ring-2 ring-white" />
+        </button>
 
         {/* User */}
         {user && (
-          <div className="flex items-center gap-2.5 pl-4">
-            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[3px] bg-blue-600 text-[9px] font-bold uppercase text-white">
+          <div className="ml-2 flex items-center gap-2.5 border-l border-zinc-100 pl-4">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm bg-zinc-900 text-[10px] font-bold uppercase text-white">
               {user.name.charAt(0)}
             </div>
             <div className="hidden leading-tight sm:block">
