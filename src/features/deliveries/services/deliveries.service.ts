@@ -73,11 +73,21 @@ function extractMessage(err: unknown): string {
 
 // ── Service functions ─────────────────────────────────────────────────────────
 
+const PAGE_SIZE = 200
+
+// Trae TODOS los repartos recorriendo las páginas del backend. La página necesita el set
+// completo: las métricas, los filtros y la búsqueda se resuelven en el cliente, así el buscador
+// encuentra un reparto aunque haya cientos. El backend ya devuelve orden natural (Rto 1, Rto 2
+// ... Rto 10), por eso no mandamos `sort`.
 export async function fetchDeliveries(): Promise<Delivery[]> {
-  const { data } = await api.get<ApiResponse<SpringPage<RouteDto>>>(
-    '/routes?size=200&sort=code,asc'
-  )
-  return data.data.content.map(fromDto)
+  const first = await api.get<ApiResponse<SpringPage<RouteDto>>>(`/routes?size=${PAGE_SIZE}&page=0`)
+  const { content, page } = first.data.data
+  const all = [...content]
+  for (let p = 1; p < page.totalPages; p++) {
+    const next = await api.get<ApiResponse<SpringPage<RouteDto>>>(`/routes?size=${PAGE_SIZE}&page=${p}`)
+    all.push(...next.data.data.content)
+  }
+  return all.map(fromDto)
 }
 
 export async function createDelivery(formData: DeliveryFormData): Promise<Delivery> {

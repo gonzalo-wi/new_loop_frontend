@@ -67,11 +67,21 @@ function extractMessage(err: unknown): string {
 
 // ── Service functions ─────────────────────────────────────────────────────────
 
+const PAGE_SIZE = 200
+
+// Trae TODOS los usuarios recorriendo las páginas del backend. El listado necesita el set
+// completo: las métricas, los filtros (rol/estado) y la búsqueda se resuelven en el cliente,
+// así el buscador encuentra un usuario aunque haya cientos. El backend ya devuelve orden
+// natural (Rto 1, Rto 2 ... Rto 10), por eso no mandamos `sort`.
 export async function fetchUsers(): Promise<User[]> {
-  const { data } = await api.get<ApiResponse<SpringPage<UserDto>>>(
-    '/users?size=200&sort=name,asc'
-  )
-  return data.data.content.map(fromDto)
+  const first = await api.get<ApiResponse<SpringPage<UserDto>>>(`/users?size=${PAGE_SIZE}&page=0`)
+  const { content, page } = first.data.data
+  const all = [...content]
+  for (let p = 1; p < page.totalPages; p++) {
+    const next = await api.get<ApiResponse<SpringPage<UserDto>>>(`/users?size=${PAGE_SIZE}&page=${p}`)
+    all.push(...next.data.data.content)
+  }
+  return all.map(fromDto)
 }
 
 export async function fetchUserById(id: string): Promise<User> {
