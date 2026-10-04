@@ -14,7 +14,7 @@ export function FormSection({ title, description, icon: Icon, children, classNam
     <div className={cn('', className)}>
       <div className="mb-4 flex items-center gap-2 border-b border-zinc-100 pb-3">
         {Icon && (
-          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-sm bg-zinc-100 text-zinc-500">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-zinc-100 text-zinc-500">
             <Icon size={13} />
           </span>
         )}
@@ -53,7 +53,7 @@ export function FormField({
     <div className={cn('flex flex-col gap-1', fullWidth && 'sm:col-span-2', className)}>
       <label
         htmlFor={htmlFor}
-        className="text-xs font-medium text-zinc-700"
+        className="text-[13px] font-medium text-zinc-700"
       >
         {label}
         {required && <span className="ml-0.5 text-red-500">*</span>}
@@ -67,10 +67,10 @@ export function FormField({
 
 // Reusable input styling
 export const inputClassName =
-  'h-9 w-full rounded-sm border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-zinc-50 disabled:text-zinc-500'
+  'h-10 w-full rounded-md border border-zinc-200 bg-white shadow-card px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 disabled:bg-zinc-50 disabled:text-zinc-500'
 
 export const selectClassName =
-  'select-chevron h-9 w-full rounded-sm border border-zinc-200 bg-white pl-3 pr-8 text-sm text-zinc-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-zinc-50 disabled:text-zinc-500 appearance-none'
+  'select-chevron h-10 w-full rounded-md border border-zinc-200 bg-white shadow-card pl-3 pr-8 text-sm text-zinc-900 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 disabled:bg-zinc-50 disabled:text-zinc-500 appearance-none'
 
 export const textareaClassName =
-  'w-full rounded-sm border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-zinc-50 disabled:text-zinc-500 resize-none'
+  'w-full rounded-md border border-zinc-200 bg-white shadow-card px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 disabled:bg-zinc-50 disabled:text-zinc-500 resize-none'

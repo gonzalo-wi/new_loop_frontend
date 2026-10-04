@@ -27,8 +27,8 @@ export function FilterBar({ filters, activeFilters, onChange, onClearAll, classN
 
   return (
     <div className={cn('flex flex-wrap items-center gap-2', className)}>
-      <span className="flex items-center gap-1 text-xs font-medium text-zinc-500 uppercase tracking-wide">
-        <Filter size={11} />
+      <span className="flex items-center gap-1.5 text-xs font-medium text-zinc-500">
+        <Filter size={13} />
         Filtros
       </span>
 
@@ -37,7 +37,7 @@ export function FilterBar({ filters, activeFilters, onChange, onClearAll, classN
           <select
             value={activeFilters[group.key] ?? ''}
             onChange={(e) => onChange(group.key, e.target.value)}
-            className="h-8 appearance-none rounded-sm border border-zinc-200 bg-white pl-2.5 pr-7 text-sm text-zinc-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="h-9 appearance-none rounded-md border border-zinc-200 bg-white pl-3 pr-8 text-sm text-zinc-700 shadow-card focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
           >
             <option value="">{group.label}</option>
             {group.options.map((opt) => (
@@ -48,7 +48,7 @@ export function FilterBar({ filters, activeFilters, onChange, onClearAll, classN
           </select>
           <ChevronDown
             size={12}
-            className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400"
+            className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400"
           />
         </div>
       ))}
@@ -56,7 +56,7 @@ export function FilterBar({ filters, activeFilters, onChange, onClearAll, classN
       {hasActiveFilters && (
         <button
           onClick={onClearAll}
-          className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-800 underline underline-offset-2"
+          className="flex h-9 items-center gap-1 rounded-md px-2 text-xs font-medium text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800"
         >
           <X size={11} />
           Limpiar

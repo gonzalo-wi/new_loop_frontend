@@ -14,6 +14,10 @@ export default {
         zinc: {
           25: '#fafafa',
         },
+        canvas: '#f4f5f7',
+      },
+      boxShadow: {
+        card: '0 1px 2px 0 rgba(16, 24, 40, 0.04)',
       },
     },
   },

@@ -89,7 +89,7 @@ export function Combobox({
           'flex h-10 items-center justify-between rounded-md border px-3.5 text-sm select-none transition-all duration-150',
           disabled
             ? 'cursor-not-allowed border-zinc-200 bg-zinc-100 text-zinc-400'
-            : 'cursor-pointer border-zinc-200 bg-zinc-50/60 text-zinc-900 hover:border-zinc-300',
+            : 'cursor-pointer border-zinc-200 bg-white text-zinc-900 shadow-card hover:border-zinc-300',
           open && !disabled
             ? '!border-blue-500 !bg-white ring-4 ring-blue-500/10'
             : '',
@@ -120,7 +120,7 @@ export function Combobox({
         <div
           ref={containerRef}
           style={style}
-          className="overflow-hidden rounded-md border border-zinc-200 bg-white shadow-lg ring-1 ring-black/5"
+          className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-lg"
         >
           {/* Search */}
           <div className="border-b border-zinc-100 p-2">

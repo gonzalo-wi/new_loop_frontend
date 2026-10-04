@@ -14,7 +14,7 @@ import {
   Loader2,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { PageHeader, MetricBlock } from '@/shared/components/ui'
+import { PageHeader, MetricBlock, Panel } from '@/shared/components/ui'
 import { ROUTES } from '@/shared/constants'
 import { cn } from '@/shared/lib/utils'
 import { fetchPendingArrivals } from '@/features/stock/services/stock-controls.service'
@@ -42,13 +42,13 @@ function QuickAction({
     <Link
       to={to}
       className={cn(
-        'flex items-center gap-1.5 rounded-sm border px-3 py-[7px] text-xs font-semibold transition-all',
+        'inline-flex h-9 items-center gap-2 rounded-md px-3.5 text-sm font-medium shadow-card transition-colors',
         variant === 'primary'
-          ? 'border-blue-600 bg-blue-600 text-white shadow-sm hover:bg-blue-700 hover:shadow'
-          : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-900'
+          ? 'bg-blue-600 text-white hover:bg-blue-700'
+          : 'border border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50'
       )}
     >
-      <Icon size={11} strokeWidth={2.5} />
+      <Icon size={15} />
       {label}
     </Link>
   )
@@ -130,267 +130,207 @@ export function DashboardPage() {
 
   const hasPendingArrivals = pendingArrCount > 0
 
-  return (
-    <div className="flex min-h-0 flex-col bg-zinc-50">
+  const ordersTotal = pendingOrderCount + inProgressCount + completedCount
+  const orderRows = [
+    { label: 'Pendientes',      hint: 'Sin asignar',     count: pendingOrderCount, loading: loadingPending,    dot: 'bg-amber-500',   bar: 'bg-amber-400' },
+    { label: 'En proceso',      hint: 'En distribución', count: inProgressCount,   loading: loadingInProgress, dot: 'bg-blue-500',    bar: 'bg-blue-500' },
+    { label: 'Completados hoy', hint: today,             count: completedCount,    loading: loadingCompleted,  dot: 'bg-emerald-500', bar: 'bg-emerald-500' },
+  ]
 
-      {/* ── Header ─────────────────────────────────────────────────────── */}
+  const spinner = <Loader2 size={20} className="animate-spin text-zinc-300" />
+
+  return (
+    <div className="pb-8">
       <PageHeader
         title="Dashboard operativo"
-        description="Estado actual del sistema de control de mercadería."
+        description={new Date().toLocaleDateString('es-AR', {
+          weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+        })}
+        actions={
+          <>
+            <QuickAction to={ROUTES.STOCK_EXITS}   icon={ArrowUpFromLine} label="Registrar salida" />
+            <QuickAction to={ROUTES.STOCK_ENTRIES} icon={ArrowDownToLine} label="Nueva entrada" variant="primary" />
+          </>
+        }
       />
 
-      {/* ── Pending arrivals banner ─────────────────────────────────────── */}
-      {!loadingArrivals && hasPendingArrivals && (
-        <div className="flex items-center gap-4 border-b border-amber-200 bg-amber-50 px-6 py-2">
-          <Clock size={12} className="shrink-0 text-amber-600" />
-          <span className="text-xs text-amber-800">
-            <strong>{pendingArrCount}</strong> reparto{pendingArrCount !== 1 ? 's' : ''} pendiente{pendingArrCount !== 1 ? 's' : ''} de llegar hoy
-          </span>
-          <Link
-            to={ROUTES.STOCK_ENTRIES}
-            className="ml-auto flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-amber-700 hover:text-amber-900"
-          >
-            Ver entradas <ArrowRight size={10} />
-          </Link>
-        </div>
-      )}
+      <div className="space-y-5 px-6">
 
-      {/* ── Quick actions ───────────────────────────────────────────────── */}
-      <div className="flex items-center gap-2 border-b border-zinc-200 bg-white px-5 py-3">
-        <span className="mr-2 text-[9px] font-bold uppercase tracking-[0.15em] text-zinc-300">
-          Acciones
-        </span>
-        <QuickAction to={ROUTES.STOCK_ENTRIES} icon={ArrowDownToLine} label="Nueva entrada"     variant="primary" />
-        <QuickAction to={ROUTES.STOCK_EXITS}   icon={ArrowUpFromLine} label="Registrar salida" />
-        <QuickAction to={ROUTES.DELIVERIES}    icon={Route}           label="Repartos" />
-        <QuickAction to={ROUTES.ORDERS}        icon={ClipboardCheck}  label="Pedidos" />
-        <QuickAction to={ROUTES.AUDITS}        icon={ClipboardList}   label="Auditoría" />
-      </div>
-
-      {/* ── Metrics strip ──────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-3 border-b border-zinc-200 bg-zinc-50 p-4 xl:grid-cols-4">
-        <MetricBlock
-          label="Faltan llegar hoy"
-          icon={Clock}
-          accent={pendingArrCount > 0 ? 'amber' : 'green'}
-          value={loadingArrivals ? <Loader2 size={18} className="animate-spin text-zinc-300" /> : `${pendingArrCount} / ${totalExpected}`}
-          note={pendingArrCount === 0 ? 'todos llegaron' : `${pendingArrivals?.arrived ?? 0} ya volvieron`}
-        />
-        <MetricBlock
-          label="Repartos activos"
-          icon={Route}
-          accent="default"
-          value={loadingDeliveries ? <Loader2 size={18} className="animate-spin text-zinc-300" /> : activeDeliveries}
-        />
-        <MetricBlock
-          label="Pedidos en proceso"
-          icon={ClipboardCheck}
-          accent={inProgressCount > 0 ? 'blue' : 'default'}
-          value={loadingInProgress ? <Loader2 size={18} className="animate-spin text-zinc-300" /> : inProgressCount}
-        />
-        <MetricBlock
-          label="Sucursales activas"
-          icon={Building2}
-          accent="default"
-          value={loadingBranches ? <Loader2 size={18} className="animate-spin text-zinc-300" /> : activeBranches}
-        />
-      </div>
-
-      {/* ── Body ────────────────────────────────────────────────────────── */}
-      <div className="flex min-h-0 flex-1 divide-x divide-zinc-200">
-
-        {/* Left: controles de hoy + faltan llegar */}
-        <div className="flex min-w-0 flex-1 flex-col">
-
-          {/* Controles de hoy */}
-          <div className="border-b border-zinc-200 bg-white">
-            <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-2.5">
-              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">
-                Controles de hoy
-              </span>
-              <span className="font-mono text-[10px] text-zinc-400">{today}</span>
-            </div>
-            <div className="flex divide-x divide-zinc-100">
-              <Link
-                to={ROUTES.STOCK_ENTRIES}
-                className="flex flex-1 flex-col gap-1 px-6 py-5 transition-colors hover:bg-zinc-50"
-              >
-                <dt className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-400">
-                  <ArrowDownToLine size={10} className="text-emerald-500" />
-                  Entradas registradas
-                </dt>
-                <dd className="text-3xl font-bold tabular-nums leading-none text-zinc-950">
-                  {loadingEntries ? <Loader2 size={18} className="animate-spin text-zinc-300" /> : entriesCount}
-                </dd>
-              </Link>
-              <Link
-                to={ROUTES.STOCK_EXITS}
-                className="flex flex-1 flex-col gap-1 px-6 py-5 transition-colors hover:bg-zinc-50"
-              >
-                <dt className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-400">
-                  <ArrowUpFromLine size={10} className="text-red-400" />
-                  Salidas registradas
-                </dt>
-                <dd className="text-3xl font-bold tabular-nums leading-none text-zinc-950">
-                  {loadingExits ? <Loader2 size={18} className="animate-spin text-zinc-300" /> : exitsCount}
-                </dd>
-              </Link>
-            </div>
-          </div>
-
-          {/* Repartos que faltan llegar */}
-          <div className="flex-1 bg-white">
-            <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-2.5">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">
-                  Repartos pendientes de llegar
-                </span>
-                {pendingArrCount > 0 && (
-                  <span className="flex h-4 min-w-[1rem] items-center justify-center rounded-[3px] bg-amber-500 px-1 text-[9px] font-bold text-white">
-                    {pendingArrCount}
-                  </span>
-                )}
-              </div>
-              <Link
-                to={ROUTES.STOCK_ENTRIES}
-                className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-400 hover:text-zinc-700"
-              >
-                Registrar entrada <ArrowRight size={10} />
-              </Link>
-            </div>
-
-            {loadingArrivals ? (
-              <div className="flex items-center justify-center py-12 text-xs text-zinc-400">
-                Cargando...
-              </div>
-            ) : pendingArrCount === 0 ? (
-              <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
-                <div className="flex h-8 w-8 items-center justify-center rounded-[3px] border border-emerald-200 bg-emerald-50">
-                  <CheckCircle2 size={16} className="text-emerald-500" />
-                </div>
-                <p className="text-xs font-medium text-zinc-500">Todos los repartos llegaron</p>
-                <p className="text-[10px] text-zinc-400">
-                  {totalExpected > 0 ? `${totalExpected} de ${totalExpected} completados` : 'Sin repartos esperados hoy'}
-                </p>
-              </div>
-            ) : (
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b border-zinc-100 bg-zinc-50">
-                    <th className="px-5 py-2 text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-400">Sucursal</th>
-                    <th className="px-4 py-2 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-400 w-24">Pendientes</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-100">
-                  {pendingByBranch.map((b) => (
-                    <tr key={b.branchId} className="bg-white hover:bg-amber-50/30">
-                      <td className="px-5 py-3">
-                        <span className="flex items-center gap-1.5">
-                          <AlertCircle size={11} className="shrink-0 text-amber-500" />
-                          <span className="text-sm text-zinc-800">{b.branchName}</span>
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <span className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-[3px] bg-amber-100 px-1.5 font-mono text-xs font-bold text-amber-700">
-                          {b.count}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </div>
-
-        {/* Right: pedidos por estado */}
-        <div className="flex w-72 shrink-0 flex-col bg-white xl:w-80">
-
-          <div className="border-b border-zinc-200 px-5 py-2.5">
-            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">
-              Pedidos
+        {/* ── Pending arrivals banner ───────────────────────────────────── */}
+        {!loadingArrivals && hasPendingArrivals && (
+          <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+              <Clock size={16} />
             </span>
-          </div>
-
-          <div className="flex flex-1 flex-col divide-y divide-zinc-100">
-            {/* PENDING */}
+            <p className="text-sm text-amber-900">
+              <strong className="font-semibold">{pendingArrCount}</strong> reparto{pendingArrCount !== 1 ? 's' : ''} pendiente{pendingArrCount !== 1 ? 's' : ''} de llegar hoy
+            </p>
             <Link
-              to={ROUTES.ORDERS}
-              className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-zinc-50"
+              to={ROUTES.STOCK_ENTRIES}
+              className="ml-auto flex items-center gap-1 rounded-md px-2.5 py-1.5 text-sm font-medium text-amber-800 hover:bg-amber-100"
             >
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-wide text-amber-600">Pendientes</p>
-                <p className="mt-0.5 text-[11px] text-zinc-500">Sin asignar</p>
-              </div>
-              <span className={cn(
-                'text-2xl font-bold tabular-nums',
-                pendingOrderCount > 0 ? 'text-amber-600' : 'text-zinc-300'
-              )}>
-                {loadingPending ? '—' : pendingOrderCount}
-              </span>
-            </Link>
-
-            {/* IN_PROGRESS */}
-            <Link
-              to={ROUTES.ORDERS}
-              className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-zinc-50"
-            >
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-wide text-blue-600">En proceso</p>
-                <p className="mt-0.5 text-[11px] text-zinc-500">En distribución</p>
-              </div>
-              <span className={cn(
-                'text-2xl font-bold tabular-nums',
-                inProgressCount > 0 ? 'text-blue-600' : 'text-zinc-300'
-              )}>
-                {loadingInProgress ? '—' : inProgressCount}
-              </span>
-            </Link>
-
-            {/* COMPLETED today */}
-            <Link
-              to={ROUTES.ORDERS}
-              className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-zinc-50"
-            >
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-wide text-emerald-600">Completados hoy</p>
-                <p className="mt-0.5 text-[11px] text-zinc-500">{today}</p>
-              </div>
-              <span className={cn(
-                'text-2xl font-bold tabular-nums',
-                completedCount > 0 ? 'text-emerald-600' : 'text-zinc-300'
-              )}>
-                {loadingCompleted ? '—' : completedCount}
-              </span>
+              Ver entradas <ArrowRight size={14} />
             </Link>
           </div>
+        )}
 
-          {/* Footer */}
-          <div className="border-t border-zinc-100 bg-zinc-50/50 px-5 py-2.5">
-            <Link
-              to={ROUTES.ORDERS}
-              className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-400 hover:text-zinc-700"
-            >
-              Ver todos los pedidos <ArrowRight size={10} />
-            </Link>
-          </div>
+        {/* ── Metrics ───────────────────────────────────────────────────── */}
+        <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+          <MetricBlock
+            label="Faltan llegar hoy"
+            icon={Clock}
+            accent={pendingArrCount > 0 ? 'amber' : 'green'}
+            value={loadingArrivals ? spinner : `${pendingArrCount} / ${totalExpected}`}
+            note={pendingArrCount === 0 ? 'Todos llegaron' : `${pendingArrivals?.arrived ?? 0} ya volvieron`}
+          />
+          <MetricBlock
+            label="Repartos activos"
+            icon={Route}
+            value={loadingDeliveries ? spinner : activeDeliveries}
+          />
+          <MetricBlock
+            label="Pedidos en proceso"
+            icon={ClipboardCheck}
+            accent={inProgressCount > 0 ? 'blue' : 'default'}
+            value={loadingInProgress ? spinner : inProgressCount}
+          />
+          <MetricBlock
+            label="Sucursales activas"
+            icon={Building2}
+            value={loadingBranches ? spinner : activeBranches}
+          />
         </div>
-      </div>
 
-      {/* ── Footer ──────────────────────────────────────────────────────── */}
-      <div className="border-t border-zinc-200 bg-white px-6 py-2">
-        <div className="flex items-center gap-4 text-[10px] text-zinc-400">
-          <span className="font-bold uppercase tracking-[0.12em]">LOOP</span>
-          <span className="h-3 w-px bg-zinc-200" />
-          <span>
-            {new Date().toLocaleDateString('es-AR', {
-              weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-            })}
-          </span>
-          <span className="ml-auto flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            Sistema activo
-          </span>
+        {/* ── Body ──────────────────────────────────────────────────────── */}
+        <div className="grid gap-5 xl:grid-cols-3">
+
+          <div className="space-y-5 xl:col-span-2">
+            <Panel
+              title="Controles de hoy"
+              icon={ClipboardList}
+              actions={<span className="text-xs tabular-nums text-zinc-400">{today}</span>}
+            >
+              <div className="grid grid-cols-2 divide-x divide-zinc-100">
+                <Link to={ROUTES.STOCK_ENTRIES} className="group flex items-center gap-4 px-5 py-5 transition-colors hover:bg-zinc-50">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                    <ArrowDownToLine size={20} />
+                  </span>
+                  <div className="flex-1">
+                    <p className="text-[13px] font-medium text-zinc-500">Entradas registradas</p>
+                    <p className="mt-1 text-[28px] font-semibold leading-none tracking-tight tabular-nums text-zinc-900">
+                      {loadingEntries ? spinner : entriesCount}
+                    </p>
+                  </div>
+                  <ArrowRight size={16} className="text-zinc-300 transition-colors group-hover:text-zinc-500" />
+                </Link>
+                <Link to={ROUTES.STOCK_EXITS} className="group flex items-center gap-4 px-5 py-5 transition-colors hover:bg-zinc-50">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-600">
+                    <ArrowUpFromLine size={20} />
+                  </span>
+                  <div className="flex-1">
+                    <p className="text-[13px] font-medium text-zinc-500">Salidas registradas</p>
+                    <p className="mt-1 text-[28px] font-semibold leading-none tracking-tight tabular-nums text-zinc-900">
+                      {loadingExits ? spinner : exitsCount}
+                    </p>
+                  </div>
+                  <ArrowRight size={16} className="text-zinc-300 transition-colors group-hover:text-zinc-500" />
+                </Link>
+              </div>
+            </Panel>
+
+            <Panel
+              title={
+                <span className="flex items-center gap-2">
+                  Repartos pendientes de llegar
+                  {pendingArrCount > 0 && (
+                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
+                      {pendingArrCount}
+                    </span>
+                  )}
+                </span>
+              }
+              icon={Route}
+              actions={
+                <Link to={ROUTES.STOCK_ENTRIES} className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700">
+                  Registrar entrada <ArrowRight size={14} />
+                </Link>
+              }
+            >
+              {loadingArrivals ? (
+                <div className="flex items-center justify-center py-12 text-sm text-zinc-400">Cargando...</div>
+              ) : pendingArrCount === 0 ? (
+                <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                    <CheckCircle2 size={20} />
+                  </span>
+                  <p className="text-sm font-medium text-zinc-700">Todos los repartos llegaron</p>
+                  <p className="text-xs text-zinc-400">
+                    {totalExpected > 0 ? `${totalExpected} de ${totalExpected} completados` : 'Sin repartos esperados hoy'}
+                  </p>
+                </div>
+              ) : (
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-zinc-100 bg-zinc-50">
+                      <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Sucursal</th>
+                      <th className="w-28 px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Pendientes</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-100">
+                    {pendingByBranch.map((b) => (
+                      <tr key={b.branchId} className="hover:bg-zinc-50/70">
+                        <td className="px-5 py-3.5">
+                          <span className="flex items-center gap-2">
+                            <AlertCircle size={15} className="shrink-0 text-amber-500" />
+                            <span className="text-sm font-medium text-zinc-800">{b.branchName}</span>
+                          </span>
+                        </td>
+                        <td className="px-5 py-3.5 text-right">
+                          <span className="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-full bg-amber-100 px-2 text-xs font-semibold tabular-nums text-amber-700">
+                            {b.count}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </Panel>
+          </div>
+
+          {/* Pedidos por estado */}
+          <Panel title="Pedidos" icon={ClipboardCheck} className="flex flex-col self-start">
+            <div className="px-5 pt-5">
+              <div className="flex h-2 overflow-hidden rounded-full bg-zinc-100">
+                {ordersTotal > 0 && orderRows.map((r) => (
+                  <div key={r.label} className={r.bar} style={{ width: `${(r.count / ordersTotal) * 100}%` }} />
+                ))}
+              </div>
+            </div>
+            <div className="divide-y divide-zinc-100 px-2 py-2">
+              {orderRows.map((r) => (
+                <Link
+                  key={r.label}
+                  to={ROUTES.ORDERS}
+                  className="flex items-center gap-3 rounded-md px-3 py-3 transition-colors hover:bg-zinc-50"
+                >
+                  <span className={cn('h-2.5 w-2.5 shrink-0 rounded-full', r.dot)} />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-zinc-800">{r.label}</p>
+                    <p className="text-xs text-zinc-400">{r.hint}</p>
+                  </div>
+                  <span className={cn('text-xl font-semibold tabular-nums', r.count > 0 ? 'text-zinc-900' : 'text-zinc-300')}>
+                    {r.loading ? '—' : r.count}
+                  </span>
+                </Link>
+              ))}
+            </div>
+            <div className="border-t border-zinc-100 px-5 py-3">
+              <Link to={ROUTES.ORDERS} className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700">
+                Ver todos los pedidos <ArrowRight size={14} />
+              </Link>
+            </div>
+          </Panel>
         </div>
       </div>
     </div>

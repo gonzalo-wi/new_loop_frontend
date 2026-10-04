@@ -19,7 +19,7 @@ export function EmptyState({
 }: Props) {
   return (
     <div className={cn('flex flex-col items-center justify-center gap-3 py-16 text-center', className)}>
-      <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-zinc-100 text-zinc-400">
+      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-zinc-100 text-zinc-400">
         <Icon size={20} />
       </div>
       <div>

@@ -37,12 +37,12 @@ export function DataTable<T>({
     <div className={cn('overflow-x-auto', className)}>
       <table className="w-full min-w-full table-auto border-collapse">
         <thead>
-          <tr className="sticky top-0 z-10 border-b border-zinc-200 bg-zinc-50 shadow-[0_1px_0_0_rgba(0,0,0,0.02)]">
+          <tr className="sticky top-0 z-10 border-b border-zinc-200 bg-zinc-50">
             {columns.map((col) => (
               <th
                 key={col.key}
                 className={cn(
-                  'whitespace-nowrap px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-zinc-500',
+                  'whitespace-nowrap px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-zinc-500',
                   col.align === 'center' && 'text-center',
                   col.align === 'right' && 'text-right',
                   col.width
@@ -83,8 +83,8 @@ export function DataTable<T>({
                 key={getRowKey(row)}
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
                 className={cn(
-                  'bg-white transition-colors',
-                  onRowClick && 'cursor-pointer hover:bg-zinc-50',
+                  'bg-white transition-colors hover:bg-zinc-50/70',
+                  onRowClick && 'cursor-pointer',
                   rowClassName?.(row)
                 )}
               >
@@ -92,7 +92,7 @@ export function DataTable<T>({
                   <td
                     key={col.key}
                     className={cn(
-                      'px-4 py-3 text-sm text-zinc-800',
+                      'px-4 py-3.5 text-sm text-zinc-800',
                       col.align === 'center' && 'text-center',
                       col.align === 'right' && 'text-right'
                     )}

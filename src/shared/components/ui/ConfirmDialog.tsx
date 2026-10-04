@@ -40,15 +40,15 @@ export function ConfirmDialog({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/30 backdrop-blur-[1px]"
+        className="absolute inset-0 bg-zinc-900/40"
         onClick={onClose}
       />
 
       {/* Dialog */}
-      <div className="relative w-full max-w-sm rounded-sm border border-zinc-200 bg-white shadow-lg mx-4">
+      <div className="relative w-full max-w-sm mx-4 rounded-lg border border-zinc-200 bg-white shadow-lg">
         <div className="flex items-start justify-between p-5">
           <div className="flex items-start gap-3">
-            <div className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-sm', config.iconClass)}>
+            <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-full', config.iconClass)}>
               <AlertTriangle size={17} />
             </div>
             <div className="min-w-0">
@@ -62,11 +62,11 @@ export function ConfirmDialog({
             <X size={16} />
           </button>
         </div>
-        <div className="flex items-center justify-end gap-2 border-t border-zinc-100 px-5 py-3">
+        <div className="flex items-center justify-end gap-2 border-t border-zinc-100 bg-zinc-50/60 px-5 py-3">
           <button
             onClick={onClose}
             disabled={isLoading}
-            className="h-8 rounded-sm border border-zinc-200 bg-white px-4 text-sm text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
+            className="h-9 rounded-md border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 shadow-card hover:bg-zinc-50 disabled:opacity-50"
           >
             {cancelLabel}
           </button>
@@ -74,7 +74,7 @@ export function ConfirmDialog({
             onClick={onConfirm}
             disabled={isLoading}
             className={cn(
-              'h-8 rounded-sm px-4 text-sm font-medium disabled:opacity-50',
+              'h-9 rounded-md px-4 text-sm font-medium shadow-card disabled:opacity-50',
               config.confirmClass
             )}
           >

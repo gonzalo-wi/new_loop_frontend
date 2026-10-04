@@ -48,14 +48,13 @@ export function StatusBadge({ status, label, variant = 'badge', size = 'sm', cla
   return (
     <span
       className={cn(
-        'inline-flex items-center border font-semibold uppercase tracking-wide rounded-[3px]',
-        size === 'sm' ? 'text-[9px] px-1.5 py-[3px] leading-none' : 'text-[10px] px-2 py-1',
+        'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border font-medium leading-none',
+        size === 'sm' ? 'px-2 py-1 text-xs' : 'px-2.5 py-1.5 text-[13px]',
         config.badge,
-        // Extra emphasis for critical statuses
-        (status === 'delayed' || status === 'rejected') && 'ring-1 ring-red-300 ring-inset',
         className
       )}
     >
+      <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', config.dot)} />
       {text}
     </span>
   )

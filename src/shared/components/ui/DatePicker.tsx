@@ -125,11 +125,11 @@ export function DatePicker({ value, onChange, placeholder = 'Seleccionar fecha',
         ref={triggerRef}
         onClick={openCalendar}
         className={[
-          'flex h-9 items-center justify-between rounded-sm border px-3 text-sm select-none',
+          'flex h-10 items-center justify-between rounded-md border px-3 text-sm shadow-card select-none',
           disabled
             ? 'cursor-not-allowed border-zinc-200 bg-zinc-50 text-zinc-500'
             : 'cursor-pointer border-zinc-200 bg-white',
-          open && !disabled ? 'border-blue-500 ring-1 ring-blue-500' : '',
+          open && !disabled ? 'border-blue-500 ring-4 ring-blue-500/10' : '',
         ].join(' ')}
       >
         <span className={displayValue ? 'text-zinc-900' : 'text-zinc-400'}>
@@ -154,7 +154,7 @@ export function DatePicker({ value, onChange, placeholder = 'Seleccionar fecha',
         <div
           ref={calendarRef}
           style={style}
-          className="rounded-sm border border-zinc-200 bg-white shadow-lg"
+          className="rounded-lg border border-zinc-200 bg-white shadow-lg"
         >
           {/* Month navigation */}
           <div className="flex items-center justify-between border-b border-zinc-100 px-3 py-2.5">
@@ -195,7 +195,7 @@ export function DatePicker({ value, onChange, placeholder = 'Seleccionar fecha',
                       type="button"
                       onClick={() => selectDay(day)}
                       className={[
-                        'flex h-7 w-7 items-center justify-center rounded-sm text-xs font-medium transition-colors',
+                        'flex h-7 w-7 items-center justify-center rounded-md text-xs font-medium transition-colors',
                         isSelected(day)
                           ? 'bg-blue-600 text-white'
                           : isToday(day)

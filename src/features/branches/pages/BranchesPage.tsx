@@ -6,6 +6,7 @@ import type { Branch } from '../types'
 import {
   PageHeader,
   ActionBar,
+  Panel,
   ActionButton,
   SearchInput,
   FilterBar,
@@ -65,7 +66,7 @@ export function BranchesPage() {
       key: 'code',
       header: 'Código',
       render: (b) => (
-        <span className="inline-flex items-center rounded-[3px] border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 font-mono text-xs font-medium text-zinc-600">
+        <span className="inline-flex items-center rounded-md border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 font-mono text-xs font-medium text-zinc-600">
           {b.code}
         </span>
       ),
@@ -76,7 +77,7 @@ export function BranchesPage() {
       header: 'Sucursal',
       render: (b) => (
         <div className="flex items-center gap-2.5">
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-[10px] font-bold uppercase text-white">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-xs font-semibold uppercase text-zinc-600">
             {b.name.charAt(0)}
           </span>
           <span className="font-medium text-zinc-900">{b.name}</span>
@@ -124,20 +125,20 @@ export function BranchesPage() {
               setSelectedBranch(b)
               setShowForm(true)
             }}
-            className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+            className="rounded-md p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
             title="Editar"
           >
-            <Pencil size={13} />
+            <Pencil size={15} />
           </button>
           <button
             onClick={(e) => {
               e.stopPropagation()
               setDeleteTarget(b)
             }}
-            className="rounded p-1 text-zinc-400 hover:bg-red-50 hover:text-red-500"
+            className="rounded-md p-1.5 text-zinc-400 hover:bg-red-50 hover:text-red-600"
             title="Eliminar"
           >
-            <Trash2 size={13} />
+            <Trash2 size={15} />
           </button>
         </div>
       ),
@@ -145,7 +146,7 @@ export function BranchesPage() {
   ]
 
   return (
-    <div>
+    <div className="pb-8">
       <PageHeader
         title="Sucursales"
         description="Plantas y puntos operativos del sistema."
@@ -163,7 +164,7 @@ export function BranchesPage() {
         }
       />
 
-      <div className="grid grid-cols-3 gap-3 border-b border-zinc-200 bg-zinc-50 p-4">
+      <div className="grid grid-cols-3 gap-4 px-6">
         <MetricBlock
           label="Sucursales activas"
           icon={Building2}
@@ -185,48 +186,50 @@ export function BranchesPage() {
         />
       </div>
 
-      <ActionBar>
-        <SearchInput
-          value={search}
-          onChange={setSearch}
-          placeholder="Buscar por nombre, código o ciudad..."
-          className="w-64"
-        />
-        <FilterBar
-          filters={[{ key: 'status', label: 'Estado', options: STATUS_FILTER }]}
-          activeFilters={filters}
-          onChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
-          onClearAll={() => setFilters({ status: '' })}
-        />
-        <span className="ml-auto text-xs text-zinc-400">
-          {filtered.length} resultado{filtered.length !== 1 ? 's' : ''}
-        </span>
-      </ActionBar>
+      <Panel className="mx-6 mt-5">
+        <ActionBar>
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Buscar por nombre, código o ciudad..."
+            className="w-64"
+          />
+          <FilterBar
+            filters={[{ key: 'status', label: 'Estado', options: STATUS_FILTER }]}
+            activeFilters={filters}
+            onChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
+            onClearAll={() => setFilters({ status: '' })}
+          />
+          <span className="ml-auto text-xs text-zinc-400">
+            {filtered.length} resultado{filtered.length !== 1 ? 's' : ''}
+          </span>
+        </ActionBar>
 
-      <div className="border-b border-zinc-200">
-        <DataTable
-          columns={columns}
-          data={filtered}
-          isLoading={isLoading}
-          isError={isError}
-          onRetry={refetch}
-          getRowKey={(b) => b.id}
-          emptyTitle="Sin sucursales"
-          emptyDescription="No hay sucursales que coincidan con los filtros."
-          emptyAction={
-            !debouncedSearch && !filters.status ? (
-              <ActionButton
-                variant="primary"
-                size="sm"
-                icon={<Plus size={13} />}
-                onClick={() => setShowForm(true)}
-              >
-                Nueva sucursal
-              </ActionButton>
-            ) : undefined
-          }
-        />
-      </div>
+        <div>
+          <DataTable
+            columns={columns}
+            data={filtered}
+            isLoading={isLoading}
+            isError={isError}
+            onRetry={refetch}
+            getRowKey={(b) => b.id}
+            emptyTitle="Sin sucursales"
+            emptyDescription="No hay sucursales que coincidan con los filtros."
+            emptyAction={
+              !debouncedSearch && !filters.status ? (
+                <ActionButton
+                  variant="primary"
+                  size="sm"
+                  icon={<Plus size={13} />}
+                  onClick={() => setShowForm(true)}
+                >
+                  Nueva sucursal
+                </ActionButton>
+              ) : undefined
+            }
+          />
+        </div>
+      </Panel>
 
       {showForm && (
         <BranchFormModal
