@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { AdminLayout } from '@/layouts/AdminLayout'
 import { AuthLayout } from '@/layouts/AuthLayout'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
@@ -17,6 +17,7 @@ import { OrderableProductsPage } from '@/features/orderable-products/pages/Order
 import { OrdersPage } from '@/features/orders/pages/OrdersPage'
 import { DispenserMovementsPage } from '@/features/dispensers/pages/DispenserMovementsPage'
 import { AppVersionPage } from '@/features/app-version/pages/AppVersionPage'
+import { DispenserStatisticsPage } from '@/features/statistics/pages/DispenserStatisticsPage'
 import { ROUTES } from '@/shared/constants'
 
 export const router = createBrowserRouter([
@@ -39,6 +40,8 @@ export const router = createBrowserRouter([
       { path: 'orders',     element: <OrdersPage /> },
       { path: 'dispensers', element: <DispenserMovementsPage /> },
       { path: 'app-version', element: <AppVersionPage /> },
+      { path: 'statistics', element: <Navigate to={ROUTES.STATISTICS_DISPENSERS} replace /> },
+      { path: 'statistics/dispensers', element: <DispenserStatisticsPage /> },
     ],
   },
   {

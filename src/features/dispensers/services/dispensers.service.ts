@@ -9,12 +9,10 @@ import type {
 
 type ApiResponse<T> = { data: T; message: string }
 
-type FlatPage<T> = {
+// Spring-style page: metadata nested under `page` (see api.md).
+type PageDto<T> = {
   content: T[]
-  totalElements: number
-  totalPages: number
-  size: number
-  number: number
+  page: { size: number; number: number; totalElements: number; totalPages: number }
 }
 
 function extractMessage(err: unknown): string {
@@ -53,10 +51,10 @@ export async function fetchDispenserMovements(
   q.set('size', String(params.size))
   q.set('sort', 'createdAt,desc')
 
-  const { data } = await api.get<ApiResponse<FlatPage<DispenserMovement>>>(
+  const { data } = await api.get<ApiResponse<PageDto<DispenserMovement>>>(
     `/dispenser-movements?${q.toString()}`
   )
-  return data.data
+  return { content: data.data.content, ...data.data.page }
 }
 
 export async function createDispenserMovement(

@@ -23,6 +23,8 @@ export const ROUTES = {
   ORDERS: '/orders',
   DISPENSERS: '/dispensers',
   APP_VERSION: '/app-version',
+  STATISTICS: '/statistics',
+  STATISTICS_DISPENSERS: '/statistics/dispensers',
 } as const
 
 export const ROLE_LABELS: Record<UserRole, string> = {

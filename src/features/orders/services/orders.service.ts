@@ -3,12 +3,10 @@ import type { Order, OrderPage, OrderParams } from '../types'
 
 type ApiResponse<T> = { data: T; message: string }
 
-type FlatPage<T> = {
+// Spring-style page: metadata nested under `page` (see api.md).
+type PageDto<T> = {
   content: T[]
-  totalElements: number
-  totalPages: number
-  size: number
-  number: number
+  page: { size: number; number: number; totalElements: number; totalPages: number }
 }
 
 export async function fetchOrders(params: OrderParams): Promise<OrderPage> {
@@ -21,8 +19,8 @@ export async function fetchOrders(params: OrderParams): Promise<OrderPage> {
   q.set('size', String(params.size))
   q.set('sort', 'createdAt,desc')
 
-  const { data } = await api.get<ApiResponse<FlatPage<Order>>>(`/orders?${q.toString()}`)
-  return data.data
+  const { data } = await api.get<ApiResponse<PageDto<Order>>>(`/orders?${q.toString()}`)
+  return { content: data.data.content, ...data.data.page }
 }
 
 export async function fetchOrderById(id: string): Promise<Order> {

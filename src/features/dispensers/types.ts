@@ -1,5 +1,10 @@
 export type DispenserMovementType   = 'LOAD' | 'UNLOAD'
-export type DispenserMovementStatus = 'REGISTERED' | 'SENT_TO_AGUAS' | 'AGUAS_ERROR' | 'CANCELLED'
+export type DispenserMovementStatus =
+  | 'REGISTERED'
+  | 'SENT_TO_AGUAS'
+  | 'SKIPPED_UNREGISTERED'
+  | 'AGUAS_ERROR'
+  | 'CANCELLED'
 
 export type AguasOption = {
   id: number
@@ -21,9 +26,12 @@ export type DispenserMovement = {
   movementDate: string
   status: DispenserMovementStatus
   serials: string[]
+  // Serials the backend left out of the Aguas/Odoo sync (e.g. not registered in Aguas).
+  excludedSerials: string[]
   aguasMovementId: string | null
-  registeredBy: string
-  registeredByUsername: string
+  odooStatus: 'SENT' | 'ERROR' | null
+  registeredBy: string | null
+  registeredByUsername: string | null
   createdAt: string
   updatedAt: string
 }

@@ -26,9 +26,12 @@ const PAGE_SIZE = 20
 const STATUS_CONFIG: Record<DispenserMovementStatus, { label: string; cls: string }> = {
   REGISTERED:      { label: 'Registrado',     cls: 'text-zinc-700 bg-zinc-50 border-zinc-200' },
   SENT_TO_AGUAS:   { label: 'Enviado Aguas',  cls: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
+  SKIPPED_UNREGISTERED: { label: 'Omitido · no registrado', cls: 'text-amber-700 bg-amber-50 border-amber-200' },
   AGUAS_ERROR:     { label: 'Error Aguas',    cls: 'text-red-700 bg-red-50 border-red-200' },
   CANCELLED:       { label: 'Cancelado',      cls: 'text-zinc-400 bg-zinc-50 border-zinc-200' },
 }
+
+const UNKNOWN_CLS = 'text-zinc-600 bg-zinc-50 border-zinc-200'
 
 const TYPE_CONFIG: Record<DispenserMovementType, { label: string; cls: string }> = {
   LOAD:   { label: 'Carga',    cls: 'text-blue-700 bg-blue-50 border-blue-200' },
@@ -45,6 +48,7 @@ const STATUS_OPTIONS = [
   { value: '',              label: 'Todos los estados' },
   { value: 'REGISTERED',   label: 'Registrado' },
   { value: 'SENT_TO_AGUAS', label: 'Enviado Aguas' },
+  { value: 'SKIPPED_UNREGISTERED', label: 'Omitido · no registrado' },
   { value: 'AGUAS_ERROR',  label: 'Error Aguas' },
   { value: 'CANCELLED',    label: 'Cancelado' },
 ]
@@ -248,8 +252,9 @@ export function DispenserMovementsPage() {
               )}
               {filtered.map((m) => {
                 const isExpanded = expandedId === m.id
-                const typeCfg    = TYPE_CONFIG[m.type]
-                const statusCfg  = STATUS_CONFIG[m.status]
+                // Fall back to the raw value so a new backend enum never crashes the page.
+                const typeCfg    = TYPE_CONFIG[m.type] ?? { label: m.type, cls: UNKNOWN_CLS }
+                const statusCfg  = STATUS_CONFIG[m.status] ?? { label: m.status, cls: UNKNOWN_CLS }
                 const isCancelled = m.status === 'CANCELLED'
 
                 return (
@@ -391,7 +396,7 @@ export function DispenserMovementsPage() {
         open={!!cancelTarget}
         onClose={() => setCancelTarget(null)}
         title="Cancelar movimiento"
-        description={cancelTarget ? `¿Confirmar cancelación del movimiento de ${TYPE_CONFIG[cancelTarget.type].label.toLowerCase()} del reparto ${cancelTarget.routeCode}? Esta acción también cancela el registro en Aguas.` : ''}
+        description={cancelTarget ? `¿Confirmar cancelación del movimiento de ${(TYPE_CONFIG[cancelTarget.type]?.label ?? cancelTarget.type).toLowerCase()} del reparto ${cancelTarget.routeCode}? Esta acción también cancela el registro en Aguas.` : ''}
         confirmLabel="Sí, cancelar"
         variant="danger"
         isLoading={cancelling}

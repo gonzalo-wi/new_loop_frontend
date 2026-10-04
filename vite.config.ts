@@ -16,7 +16,8 @@ export default defineConfig({
       // This avoids browser CORS restrictions during development.
       //http://192.168.0.42:8095 produccion - http://localhost:8080 
       '/api': {
-        target: 'http://192.168.0.42:8095',
+        // Override with API_PROXY_TARGET to hit a local backend (e.g. http://localhost:8095).
+        target: process.env.API_PROXY_TARGET ?? 'http://192.168.0.42:8095',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
