@@ -14,9 +14,11 @@ import {
 import {
   FormSection,
   FormField,
+  inputClassName,
   selectClassName,
   DatePicker,
 } from '@/shared/components/ui'
+import { useEscapeKey } from '@/shared/hooks/useEscapeKey'
 
 const TODAY = new Date().toISOString().split('T')[0]
 
@@ -155,34 +157,37 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
     }
   }
 
+  useEscapeKey(onClose)
+
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 pt-16">
-      <div className="w-full max-w-xl rounded-md border border-zinc-200 bg-white shadow-lg">
+    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-16">
+      <div className="absolute inset-0 animate-fade-in bg-zinc-900/30" onClick={onClose} />
+      <div className="relative w-full max-w-xl animate-dialog-in overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-lg">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-zinc-200 bg-zinc-50/60 px-5 py-3.5">
+        <div className="flex items-start justify-between gap-4 border-b border-zinc-100 px-6 py-5">
           <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-zinc-900 text-white">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 ring-1 ring-inset ring-blue-100">
               <Droplets size={16} />
             </span>
             <div>
-              <h2 className="text-sm font-semibold text-zinc-900">
+              <h2 className="text-base font-semibold text-zinc-900">
                 {isEditing ? 'Editar movimiento' : 'Nuevo movimiento'}
               </h2>
-              <p className="mt-0.5 text-[11px] text-zinc-400">
+              <p className="mt-0.5 text-sm text-zinc-500">
                 {isEditing ? 'Corrección — cancela el anterior en Aguas' : 'Carga o descarga de dispensers'}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="rounded-md p-1.5 text-zinc-400 hover:bg-zinc-200/60 hover:text-zinc-700"
+            className="-mr-2 -mt-1 rounded-lg p-2 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
           >
             <X size={16} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="max-h-[70vh] overflow-y-auto px-5 py-4 space-y-5">
+          <div className="max-h-[70vh] space-y-6 overflow-y-auto px-6 py-6">
 
             {/* Type toggle */}
             <FormSection title="Tipo de movimiento" icon={ArrowLeftRight}>
@@ -190,19 +195,19 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
                 control={control}
                 name="type"
                 render={({ field }) => (
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 sm:col-span-2">
                     {(['LOAD', 'UNLOAD'] as const).map((t) => (
                       <button
                         key={t}
                         type="button"
                         onClick={() => field.onChange(t)}
                         className={[
-                          'flex-1 rounded-md border py-2 text-xs font-semibold uppercase tracking-wide transition-colors',
+                          'flex-1 rounded-lg border py-2.5 text-sm font-medium transition-colors',
                           field.value === t
                             ? t === 'LOAD'
-                              ? 'border-blue-300 bg-blue-50 text-blue-700'
-                              : 'border-amber-300 bg-amber-50 text-amber-700'
-                            : 'border-zinc-200 bg-white text-zinc-400 hover:border-zinc-300 hover:text-zinc-600',
+                              ? 'border-blue-500 bg-blue-50 text-blue-700 ring-4 ring-blue-500/10'
+                              : 'border-amber-500 bg-amber-50 text-amber-700 ring-4 ring-amber-500/10'
+                            : 'border-zinc-200 bg-white text-zinc-500 shadow-card hover:border-zinc-300 hover:text-zinc-800',
                         ].join(' ')}
                       >
                         {t === 'LOAD' ? 'Carga (Salida)' : 'Descarga (Vuelta)'}
@@ -215,12 +220,12 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
 
             {/* Route & Technician */}
             <FormSection title="Datos del movimiento" icon={ClipboardList}>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4 sm:col-span-2">
                 <FormField label="Código de reparto" error={errors.routeCode?.message}>
                   <input
                     {...register('routeCode')}
                     placeholder="Ej: R001"
-                    className="h-8 w-full rounded-md border border-zinc-200 px-2.5 text-xs text-zinc-900 focus:border-zinc-400 focus:outline-none"
+                    className={inputClassName}
                   />
                 </FormField>
 
@@ -228,7 +233,7 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
                   <input
                     {...register('technician')}
                     placeholder="Nombre del técnico"
-                    className="h-8 w-full rounded-md border border-zinc-200 px-2.5 text-xs text-zinc-900 focus:border-zinc-400 focus:outline-none"
+                    className={inputClassName}
                   />
                 </FormField>
 
@@ -251,11 +256,11 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
 
             {/* Location & State from Aguas */}
             <FormSection title="Configuración Aguas" icon={Settings2}>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4 sm:col-span-2">
                 <FormField label="Ubicación" error={errors.locationId?.message}>
                   <select
                     {...register('locationId')}
-                    className={`${selectClassName} h-8 w-full text-xs`}
+                    className={selectClassName}
                     disabled={locationOptions.length === 0}
                   >
                     {locationOptions.length === 0 && (
@@ -272,7 +277,7 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
                 <FormField label="Estado" error={errors.stateId?.message}>
                   <select
                     {...register('stateId')}
-                    className={`${selectClassName} h-8 w-full text-xs`}
+                    className={selectClassName}
                     disabled={stateOptions.length === 0}
                   >
                     {stateOptions.length === 0 && (
@@ -290,7 +295,7 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
 
             {/* Serials */}
             <FormSection title="Seriales" icon={Hash}>
-              <div className="space-y-2">
+              <div className="space-y-2 sm:col-span-2">
                 <div className="flex gap-2">
                   <input
                     ref={serialRef}
@@ -298,12 +303,12 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
                     onChange={(e) => setSerialInput(e.target.value)}
                     onKeyDown={handleSerialKeyDown}
                     placeholder="Ingresar serial y presionar Enter"
-                    className="h-8 flex-1 rounded-md border border-zinc-200 px-2.5 text-xs text-zinc-900 focus:border-zinc-400 focus:outline-none"
+                    className={`${inputClassName} flex-1`}
                   />
                   <button
                     type="button"
                     onClick={addSerial}
-                    className="flex h-8 items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 text-xs text-zinc-600 hover:border-zinc-300 hover:text-zinc-900"
+                    className="flex h-10 shrink-0 items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3.5 text-sm font-medium text-zinc-700 shadow-card hover:border-zinc-300 hover:bg-zinc-50"
                   >
                     <Plus size={13} />
                     Agregar
@@ -343,23 +348,23 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
 
           {/* Footer */}
           {error && (
-            <div className="border-t border-red-100 bg-red-50 px-5 py-2.5">
-              <p className="text-xs text-red-700">{(error as Error).message}</p>
+            <div className="mx-6 mb-4 rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5">
+              <p className="text-sm text-red-700">{(error as Error).message}</p>
             </div>
           )}
 
-          <div className="flex justify-end gap-2 border-t border-zinc-200 bg-zinc-50/60 px-5 py-3.5">
+          <div className="flex justify-end gap-3 border-t border-zinc-100 px-6 py-4">
             <button
               type="button"
               onClick={onClose}
-              className="h-8 rounded-md border border-zinc-200 bg-white px-4 text-xs text-zinc-700 hover:border-zinc-300"
+              className="h-10 rounded-lg border border-zinc-200 bg-white px-5 text-sm font-medium text-zinc-700 shadow-card transition-colors hover:bg-zinc-50 disabled:opacity-50"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="flex h-8 items-center gap-1.5 rounded-md bg-blue-600 px-4 text-xs font-medium text-white shadow-sm hover:bg-blue-700 hover:shadow disabled:opacity-50"
+              className="flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-5 text-sm font-medium text-white shadow-card transition-colors hover:bg-blue-700 disabled:opacity-50"
             >
               {isPending && <Loader2 size={12} className="animate-spin" />}
               {isEditing ? 'Guardar corrección' : 'Registrar'}

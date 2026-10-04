@@ -40,12 +40,12 @@ export function ConfirmDialog({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-zinc-900/40"
+        className="absolute inset-0 animate-fade-in bg-zinc-900/30"
         onClick={onClose}
       />
 
       {/* Dialog */}
-      <div className="relative w-full max-w-sm mx-4 rounded-lg border border-zinc-200 bg-white shadow-lg">
+      <div className="relative w-full max-w-sm mx-4 animate-dialog-in rounded-xl border border-zinc-200 bg-white shadow-lg">
         <div className="flex items-start justify-between p-5">
           <div className="flex items-start gap-3">
             <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-full', config.iconClass)}>

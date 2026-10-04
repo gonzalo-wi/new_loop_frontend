@@ -16,14 +16,15 @@ import {
   DatePicker,
   SearchInput,
 } from '@/shared/components/ui'
+import { useEscapeKey } from '@/shared/hooks/useEscapeKey'
 
 // Premium input treatment — same language introduced in the Products/Deliveries
 // modals: soft resting background, larger focus "glow", softer corners.
 const fancySelect =
-  'select-chevron h-10 w-full rounded-md border border-zinc-200 bg-zinc-50/60 pl-3.5 pr-8 text-sm text-zinc-900 appearance-none transition-all duration-150 hover:border-zinc-300 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 disabled:bg-zinc-100 disabled:text-zinc-400'
+  'select-chevron h-10 w-full rounded-lg border border-zinc-200 bg-white shadow-card pl-3.5 pr-8 text-sm text-zinc-900 appearance-none transition-all duration-150 hover:border-zinc-300 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 disabled:bg-zinc-100 disabled:text-zinc-400'
 
 const fancyTextarea =
-  'w-full rounded-md border border-zinc-200 bg-zinc-50/60 px-3.5 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 transition-all duration-150 hover:border-zinc-300 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 disabled:bg-zinc-100 disabled:text-zinc-400 resize-none'
+  'w-full rounded-lg border border-zinc-200 bg-white shadow-card px-3.5 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 transition-all duration-150 hover:border-zinc-300 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 disabled:bg-zinc-100 disabled:text-zinc-400 resize-none'
 
 const itemSchema = z.object({
   productId:        z.string(),
@@ -183,21 +184,23 @@ export function StockControlFormModal({ type, control, onClose, onSuccess }: Pro
       return product?.name.toLowerCase().includes(q) || product?.code.toLowerCase().includes(q)
     })
 
+  useEscapeKey(onClose)
+
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-end">
-      <div className="absolute inset-0 bg-black/25" onClick={onClose} />
-      <div className="relative flex h-full w-full max-w-2xl flex-col bg-white shadow-lg">
+    <div className="fixed inset-0 z-50 flex justify-end p-3">
+      <div className="absolute inset-0 animate-fade-in bg-zinc-900/30" onClick={onClose} />
+      <div className="relative flex h-full w-full max-w-2xl animate-drawer-in flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-lg">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-zinc-200 bg-zinc-50/60 px-6 py-4">
+        <div className="flex items-start justify-between gap-4 border-b border-zinc-100 px-6 py-5">
           <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-zinc-900 text-white">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 ring-1 ring-inset ring-blue-100">
               <TypeIcon size={16} />
             </span>
             <div>
-              <h2 className="text-sm font-semibold text-zinc-900">
+              <h2 className="text-base font-semibold text-zinc-900">
                 {isEditing ? `Editar control de ${typeLabel}` : `Nuevo control de ${typeLabel}`}
               </h2>
-              <p className="mt-0.5 text-xs text-zinc-500">
+              <p className="mt-0.5 text-sm text-zinc-500">
                 {isEditing
                   ? `Modificando ${control.routeCode} · ${control.controlDate}`
                   : `Completá las cantidades por producto`}
@@ -206,7 +209,7 @@ export function StockControlFormModal({ type, control, onClose, onSuccess }: Pro
           </div>
           <button
             onClick={onClose}
-            className="rounded-md p-1.5 text-zinc-400 hover:bg-zinc-200/60 hover:text-zinc-700"
+            className="-mr-2 -mt-1 rounded-lg p-2 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
           >
             <X size={16} />
           </button>
@@ -217,7 +220,7 @@ export function StockControlFormModal({ type, control, onClose, onSuccess }: Pro
           onSubmit={handleSubmit((data) => mutation.mutate(data))}
           className="flex flex-1 flex-col overflow-hidden"
         >
-          <div className="flex-1 space-y-6 overflow-y-auto px-6 py-5">
+          <div className="flex-1 space-y-6 overflow-y-auto px-6 py-6">
             {/* Control info */}
             <FormSection title="Control" icon={ClipboardCheck}>
               <FormField label="Sucursal" htmlFor="branchId" required error={errors.branchId?.message}>
@@ -281,7 +284,7 @@ export function StockControlFormModal({ type, control, onClose, onSuccess }: Pro
 
               {/* Truck ordered — full width, rendered outside the 2-col grid via fullWidth */}
               <div className="sm:col-span-2">
-                <label className="flex cursor-pointer items-center gap-3 rounded-md border border-zinc-200 bg-zinc-50/60 px-4 py-3 transition-all duration-150 hover:border-zinc-300 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50/40 has-[:checked]:ring-4 has-[:checked]:ring-blue-500/10">
+                <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-zinc-200 bg-white shadow-card px-4 py-3 transition-all duration-150 hover:border-zinc-300 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50/40 has-[:checked]:ring-4 has-[:checked]:ring-blue-500/10">
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white text-zinc-400 ring-1 ring-inset ring-zinc-200">
                     <Truck size={14} />
                   </span>
@@ -436,9 +439,9 @@ export function StockControlFormModal({ type, control, onClose, onSuccess }: Pro
           </div>
 
           {/* Footer */}
-          <div className="border-t border-zinc-200 bg-zinc-50/60 px-6 py-4">
+          <div className="border-t border-zinc-100 bg-white px-6 py-4">
             {errors.root && (
-              <p className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+              <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-700">
                 {errors.root.message}
               </p>
             )}
@@ -451,14 +454,14 @@ export function StockControlFormModal({ type, control, onClose, onSuccess }: Pro
                   type="button"
                   onClick={onClose}
                   disabled={mutation.isPending}
-                  className="h-9 rounded-md border border-zinc-200 bg-white px-5 text-sm text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
+                  className="h-10 rounded-lg border border-zinc-200 bg-white px-5 text-sm font-medium text-zinc-700 shadow-card transition-colors hover:bg-zinc-50 disabled:opacity-50"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={mutation.isPending || productsLoading}
-                  className="flex h-9 items-center gap-2 rounded-md bg-blue-600 px-5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 hover:shadow disabled:opacity-50"
+                  className="flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-5 text-sm font-medium text-white shadow-card transition-colors hover:bg-blue-700 disabled:opacity-50"
                 >
                   {mutation.isPending && <Loader2 size={13} className="animate-spin" />}
                   {mutation.isPending

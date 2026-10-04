@@ -125,7 +125,7 @@ export function DatePicker({ value, onChange, placeholder = 'Seleccionar fecha',
         ref={triggerRef}
         onClick={openCalendar}
         className={[
-          'flex h-10 items-center justify-between rounded-md border px-3 text-sm shadow-card select-none',
+          'flex h-10 items-center justify-between rounded-lg border px-3.5 text-sm shadow-card select-none',
           disabled
             ? 'cursor-not-allowed border-zinc-200 bg-zinc-50 text-zinc-500'
             : 'cursor-pointer border-zinc-200 bg-white',

@@ -86,7 +86,7 @@ export function Combobox({
         ref={triggerRef}
         onClick={openDropdown}
         className={[
-          'flex h-10 items-center justify-between rounded-md border px-3.5 text-sm select-none transition-all duration-150',
+          'flex h-10 items-center justify-between rounded-lg border px-3.5 text-sm select-none transition-all duration-150',
           disabled
             ? 'cursor-not-allowed border-zinc-200 bg-zinc-100 text-zinc-400'
             : 'cursor-pointer border-zinc-200 bg-white text-zinc-900 shadow-card hover:border-zinc-300',

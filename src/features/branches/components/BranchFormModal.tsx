@@ -7,10 +7,11 @@ import { useMutation } from '@tanstack/react-query'
 import type { Branch, BranchFormData } from '../types'
 import { createBranch, updateBranch } from '../services/branches.service'
 import { FormSection, FormField } from '@/shared/components/ui'
+import { useEscapeKey } from '@/shared/hooks/useEscapeKey'
 
 // Premium input treatment — same language introduced in the Deliveries modal.
 const fancyInput =
-  'h-10 w-full rounded-md border border-zinc-200 bg-zinc-50/60 px-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 transition-all duration-150 hover:border-zinc-300 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 disabled:bg-zinc-100 disabled:text-zinc-400'
+  'h-10 w-full rounded-lg border border-zinc-200 bg-white shadow-card px-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 transition-all duration-150 hover:border-zinc-300 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 disabled:bg-zinc-100 disabled:text-zinc-400'
 
 const schema = z.object({
   code: z.string().min(1, 'Requerido').max(20, 'Máximo 20 caracteres').toUpperCase(),
@@ -96,28 +97,30 @@ export function BranchFormModal({ branch, onClose, onSuccess }: Props) {
     mutation.mutate(data as BranchFormData)
   }
 
+  useEscapeKey(onClose)
+
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-end">
-      <div className="absolute inset-0 bg-black/25" onClick={onClose} />
-      <div className="relative flex h-full w-full max-w-xl flex-col bg-white shadow-lg">
+    <div className="fixed inset-0 z-50 flex justify-end p-3">
+      <div className="absolute inset-0 animate-fade-in bg-zinc-900/30" onClick={onClose} />
+      <div className="relative flex h-full w-full max-w-xl animate-drawer-in flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-lg">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-zinc-200 bg-zinc-50/60 px-6 py-4">
+        <div className="flex items-start justify-between gap-4 border-b border-zinc-100 px-6 py-5">
           <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-zinc-900 text-white">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 ring-1 ring-inset ring-blue-100">
               <Building2 size={16} />
             </span>
             <div>
-              <h2 className="text-sm font-semibold text-zinc-900">
+              <h2 className="text-base font-semibold text-zinc-900">
                 {isEditing ? 'Editar sucursal' : 'Nueva sucursal'}
               </h2>
-              <p className="mt-0.5 text-xs text-zinc-500">
+              <p className="mt-0.5 text-sm text-zinc-500">
                 {isEditing ? `Modificando ${branch.name}` : 'Complete los datos de la nueva sucursal'}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="rounded-md p-1.5 text-zinc-400 hover:bg-zinc-200/60 hover:text-zinc-700"
+            className="-mr-2 -mt-1 rounded-lg p-2 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
           >
             <X size={16} />
           </button>
@@ -125,7 +128,7 @@ export function BranchFormModal({ branch, onClose, onSuccess }: Props) {
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col overflow-hidden">
-          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+          <div className="flex-1 space-y-6 overflow-y-auto px-6 py-6">
             <FormSection title="Identificación" icon={Building2}>
               <FormField label="Código de sucursal" htmlFor="code" required error={errors.code?.message}>
                 <div className="relative">
@@ -211,7 +214,7 @@ export function BranchFormModal({ branch, onClose, onSuccess }: Props) {
                       <button
                         type="button"
                         onClick={() => field.onChange('active')}
-                        className={`flex items-center gap-2.5 rounded-md border px-3.5 py-2.5 text-sm font-medium transition-all ${
+                        className={`flex items-center gap-2.5 rounded-lg border px-3.5 py-2.5 text-sm font-medium transition-all ${
                           field.value === 'active'
                             ? 'border-emerald-500 bg-emerald-50 text-emerald-700 ring-4 ring-emerald-500/10'
                             : 'border-zinc-200 bg-zinc-50/60 text-zinc-600 hover:border-zinc-300'
@@ -223,7 +226,7 @@ export function BranchFormModal({ branch, onClose, onSuccess }: Props) {
                       <button
                         type="button"
                         onClick={() => field.onChange('inactive')}
-                        className={`flex items-center gap-2.5 rounded-md border px-3.5 py-2.5 text-sm font-medium transition-all ${
+                        className={`flex items-center gap-2.5 rounded-lg border px-3.5 py-2.5 text-sm font-medium transition-all ${
                           field.value === 'inactive'
                             ? 'border-zinc-400 bg-zinc-100 text-zinc-700 ring-4 ring-zinc-400/10'
                             : 'border-zinc-200 bg-zinc-50/60 text-zinc-600 hover:border-zinc-300'
@@ -240,9 +243,9 @@ export function BranchFormModal({ branch, onClose, onSuccess }: Props) {
           </div>
 
           {/* Footer */}
-          <div className="border-t border-zinc-200 bg-zinc-50/60 px-6 py-4">
+          <div className="border-t border-zinc-100 bg-white px-6 py-4">
             {errors.root && (
-              <p className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+              <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-700">
                 {errors.root.message}
               </p>
             )}
@@ -251,14 +254,14 @@ export function BranchFormModal({ branch, onClose, onSuccess }: Props) {
                 type="button"
                 onClick={onClose}
                 disabled={mutation.isPending}
-                className="h-9 rounded-md border border-zinc-200 bg-white px-5 text-sm text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
+                className="h-10 rounded-lg border border-zinc-200 bg-white px-5 text-sm font-medium text-zinc-700 shadow-card transition-colors hover:bg-zinc-50 disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={mutation.isPending}
-                className="flex h-9 items-center gap-2 rounded-md bg-blue-600 px-5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 hover:shadow disabled:opacity-50"
+                className="flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-5 text-sm font-medium text-white shadow-card transition-colors hover:bg-blue-700 disabled:opacity-50"
               >
                 {mutation.isPending && <Loader2 size={13} className="animate-spin" />}
                 {mutation.isPending ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Crear sucursal'}
