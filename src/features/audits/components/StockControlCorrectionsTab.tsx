@@ -8,7 +8,7 @@ import type { StockControl } from '@/features/stock/types'
 import { STOCK_CONTROL_TYPE_LABELS as TYPE_LABELS } from '@/features/stock/constants'
 import { humanizeRole } from '../constants'
 import { AuditValueDiff } from './AuditValueDiff'
-import { MetricBlock, DatePicker } from '@/shared/components/ui'
+import { MetricBlock, DatePicker, Panel } from '@/shared/components/ui'
 import { formatDateTime, formatDuration, truncate } from '@/shared/lib/utils'
 
 const today = new Date()
@@ -71,13 +71,13 @@ export function StockControlCorrectionsTab() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center gap-3 border-b border-zinc-200 bg-white px-6 py-3">
+      <div className="flex flex-wrap items-end gap-3 px-6 pb-5">
         <div className="flex flex-col gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Desde</span>
+          <span className="text-xs font-medium text-zinc-500">Desde</span>
           <DatePicker value={from} onChange={setFrom} placeholder="Fecha inicio" className="w-40" />
         </div>
         <div className="flex flex-col gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Hasta</span>
+          <span className="text-xs font-medium text-zinc-500">Hasta</span>
           <DatePicker value={to} onChange={setTo} placeholder="Fecha fin" className="w-40" />
         </div>
         {truncated && (
@@ -88,7 +88,7 @@ export function StockControlCorrectionsTab() {
         )}
       </div>
 
-      <div className="grid grid-cols-3 gap-3 border-b border-zinc-200 bg-zinc-50 p-4">
+      <div className="grid grid-cols-3 gap-4 px-6">
         <MetricBlock
           label="Correcciones registradas"
           accent={corrections.length > 0 ? 'amber' : 'default'}
@@ -106,139 +106,141 @@ export function StockControlCorrectionsTab() {
         />
       </div>
 
-      <div className="border-b border-zinc-200">
-        <table className="w-full text-left">
-          <thead>
-            <tr className="border-b border-zinc-200 bg-zinc-50">
-              <th className="w-8" />
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 w-36">
-                Fecha corrección
-              </th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
-                Control
-              </th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 w-36">
-                Corregido por
-              </th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
-                Motivo
-              </th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 w-36">
-                Tiempo desde creación
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading && (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-sm text-zinc-400">Cargando...</td>
+      <Panel className="mx-6 mt-5">
+        <div>
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b border-zinc-200 bg-zinc-50">
+                <th className="w-8" />
+                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500 w-36">
+                  Fecha corrección
+                </th>
+                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                  Control
+                </th>
+                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500 w-36">
+                  Corregido por
+                </th>
+                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                  Motivo
+                </th>
+                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500 w-36">
+                  Tiempo desde creación
+                </th>
               </tr>
-            )}
-            {isError && (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center">
-                  <p className="text-sm text-zinc-500">No se pudieron cargar las correcciones.</p>
-                  <button onClick={() => refetch()} className="mt-2 text-xs text-zinc-400 underline hover:text-zinc-700">
-                    Reintentar
-                  </button>
-                </td>
-              </tr>
-            )}
-            {!isLoading && !isError && corrections.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-sm text-zinc-400">
-                  Sin correcciones registradas en el rango seleccionado.
-                </td>
-              </tr>
-            )}
-            {corrections.map((log) => {
-              const control     = controlMap.get(log.entityId)
-              const isExpanded  = expandedId === log.id
-              const user        = log.userId ? userMap.get(log.userId) : undefined
-              const deltaMs     = control
-                ? new Date(log.createdAt).getTime() - new Date(control.createdAt).getTime()
-                : null
-              const canExpand   = log.oldValue !== null || log.newValue !== null
+            </thead>
+            <tbody>
+              {isLoading && (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-sm text-zinc-400">Cargando...</td>
+                </tr>
+              )}
+              {isError && (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center">
+                    <p className="text-sm text-zinc-500">No se pudieron cargar las correcciones.</p>
+                    <button onClick={() => refetch()} className="mt-2 text-xs text-zinc-400 underline hover:text-zinc-700">
+                      Reintentar
+                    </button>
+                  </td>
+                </tr>
+              )}
+              {!isLoading && !isError && corrections.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-4 py-10 text-center text-sm text-zinc-400">
+                    Sin correcciones registradas en el rango seleccionado.
+                  </td>
+                </tr>
+              )}
+              {corrections.map((log) => {
+                const control     = controlMap.get(log.entityId)
+                const isExpanded  = expandedId === log.id
+                const user        = log.userId ? userMap.get(log.userId) : undefined
+                const deltaMs     = control
+                  ? new Date(log.createdAt).getTime() - new Date(control.createdAt).getTime()
+                  : null
+                const canExpand   = log.oldValue !== null || log.newValue !== null
 
-              return (
-                <>
-                  <tr
-                    key={log.id}
-                    onClick={() => canExpand && setExpandedId(isExpanded ? null : log.id)}
-                    className={`border-b border-zinc-100 transition-colors ${
-                      canExpand ? 'cursor-pointer hover:bg-zinc-50' : ''
-                    } ${isExpanded ? 'bg-zinc-50' : 'bg-white'}`}
-                  >
-                    <td className="w-8 pl-3">
-                      {canExpand ? (
-                        <span className="text-zinc-300">
-                          {isExpanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+                return (
+                  <>
+                    <tr
+                      key={log.id}
+                      onClick={() => canExpand && setExpandedId(isExpanded ? null : log.id)}
+                      className={`border-b border-zinc-100 transition-colors ${
+                        canExpand ? 'cursor-pointer hover:bg-zinc-50' : ''
+                      } ${isExpanded ? 'bg-zinc-50' : 'bg-white'}`}
+                    >
+                      <td className="w-8 pl-3">
+                        {canExpand ? (
+                          <span className="text-zinc-300">
+                            {isExpanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+                          </span>
+                        ) : null}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-xs tabular-nums text-zinc-500">
+                          {formatDateTime(log.createdAt)}
                         </span>
-                      ) : null}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="text-xs tabular-nums text-zinc-500">
-                        {formatDateTime(log.createdAt)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      {control ? (
-                        <>
-                          <p className="text-sm font-medium text-zinc-800">
-                            {control.routeCode} · {control.branchName}
-                          </p>
-                          <p className="text-[10px] text-zinc-400">
-                            {TYPE_LABELS[control.type]} · {control.controlDate}
-                          </p>
-                        </>
-                      ) : (
-                        <span className="font-mono text-[10px] text-zinc-400">
-                          {log.entityId.slice(0, 8)}…
+                      </td>
+                      <td className="px-4 py-3">
+                        {control ? (
+                          <>
+                            <p className="text-sm font-medium text-zinc-800">
+                              {control.routeCode} · {control.branchName}
+                            </p>
+                            <p className="text-[10px] text-zinc-400">
+                              {TYPE_LABELS[control.type]} · {control.controlDate}
+                            </p>
+                          </>
+                        ) : (
+                          <span className="font-mono text-[10px] text-zinc-400">
+                            {log.entityId.slice(0, 8)}…
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        {log.userId ? (
+                          <>
+                            <p className="text-xs font-medium text-zinc-700">
+                              {user?.name ?? log.userId.slice(0, 8)}
+                            </p>
+                            <p className="text-[10px] text-zinc-400">{humanizeRole(log.userRole)}</p>
+                          </>
+                        ) : (
+                          <span className="text-xs text-zinc-400">Sistema</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-xs text-amber-700" title={log.reason ?? ''}>
+                          {truncate(log.reason ?? '', 60)}
                         </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      {log.userId ? (
-                        <>
-                          <p className="text-xs font-medium text-zinc-700">
-                            {user?.name ?? log.userId.slice(0, 8)}
-                          </p>
-                          <p className="text-[10px] text-zinc-400">{humanizeRole(log.userRole)}</p>
-                        </>
-                      ) : (
-                        <span className="text-xs text-zinc-400">Sistema</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="text-xs text-amber-700" title={log.reason ?? ''}>
-                        {truncate(log.reason ?? '', 60)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="text-xs font-medium tabular-nums text-zinc-700">
-                        {deltaMs !== null ? formatDuration(deltaMs) : '—'}
-                      </span>
-                    </td>
-                  </tr>
-
-                  {isExpanded && (
-                    <tr key={`${log.id}-detail`} className="bg-zinc-50">
-                      <td />
-                      <td colSpan={5} className="px-4 py-4">
-                        <AuditValueDiff
-                          oldValue={log.oldValue}
-                          newValue={log.newValue}
-                          resolveId={(_, id) => userMap.get(id)?.name}
-                        />
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-xs font-medium tabular-nums text-zinc-700">
+                          {deltaMs !== null ? formatDuration(deltaMs) : '—'}
+                        </span>
                       </td>
                     </tr>
-                  )}
-                </>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
+
+                    {isExpanded && (
+                      <tr key={`${log.id}-detail`} className="bg-zinc-50">
+                        <td />
+                        <td colSpan={5} className="px-4 py-4">
+                          <AuditValueDiff
+                            oldValue={log.oldValue}
+                            newValue={log.newValue}
+                            resolveId={(_, id) => userMap.get(id)?.name}
+                          />
+                        </td>
+                      </tr>
+                    )}
+                  </>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </Panel>
     </div>
   )
 }

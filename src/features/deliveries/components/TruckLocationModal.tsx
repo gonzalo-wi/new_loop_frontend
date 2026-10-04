@@ -59,11 +59,11 @@ export function TruckLocationModal({ delivery, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/25" onClick={onClose} />
-      <div className="relative flex h-[80vh] w-full max-w-4xl flex-col overflow-hidden rounded-md bg-white shadow-xl">
+      <div className="relative flex h-[80vh] w-full max-w-4xl flex-col overflow-hidden rounded-md bg-white shadow-lg">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-zinc-200 bg-zinc-50/60 px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-sm bg-zinc-900 text-white">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-zinc-900 text-white">
               <MapPin size={16} />
             </div>
             <div>
@@ -91,7 +91,7 @@ export function TruckLocationModal({ delivery, onClose }: Props) {
             )}
             <button
               onClick={onClose}
-              className="rounded-sm p-1.5 text-zinc-400 hover:bg-zinc-200/60 hover:text-zinc-700"
+              className="rounded-md p-1.5 text-zinc-400 hover:bg-zinc-200/60 hover:text-zinc-700"
             >
               <X size={16} />
             </button>
@@ -173,7 +173,7 @@ function MapArea({ location }: { location: FleetLocation }) {
         href={mapsUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-1.5 rounded-sm border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+        className="flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
       >
         <ExternalLink size={12} />
         Abrir en Google Maps
@@ -243,7 +243,7 @@ function InfoPanel({ location }: { location: FleetLocation }) {
   return (
     <div className="w-full shrink-0 space-y-5 overflow-y-auto border-t border-zinc-200 bg-white p-5 md:w-72 md:border-l md:border-t-0">
       <div className="flex items-center justify-between">
-        <span className="rounded-sm border border-zinc-200 bg-zinc-50 px-2 py-1 font-mono text-sm font-semibold uppercase text-zinc-900">
+        <span className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 font-mono text-sm font-semibold uppercase text-zinc-900">
           {location.licensePlate}
         </span>
         {location.engineOn ? (
@@ -295,7 +295,7 @@ function InfoRow({
 }) {
   return (
     <div className="flex gap-3">
-      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm bg-zinc-100 text-zinc-500">
+      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-zinc-100 text-zinc-500">
         <Icon size={13} />
       </span>
       <div className="min-w-0 pt-0.5">
@@ -340,7 +340,7 @@ function StateMessage({
       {onRetry && (
         <button
           onClick={onRetry}
-          className="mt-1 rounded-sm border border-zinc-200 bg-white px-4 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+          className="mt-1 rounded-md border border-zinc-200 bg-white px-4 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
         >
           Reintentar
         </button>

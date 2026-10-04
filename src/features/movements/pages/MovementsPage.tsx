@@ -9,6 +9,7 @@ import {
   FilterBar,
   DataTable,
   StatusBadge,
+  Panel,
 } from '@/shared/components/ui'
 import type { TableColumn } from '@/shared/types'
 import { formatDateTime } from '@/shared/lib/utils'
@@ -68,7 +69,7 @@ export function MovementsPage() {
       render: (m) => (
         <span
           className={cn(
-            'inline-flex items-center rounded-sm border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide',
+            'inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide',
             TYPE_STYLE[m.type]
           )}
         >
@@ -143,62 +144,64 @@ export function MovementsPage() {
   ]
 
   return (
-    <div>
+    <div className="pb-8">
       <PageHeader
         title="Movimientos"
         description="Registro de entradas, salidas, transferencias y ajustes de stock."
       />
 
-      <ActionBar>
-        <SearchInput
-          value={search}
-          onChange={setSearch}
-          placeholder="Buscar por código, producto o sucursal..."
-          className="w-72"
-        />
-        <FilterBar
-          filters={[
-            {
-              key: 'type',
-              label: 'Tipo',
-              options: Object.entries(TYPE_LABELS).map(([value, label]) => ({ value, label })),
-            },
-            {
-              key: 'status',
-              label: 'Estado',
-              options: [
-                { value: 'pending',     label: 'Pendiente' },
-                { value: 'in_progress', label: 'En proceso' },
-                { value: 'completed',   label: 'Completado' },
-                { value: 'delayed',     label: 'Demorado' },
-                { value: 'cancelled',   label: 'Cancelado' },
-              ],
-            },
-          ]}
-          activeFilters={filters}
-          onChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
-          onClearAll={() => setFilters({ type: '', status: '' })}
-        />
-        <span className="ml-auto text-xs text-zinc-400">
-          {filtered.length} movimiento{filtered.length !== 1 ? 's' : ''}
-        </span>
-      </ActionBar>
+      <Panel className="mx-6">
+        <ActionBar>
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Buscar por código, producto o sucursal..."
+            className="w-72"
+          />
+          <FilterBar
+            filters={[
+              {
+                key: 'type',
+                label: 'Tipo',
+                options: Object.entries(TYPE_LABELS).map(([value, label]) => ({ value, label })),
+              },
+              {
+                key: 'status',
+                label: 'Estado',
+                options: [
+                  { value: 'pending',     label: 'Pendiente' },
+                  { value: 'in_progress', label: 'En proceso' },
+                  { value: 'completed',   label: 'Completado' },
+                  { value: 'delayed',     label: 'Demorado' },
+                  { value: 'cancelled',   label: 'Cancelado' },
+                ],
+              },
+            ]}
+            activeFilters={filters}
+            onChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
+            onClearAll={() => setFilters({ type: '', status: '' })}
+          />
+          <span className="ml-auto text-xs text-zinc-400">
+            {filtered.length} movimiento{filtered.length !== 1 ? 's' : ''}
+          </span>
+        </ActionBar>
 
-      <div className="border-b border-zinc-200">
-        <DataTable
-          columns={columns}
-          data={filtered}
-          isLoading={isLoading}
-          isError={isError}
-          onRetry={refetch}
-          getRowKey={(m) => m.id}
-          emptyTitle="Sin movimientos"
-          emptyDescription="No hay movimientos que coincidan con los filtros."
-          rowClassName={(m) =>
-            m.status === 'delayed' ? 'border-l-2 border-l-red-400' : undefined
-          }
-        />
-      </div>
+        <div>
+          <DataTable
+            columns={columns}
+            data={filtered}
+            isLoading={isLoading}
+            isError={isError}
+            onRetry={refetch}
+            getRowKey={(m) => m.id}
+            emptyTitle="Sin movimientos"
+            emptyDescription="No hay movimientos que coincidan con los filtros."
+            rowClassName={(m) =>
+              m.status === 'delayed' ? 'border-l-2 border-l-red-400' : undefined
+            }
+          />
+        </div>
+      </Panel>
     </div>
   )
 }

@@ -15,20 +15,17 @@ type Props = {
 
 export function AuditTabs({ active, onChange }: Props) {
   return (
-    <div className="flex items-center gap-1 border-b border-zinc-200 bg-white px-6">
+    <div className="mx-6 mb-5 inline-flex items-center gap-1 rounded-lg border border-zinc-200 bg-white p-1 shadow-card">
       {TABS.map((tab) => (
         <button
           key={tab.key}
           onClick={() => onChange(tab.key)}
           className={cn(
-            'relative px-3 py-2.5 text-xs font-semibold transition-colors',
-            active === tab.key ? 'text-zinc-900' : 'text-zinc-400 hover:text-zinc-700'
+            'rounded-md px-3.5 py-1.5 text-sm font-medium transition-colors',
+            active === tab.key ? 'bg-blue-50 text-blue-700' : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
           )}
         >
           {tab.label}
-          {active === tab.key && (
-            <span className="absolute inset-x-0 -bottom-px h-[2px] bg-blue-600" />
-          )}
         </button>
       ))}
     </div>

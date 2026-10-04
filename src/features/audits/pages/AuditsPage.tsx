@@ -9,7 +9,7 @@ export function AuditsPage() {
   const [tab, setTab] = useState<AuditTabKey>('events')
 
   return (
-    <div>
+    <div className="pb-8">
       <PageHeader
         title="Auditoría"
         description="Trazabilidad de operaciones: eventos del sistema, correcciones de controles y rendimiento de pedidos por usuario."

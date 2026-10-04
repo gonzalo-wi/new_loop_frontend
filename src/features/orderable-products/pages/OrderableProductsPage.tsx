@@ -18,6 +18,7 @@ import {
   StatusBadge,
   ConfirmDialog,
   MetricBlock,
+  Panel,
 } from '@/shared/components/ui'
 import type { TableColumn } from '@/shared/types'
 import { formatDate } from '@/shared/lib/utils'
@@ -157,7 +158,7 @@ export function OrderableProductsPage() {
               setSelected(p)
               setShowForm(true)
             }}
-            className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+            className="rounded-md p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
             title="Editar"
           >
             <Pencil size={13} />
@@ -168,7 +169,7 @@ export function OrderableProductsPage() {
                 e.stopPropagation()
                 setConfirm({ product: p, action: 'deactivate' })
               }}
-              className="rounded p-1 text-zinc-400 hover:bg-red-50 hover:text-red-600"
+              className="rounded-md p-1 text-zinc-400 hover:bg-red-50 hover:text-red-600"
               title="Desactivar"
             >
               <PowerOff size={13} />
@@ -179,7 +180,7 @@ export function OrderableProductsPage() {
                 e.stopPropagation()
                 setConfirm({ product: p, action: 'activate' })
               }}
-              className="rounded p-1 text-zinc-400 hover:bg-emerald-50 hover:text-emerald-600"
+              className="rounded-md p-1 text-zinc-400 hover:bg-emerald-50 hover:text-emerald-600"
               title="Activar"
             >
               <Power size={13} />
@@ -191,7 +192,7 @@ export function OrderableProductsPage() {
   ]
 
   return (
-    <div>
+    <div className="pb-8">
       <PageHeader
         title="Productos pedibles"
         description="Catálogo de productos que los repartidores pueden pedir."
@@ -206,7 +207,7 @@ export function OrderableProductsPage() {
         }
       />
 
-      <div className="grid grid-cols-3 gap-3 border-b border-zinc-200 bg-zinc-50 p-4">
+      <div className="grid grid-cols-3 gap-4 px-6">
         <MetricBlock
           label="Pedibles activos"
           icon={ShoppingBasket}
@@ -228,48 +229,50 @@ export function OrderableProductsPage() {
         />
       </div>
 
-      <ActionBar>
-        <SearchInput
-          value={search}
-          onChange={setSearch}
-          placeholder="Buscar por código o nombre..."
-          className="w-64"
-        />
-        <FilterBar
-          filters={[{ key: 'status', label: 'Estado', options: STATUS_FILTER }]}
-          activeFilters={filters}
-          onChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
-          onClearAll={() => setFilters({ status: '' })}
-        />
-        <span className="ml-auto text-xs text-zinc-400">
-          {filtered.length} producto{filtered.length !== 1 ? 's' : ''}
-        </span>
-      </ActionBar>
+      <Panel className="mx-6 mt-5">
+        <ActionBar>
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Buscar por código o nombre..."
+            className="w-64"
+          />
+          <FilterBar
+            filters={[{ key: 'status', label: 'Estado', options: STATUS_FILTER }]}
+            activeFilters={filters}
+            onChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
+            onClearAll={() => setFilters({ status: '' })}
+          />
+          <span className="ml-auto text-xs text-zinc-400">
+            {filtered.length} producto{filtered.length !== 1 ? 's' : ''}
+          </span>
+        </ActionBar>
 
-      <div className="border-b border-zinc-200">
-        <DataTable
-          columns={columns}
-          data={filtered}
-          isLoading={isLoading}
-          isError={isError}
-          onRetry={refetch}
-          getRowKey={(p) => p.id}
-          emptyTitle="Sin productos pedibles"
-          emptyDescription="No hay productos que coincidan con los filtros."
-          emptyAction={
-            !debouncedSearch && !filters.status ? (
-              <ActionButton
-                variant="primary"
-                size="sm"
-                icon={<Plus size={13} />}
-                onClick={() => { setSelected(null); setShowForm(true) }}
-              >
-                Nuevo producto
-              </ActionButton>
-            ) : undefined
-          }
-        />
-      </div>
+        <div>
+          <DataTable
+            columns={columns}
+            data={filtered}
+            isLoading={isLoading}
+            isError={isError}
+            onRetry={refetch}
+            getRowKey={(p) => p.id}
+            emptyTitle="Sin productos pedibles"
+            emptyDescription="No hay productos que coincidan con los filtros."
+            emptyAction={
+              !debouncedSearch && !filters.status ? (
+                <ActionButton
+                  variant="primary"
+                  size="sm"
+                  icon={<Plus size={13} />}
+                  onClick={() => { setSelected(null); setShowForm(true) }}
+                >
+                  Nuevo producto
+                </ActionButton>
+              ) : undefined
+            }
+          />
+        </div>
+      </Panel>
 
       {showForm && (
         <OrderableProductFormModal

@@ -33,6 +33,7 @@ import {
   StatusBadge,
   ConfirmDialog,
   MetricBlock,
+  Panel,
 } from '@/shared/components/ui'
 import type { TableColumn } from '@/shared/types'
 import { formatDate } from '@/shared/lib/utils'
@@ -91,7 +92,7 @@ function SortableRow({ product, index }: { product: Product; index: number }) {
       </td>
       <td className="w-28 px-3 py-2.5">
         <span
-          className={`inline-flex items-center rounded-sm px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${TYPE_STYLE[product.type]}`}
+          className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${TYPE_STYLE[product.type]}`}
         >
           {TYPE_LABEL[product.type]}
         </span>
@@ -231,7 +232,7 @@ export function ProductsPage() {
       width: '110px',
       render: (p) => (
         <span
-          className={`inline-flex items-center rounded-sm px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${TYPE_STYLE[p.type]}`}
+          className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${TYPE_STYLE[p.type]}`}
         >
           {TYPE_LABEL[p.type]}
         </span>
@@ -284,7 +285,7 @@ export function ProductsPage() {
               setSelectedProduct(p)
               setShowForm(true)
             }}
-            className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+            className="rounded-md p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
             title="Editar"
           >
             <Pencil size={13} />
@@ -295,7 +296,7 @@ export function ProductsPage() {
                 e.stopPropagation()
                 setConfirmTarget({ product: p, action: 'deactivate' })
               }}
-              className="rounded p-1 text-zinc-400 hover:bg-red-50 hover:text-red-500"
+              className="rounded-md p-1 text-zinc-400 hover:bg-red-50 hover:text-red-500"
               title="Desactivar"
             >
               <PowerOff size={13} />
@@ -306,7 +307,7 @@ export function ProductsPage() {
                 e.stopPropagation()
                 setConfirmTarget({ product: p, action: 'activate' })
               }}
-              className="rounded p-1 text-zinc-400 hover:bg-emerald-50 hover:text-emerald-600"
+              className="rounded-md p-1 text-zinc-400 hover:bg-emerald-50 hover:text-emerald-600"
               title="Activar"
             >
               <Power size={13} />
@@ -321,7 +322,7 @@ export function ProductsPage() {
 
   if (reorderMode) {
     return (
-      <div>
+      <div className="pb-8">
         <PageHeader
           title="Reordenar productos"
           description="Arrastrá las filas para cambiar el orden de visualización."
@@ -330,14 +331,14 @@ export function ProductsPage() {
               <button
                 onClick={cancelReorder}
                 disabled={isSaving}
-                className="h-9 rounded-sm border border-zinc-200 bg-white px-4 text-sm text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
+                className="h-9 rounded-md border border-zinc-200 bg-white px-4 text-sm text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 onClick={saveOrder}
                 disabled={isSaving}
-                className="flex h-9 items-center gap-2 rounded-sm bg-blue-600 px-5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                className="flex h-9 items-center gap-2 rounded-md bg-blue-600 px-5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
               >
                 {isSaving && <Loader2 size={13} className="animate-spin" />}
                 {isSaving ? 'Guardando...' : 'Guardar orden'}
@@ -347,57 +348,59 @@ export function ProductsPage() {
         />
 
         {saveError && (
-          <div className="mx-6 mb-4 rounded-sm border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">
+          <div className="mx-6 mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">
             {saveError}
           </div>
         )}
 
-        <div className="border-b border-zinc-200">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-zinc-200 bg-zinc-50">
-                <th className="w-8 px-3 py-2.5" />
-                <th className="w-10 px-3 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
-                  #
-                </th>
-                <th className="w-28 px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
-                  Código
-                </th>
-                <th className="px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
-                  Producto
-                </th>
-                <th className="w-28 px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
-                  Tipo
-                </th>
-                <th className="w-24 px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
-                  Estado
-                </th>
-              </tr>
-            </thead>
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext
-                items={reorderList.map((p) => p.id)}
-                strategy={verticalListSortingStrategy}
+        <Panel className="mx-6">
+          <div>
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-zinc-200 bg-zinc-50">
+                  <th className="w-8 px-3 py-2.5" />
+                  <th className="w-10 px-3 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+                    #
+                  </th>
+                  <th className="w-28 px-3 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                    Código
+                  </th>
+                  <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                    Producto
+                  </th>
+                  <th className="w-28 px-3 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                    Tipo
+                  </th>
+                  <th className="w-24 px-3 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                    Estado
+                  </th>
+                </tr>
+              </thead>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
               >
-                <tbody>
-                  {reorderList.map((product, index) => (
-                    <SortableRow key={product.id} product={product} index={index} />
-                  ))}
-                </tbody>
-              </SortableContext>
-            </DndContext>
-          </table>
-        </div>
+                <SortableContext
+                  items={reorderList.map((p) => p.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <tbody>
+                    {reorderList.map((product, index) => (
+                      <SortableRow key={product.id} product={product} index={index} />
+                    ))}
+                  </tbody>
+                </SortableContext>
+              </DndContext>
+            </table>
+          </div>
+        </Panel>
       </div>
     )
   }
 
   return (
-    <div>
+    <div className="pb-8">
       <PageHeader
         title="Productos"
         description="Catálogo de productos retornables y descartables."
@@ -406,7 +409,7 @@ export function ProductsPage() {
             <button
               onClick={enterReorderMode}
               disabled={products.length === 0}
-              className="flex h-9 items-center gap-2 rounded-sm border border-zinc-200 bg-white px-4 text-sm text-zinc-700 hover:bg-zinc-50 disabled:opacity-40"
+              className="flex h-9 items-center gap-2 rounded-md border border-zinc-200 bg-white px-4 text-sm text-zinc-700 hover:bg-zinc-50 disabled:opacity-40"
             >
               <ArrowUpDown size={13} />
               Reordenar
@@ -425,7 +428,7 @@ export function ProductsPage() {
         }
       />
 
-      <div className="grid grid-cols-3 gap-3 border-b border-zinc-200 bg-zinc-50 p-4">
+      <div className="grid grid-cols-3 gap-4 px-6">
         <MetricBlock
           label="Productos activos"
           icon={Package}
@@ -447,53 +450,55 @@ export function ProductsPage() {
         />
       </div>
 
-      <ActionBar>
-        <SearchInput
-          value={search}
-          onChange={setSearch}
-          placeholder="Buscar por nombre, código o descripción..."
-          className="w-72"
-        />
-        <FilterBar
-          filters={[
-            {
-              key: 'type',
-              label: 'Tipo',
-              options: [
-                { value: 'returnable', label: 'Retornable' },
-                { value: 'disposable', label: 'Descartable' },
-              ],
-            },
-            {
-              key: 'status',
-              label: 'Estado',
-              options: [
-                { value: 'active',   label: 'Activo' },
-                { value: 'inactive', label: 'Inactivo' },
-              ],
-            },
-          ]}
-          activeFilters={filters}
-          onChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
-          onClearAll={() => setFilters({ type: '', status: '' })}
-        />
-        <span className="ml-auto text-xs text-zinc-400">
-          {filtered.length} resultado{filtered.length !== 1 ? 's' : ''}
-        </span>
-      </ActionBar>
+      <Panel className="mx-6 mt-5">
+        <ActionBar>
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Buscar por nombre, código o descripción..."
+            className="w-72"
+          />
+          <FilterBar
+            filters={[
+              {
+                key: 'type',
+                label: 'Tipo',
+                options: [
+                  { value: 'returnable', label: 'Retornable' },
+                  { value: 'disposable', label: 'Descartable' },
+                ],
+              },
+              {
+                key: 'status',
+                label: 'Estado',
+                options: [
+                  { value: 'active',   label: 'Activo' },
+                  { value: 'inactive', label: 'Inactivo' },
+                ],
+              },
+            ]}
+            activeFilters={filters}
+            onChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
+            onClearAll={() => setFilters({ type: '', status: '' })}
+          />
+          <span className="ml-auto text-xs text-zinc-400">
+            {filtered.length} resultado{filtered.length !== 1 ? 's' : ''}
+          </span>
+        </ActionBar>
 
-      <div className="border-b border-zinc-200">
-        <DataTable
-          columns={columns}
-          data={filtered}
-          isLoading={isLoading}
-          isError={isError}
-          onRetry={refetch}
-          getRowKey={(p) => p.id}
-          emptyTitle="Sin productos"
-          emptyDescription="No hay productos que coincidan con los filtros."
-        />
-      </div>
+        <div>
+          <DataTable
+            columns={columns}
+            data={filtered}
+            isLoading={isLoading}
+            isError={isError}
+            onRetry={refetch}
+            getRowKey={(p) => p.id}
+            emptyTitle="Sin productos"
+            emptyDescription="No hay productos que coincidan con los filtros."
+          />
+        </div>
+      </Panel>
 
       {showForm && (
         <ProductFormModal

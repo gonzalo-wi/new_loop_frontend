@@ -108,7 +108,7 @@ export function LoginPage() {
         </div>
 
         {serverError && (
-          <div className="flex items-start gap-2 rounded-sm border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-600">
+          <div className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-600">
             <AlertCircle size={15} className="mt-0.5 shrink-0" />
             <span>{serverError}</span>
           </div>
@@ -117,7 +117,7 @@ export function LoginPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex h-9 w-full items-center justify-center gap-2 rounded-sm bg-blue-600 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex h-9 w-full items-center justify-center gap-2 rounded-md bg-blue-600 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting && <Loader2 size={14} className="animate-spin" />}
           {isSubmitting ? 'Verificando...' : 'Ingresar'}

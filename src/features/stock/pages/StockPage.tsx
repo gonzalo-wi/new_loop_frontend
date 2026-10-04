@@ -9,6 +9,7 @@ import {
   FilterBar,
   DataTable,
   SectionHeader,
+  Panel,
 } from '@/shared/components/ui'
 import type { TableColumn } from '@/shared/types'
 import { formatDateTime } from '@/shared/lib/utils'
@@ -79,7 +80,7 @@ export function StockPage() {
       render: (s) => (
         <span
           className={cn(
-            'text-[10px] font-medium uppercase tracking-wide rounded-sm px-1.5 py-0.5 border',
+            'text-[10px] font-medium uppercase tracking-wide rounded-md px-1.5 py-0.5 border',
             s.productType === 'returnable'
               ? 'text-blue-700 bg-blue-50 border-blue-200'
               : 'text-zinc-600 bg-zinc-100 border-zinc-200'
@@ -131,80 +132,82 @@ export function StockPage() {
   ]
 
   return (
-    <div>
+    <div className="pb-8">
       <PageHeader
         title="Stock"
         description="Estado actual del inventario por producto y sucursal."
       />
 
-      {/* Summary bar */}
-      <div className="border-b border-zinc-200 bg-white px-6 py-3">
-        <div className="flex items-center gap-6">
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Total llenos</p>
-            <p className="text-lg font-semibold text-zinc-900 tabular-nums">
-              {totalFull.toLocaleString('es-AR')}
-            </p>
-          </div>
-          <div className="h-8 w-px bg-zinc-200" />
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Total vacíos</p>
-            <p className="text-lg font-semibold text-zinc-900 tabular-nums">
-              {totalEmpty.toLocaleString('es-AR')}
-            </p>
-          </div>
-          <div className="h-8 w-px bg-zinc-200" />
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Recambios</p>
-            <p className="text-lg font-semibold text-zinc-900 tabular-nums">
-              {totalReplacement.toLocaleString('es-AR')}
-            </p>
-          </div>
-          <div className="ml-auto">
-            <SectionHeader
-              title={`${filtered.length} registro${filtered.length !== 1 ? 's' : ''}`}
-            />
+      <Panel className="mx-6">
+        {/* Summary bar */}
+        <div className="border-b border-zinc-100 px-4 py-3">
+          <div className="flex items-center gap-6">
+            <div>
+              <p className="text-xs font-medium text-zinc-500">Total llenos</p>
+              <p className="text-lg font-semibold text-zinc-900 tabular-nums">
+                {totalFull.toLocaleString('es-AR')}
+              </p>
+            </div>
+            <div className="h-8 w-px bg-zinc-200" />
+            <div>
+              <p className="text-xs font-medium text-zinc-500">Total vacíos</p>
+              <p className="text-lg font-semibold text-zinc-900 tabular-nums">
+                {totalEmpty.toLocaleString('es-AR')}
+              </p>
+            </div>
+            <div className="h-8 w-px bg-zinc-200" />
+            <div>
+              <p className="text-xs font-medium text-zinc-500">Recambios</p>
+              <p className="text-lg font-semibold text-zinc-900 tabular-nums">
+                {totalReplacement.toLocaleString('es-AR')}
+              </p>
+            </div>
+            <div className="ml-auto">
+              <SectionHeader
+                title={`${filtered.length} registro${filtered.length !== 1 ? 's' : ''}`}
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      <ActionBar>
-        <SearchInput
-          value={search}
-          onChange={setSearch}
-          placeholder="Buscar producto o sucursal..."
-          className="w-60"
-        />
-        <FilterBar
-          filters={[
-            { key: 'branchId', label: 'Sucursal', options: branches },
-            {
-              key: 'productType',
-              label: 'Tipo',
-              options: [
-                { value: 'returnable', label: 'Retornable' },
-                { value: 'disposable', label: 'Descartable' },
-              ],
-            },
-          ]}
-          activeFilters={filters}
-          onChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
-          onClearAll={() => setFilters({ branchId: '', productType: '' })}
-        />
-      </ActionBar>
+        <ActionBar>
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Buscar producto o sucursal..."
+            className="w-60"
+          />
+          <FilterBar
+            filters={[
+              { key: 'branchId', label: 'Sucursal', options: branches },
+              {
+                key: 'productType',
+                label: 'Tipo',
+                options: [
+                  { value: 'returnable', label: 'Retornable' },
+                  { value: 'disposable', label: 'Descartable' },
+                ],
+              },
+            ]}
+            activeFilters={filters}
+            onChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
+            onClearAll={() => setFilters({ branchId: '', productType: '' })}
+          />
+        </ActionBar>
 
-      <div className="border-b border-zinc-200">
-        <DataTable
-          columns={columns}
-          data={filtered}
-          isLoading={isLoading}
-          isError={isError}
-          onRetry={refetch}
-          getRowKey={(s) => s.id}
-          emptyTitle="Sin registros de stock"
-          emptyDescription="No hay entradas de stock que coincidan con los filtros aplicados."
-        />
-      </div>
+        <div>
+          <DataTable
+            columns={columns}
+            data={filtered}
+            isLoading={isLoading}
+            isError={isError}
+            onRetry={refetch}
+            getRowKey={(s) => s.id}
+            emptyTitle="Sin registros de stock"
+            emptyDescription="No hay entradas de stock que coincidan con los filtros aplicados."
+          />
+        </div>
+      </Panel>
     </div>
   )
 }

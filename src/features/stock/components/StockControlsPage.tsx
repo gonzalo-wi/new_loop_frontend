@@ -17,6 +17,7 @@ import {
   DataTable,
   MetricBlock,
   Combobox,
+  Panel,
 } from '@/shared/components/ui'
 import type { TableColumn } from '@/shared/types'
 import { formatDate } from '@/shared/lib/utils'
@@ -143,7 +144,7 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
       render: (c) => {
         const cfg = STOCK_CONTROL_STATUS_CONFIG[c.status] ?? { label: c.status, cls: 'text-zinc-600 bg-zinc-100 border-zinc-200' }
         return (
-          <span className={`inline-flex items-center rounded-sm border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${cfg.cls}`}>
+          <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${cfg.cls}`}>
             {cfg.label}
           </span>
         )
@@ -184,7 +185,7 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
           <div className="flex items-center justify-end gap-1">
             <button
               onClick={(e) => { e.stopPropagation(); setDetailControl(c) }}
-              className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+              className="rounded-md p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
               title="Ver detalle"
             >
               <Eye size={13} />
@@ -192,7 +193,7 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
             {canEdit && (
               <button
                 onClick={(e) => { e.stopPropagation(); setSelectedControl(c); setShowForm(true) }}
-                className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+                className="rounded-md p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
                 title="Editar"
               >
                 <Pencil size={13} />
@@ -207,7 +208,7 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
   ]
 
   return (
-    <div>
+    <div className="pb-8">
       <PageHeader
         title={title}
         description={description}
@@ -223,7 +224,7 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
       />
 
       {/* Metrics */}
-      <div className="grid grid-cols-3 gap-3 border-b border-zinc-200 bg-zinc-50 p-4">
+      <div className="grid grid-cols-3 gap-4 px-6">
         <MetricBlock
           label="Registros"
           icon={ClipboardList}
@@ -259,7 +260,7 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
 
       {/* Pending arrivals panel — ENTRY only */}
       {type === 'ENTRY' && pendingArrivals && pendingArrivals.pendingRoutes.length > 0 && (
-        <div className="mx-6 mt-4 overflow-hidden rounded-md border border-zinc-200 bg-white shadow-sm">
+        <div className="mx-6 mt-5 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-card">
           <div className="flex flex-wrap items-center gap-4 border-b border-zinc-200 bg-amber-50/40 px-5 py-3">
             <div className="flex items-center gap-2">
               {pendingArrivals.pending === 0 ? (
@@ -300,8 +301,8 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-zinc-100 bg-zinc-50">
-                  <th className="px-5 py-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Sucursal</th>
-                  <th className="px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-400 w-28 text-right">Pendientes</th>
+                  <th className="px-5 py-2 text-xs font-medium text-zinc-500">Sucursal</th>
+                  <th className="px-4 py-2 text-xs font-medium text-zinc-500 w-28 text-right">Pendientes</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
@@ -319,7 +320,7 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
                       </span>
                     </td>
                     <td className="px-4 py-2.5 text-right">
-                      <span className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-[3px] bg-amber-100 px-1.5 font-mono text-xs font-bold text-amber-700">
+                      <span className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-md bg-amber-100 px-1.5 font-mono text-xs font-bold text-amber-700">
                         {b.count}
                       </span>
                     </td>
@@ -331,9 +332,9 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-zinc-100 bg-zinc-50">
-                  <th className="px-5 py-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-400 w-32">Reparto</th>
-                  <th className="px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Sucursal</th>
-                  <th className="px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-400 w-32">Fecha control</th>
+                  <th className="px-5 py-2 text-xs font-medium text-zinc-500 w-32">Reparto</th>
+                  <th className="px-4 py-2 text-xs font-medium text-zinc-500">Sucursal</th>
+                  <th className="px-4 py-2 text-xs font-medium text-zinc-500 w-32">Fecha control</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
@@ -352,87 +353,89 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
         </div>
       )}
 
-      <ActionBar className="mt-4 flex-wrap">
-        <SearchInput
-          value={search}
-          onChange={setSearch}
-          placeholder="Buscar por reparto, sucursal o fecha..."
-          className="w-72"
-        />
-        <FilterBar
-          filters={[{ key: 'status', label: 'Estado', options: STOCK_CONTROL_STATUS_OPTIONS }]}
-          activeFilters={{ status: statusFilter }}
-          onChange={(_key, value) => resetPage(setStatus)(value)}
-          onClearAll={() => resetPage(setStatus)('')}
-        />
-        <div className="flex items-center gap-1.5 border-l border-zinc-200 pl-3">
-          <DatePicker value={from} onChange={resetPage(setFrom)} placeholder="Desde" className="w-32" />
-          <span className="text-xs text-zinc-300">–</span>
-          <DatePicker value={to} onChange={resetPage(setTo)} placeholder="Hasta" className="w-32" />
-        </div>
-        <span className="ml-auto text-xs text-zinc-400">
-          {meta ? `${meta.totalElements} registro${meta.totalElements !== 1 ? 's' : ''}` : ''}
-        </span>
-      </ActionBar>
-
-      {/* Table */}
-      <div className="border-b border-zinc-200">
-        <DataTable
-          columns={columns}
-          data={filtered}
-          isLoading={isLoading}
-          isError={isError}
-          onRetry={refetch}
-          onRowClick={(c) => setDetailControl(c)}
-          getRowKey={(c) => c.id}
-          rowClassName={(c) =>
-            c.status === 'WITH_DIFFERENCES'
-              ? 'border-l-2 border-l-orange-400'
-              : c.status === 'REJECTED_BY_DRIVER' || c.status === 'AGUAS_ERROR'
-                ? 'border-l-2 border-l-red-400'
-                : undefined
-          }
-          emptyTitle="Sin registros"
-          emptyDescription={`No hay ${type === 'EXIT' ? 'salidas' : 'entradas'} que coincidan con los filtros.`}
-          emptyAction={
-            !debouncedSearch && !statusFilter ? (
-              <ActionButton
-                variant="primary"
-                size="sm"
-                icon={<Plus size={13} />}
-                onClick={() => { setSelectedControl(null); setShowForm(true) }}
-              >
-                {createLabel}
-              </ActionButton>
-            ) : undefined
-          }
-        />
-      </div>
-
-      {/* Pagination */}
-      {meta && meta.totalPages > 1 && (
-        <div className="flex items-center justify-between border-b border-zinc-200 px-6 py-3">
-          <button
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
-            disabled={page === 0}
-            className="h-8 rounded-sm border border-zinc-200 bg-white px-4 text-xs text-zinc-700 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            ← Anterior
-          </button>
-          <span className="flex items-center gap-2 text-xs text-zinc-500">
-            <TypeIcon size={12} className="text-zinc-300" />
-            Página {meta.number + 1} de {meta.totalPages}
-            <span className="text-zinc-400">({meta.totalElements} registros)</span>
+      <Panel className="mx-6 mt-5">
+        <ActionBar>
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Buscar por reparto, sucursal o fecha..."
+            className="w-72"
+          />
+          <FilterBar
+            filters={[{ key: 'status', label: 'Estado', options: STOCK_CONTROL_STATUS_OPTIONS }]}
+            activeFilters={{ status: statusFilter }}
+            onChange={(_key, value) => resetPage(setStatus)(value)}
+            onClearAll={() => resetPage(setStatus)('')}
+          />
+          <div className="flex items-center gap-1.5 border-l border-zinc-200 pl-3">
+            <DatePicker value={from} onChange={resetPage(setFrom)} placeholder="Desde" className="w-32" />
+            <span className="text-xs text-zinc-300">–</span>
+            <DatePicker value={to} onChange={resetPage(setTo)} placeholder="Hasta" className="w-32" />
+          </div>
+          <span className="ml-auto text-xs text-zinc-400">
+            {meta ? `${meta.totalElements} registro${meta.totalElements !== 1 ? 's' : ''}` : ''}
           </span>
-          <button
-            onClick={() => setPage((p) => Math.min(meta.totalPages - 1, p + 1))}
-            disabled={page >= meta.totalPages - 1}
-            className="h-8 rounded-sm border border-zinc-200 bg-white px-4 text-xs text-zinc-700 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Siguiente →
-          </button>
+        </ActionBar>
+
+        {/* Table */}
+        <div>
+          <DataTable
+            columns={columns}
+            data={filtered}
+            isLoading={isLoading}
+            isError={isError}
+            onRetry={refetch}
+            onRowClick={(c) => setDetailControl(c)}
+            getRowKey={(c) => c.id}
+            rowClassName={(c) =>
+              c.status === 'WITH_DIFFERENCES'
+                ? 'border-l-2 border-l-orange-400'
+                : c.status === 'REJECTED_BY_DRIVER' || c.status === 'AGUAS_ERROR'
+                  ? 'border-l-2 border-l-red-400'
+                  : undefined
+            }
+            emptyTitle="Sin registros"
+            emptyDescription={`No hay ${type === 'EXIT' ? 'salidas' : 'entradas'} que coincidan con los filtros.`}
+            emptyAction={
+              !debouncedSearch && !statusFilter ? (
+                <ActionButton
+                  variant="primary"
+                  size="sm"
+                  icon={<Plus size={13} />}
+                  onClick={() => { setSelectedControl(null); setShowForm(true) }}
+                >
+                  {createLabel}
+                </ActionButton>
+              ) : undefined
+            }
+          />
         </div>
-      )}
+
+        {/* Pagination */}
+        {meta && meta.totalPages > 1 && (
+          <div className="flex items-center justify-between border-t border-zinc-100 px-4 py-3">
+            <button
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={page === 0}
+              className="h-8 rounded-md border border-zinc-200 bg-white px-3.5 text-xs font-medium text-zinc-700 shadow-card hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              ← Anterior
+            </button>
+            <span className="flex items-center gap-2 text-xs text-zinc-500">
+              <TypeIcon size={12} className="text-zinc-300" />
+              Página {meta.number + 1} de {meta.totalPages}
+              <span className="text-zinc-400">({meta.totalElements} registros)</span>
+            </span>
+            <button
+              onClick={() => setPage((p) => Math.min(meta.totalPages - 1, p + 1))}
+              disabled={page >= meta.totalPages - 1}
+              className="h-8 rounded-md border border-zinc-200 bg-white px-3.5 text-xs font-medium text-zinc-700 shadow-card hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Siguiente →
+            </button>
+          </div>
+        )}
+      </Panel>
 
       {/* Form modal */}
       {showForm && (

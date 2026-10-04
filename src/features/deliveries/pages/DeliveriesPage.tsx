@@ -14,6 +14,7 @@ import {
   StatusBadge,
   ConfirmDialog,
   MetricBlock,
+  Panel,
 } from '@/shared/components/ui'
 import type { TableColumn } from '@/shared/types'
 import { formatDate } from '@/shared/lib/utils'
@@ -124,7 +125,7 @@ export function DeliveriesPage() {
                 ? <p className="truncate text-sm text-zinc-800">{driverName}</p>
                 : <span className="text-sm text-zinc-300">Sin asignar</span>}
               {d.truckPlate && (
-                <span className="inline-flex items-center rounded-[3px] border border-zinc-200 bg-zinc-50 px-1 font-mono text-[10px] uppercase text-zinc-500">
+                <span className="inline-flex items-center rounded-md border border-zinc-200 bg-zinc-50 px-1 font-mono text-[10px] uppercase text-zinc-500">
                   {d.truckPlate}
                 </span>
               )}
@@ -168,7 +169,7 @@ export function DeliveriesPage() {
               e.stopPropagation()
               setTrackTarget(d)
             }}
-            className="rounded p-1 text-zinc-400 hover:bg-blue-50 hover:text-blue-600"
+            className="rounded-md p-1 text-zinc-400 hover:bg-blue-50 hover:text-blue-600"
             title={d.truckPlate ? 'Ver ubicación en el mapa' : 'Sin patente cargada'}
           >
             <MapPin size={13} />
@@ -179,7 +180,7 @@ export function DeliveriesPage() {
               setSelectedDelivery(d)
               setShowForm(true)
             }}
-            className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+            className="rounded-md p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
             title="Editar"
           >
             <Pencil size={13} />
@@ -190,7 +191,7 @@ export function DeliveriesPage() {
                 e.stopPropagation()
                 setConfirmTarget({ delivery: d, action: 'deactivate' })
               }}
-              className="rounded p-1 text-zinc-400 hover:bg-red-50 hover:text-red-500"
+              className="rounded-md p-1 text-zinc-400 hover:bg-red-50 hover:text-red-500"
               title="Desactivar"
             >
               <PowerOff size={13} />
@@ -201,7 +202,7 @@ export function DeliveriesPage() {
                 e.stopPropagation()
                 setConfirmTarget({ delivery: d, action: 'activate' })
               }}
-              className="rounded p-1 text-zinc-400 hover:bg-emerald-50 hover:text-emerald-600"
+              className="rounded-md p-1 text-zinc-400 hover:bg-emerald-50 hover:text-emerald-600"
               title="Activar"
             >
               <Power size={13} />
@@ -213,7 +214,7 @@ export function DeliveriesPage() {
   ]
 
   return (
-    <div>
+    <div className="pb-8">
       <PageHeader
         title="Repartos"
         description="Rutas de distribución por sucursal."
@@ -231,7 +232,7 @@ export function DeliveriesPage() {
         }
       />
 
-      <div className="grid grid-cols-3 gap-3 border-b border-zinc-200 bg-zinc-50 p-4">
+      <div className="grid grid-cols-3 gap-4 px-6">
         <MetricBlock
           label="Repartos activos"
           icon={Route}
@@ -255,57 +256,59 @@ export function DeliveriesPage() {
         />
       </div>
 
-      <ActionBar>
-        <SearchInput
-          value={search}
-          onChange={setSearch}
-          placeholder="Buscar por código, conductor, patente o sucursal..."
-          className="w-80"
-        />
-        <FilterBar
-          filters={[
-            {
-              key: 'status',
-              label: 'Estado',
-              options: [
-                { value: 'active',   label: 'Activo' },
-                { value: 'inactive', label: 'Inactivo' },
-              ],
-            },
-          ]}
-          activeFilters={filters}
-          onChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
-          onClearAll={() => setFilters({ status: '' })}
-        />
-        <span className="ml-auto text-xs text-zinc-400">
-          {filtered.length} reparto{filtered.length !== 1 ? 's' : ''}
-        </span>
-      </ActionBar>
+      <Panel className="mx-6 mt-5">
+        <ActionBar>
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Buscar por código, conductor, patente o sucursal..."
+            className="w-80"
+          />
+          <FilterBar
+            filters={[
+              {
+                key: 'status',
+                label: 'Estado',
+                options: [
+                  { value: 'active',   label: 'Activo' },
+                  { value: 'inactive', label: 'Inactivo' },
+                ],
+              },
+            ]}
+            activeFilters={filters}
+            onChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
+            onClearAll={() => setFilters({ status: '' })}
+          />
+          <span className="ml-auto text-xs text-zinc-400">
+            {filtered.length} reparto{filtered.length !== 1 ? 's' : ''}
+          </span>
+        </ActionBar>
 
-      <div className="border-b border-zinc-200">
-        <DataTable
-          columns={columns}
-          data={filtered}
-          isLoading={isLoading}
-          isError={isError}
-          onRetry={refetch}
-          getRowKey={(d) => d.id}
-          emptyTitle="Sin repartos"
-          emptyDescription="No hay repartos que coincidan con los filtros."
-          emptyAction={
-            !debouncedSearch && !filters.status ? (
-              <ActionButton
-                variant="primary"
-                size="sm"
-                icon={<Plus size={13} />}
-                onClick={() => setShowForm(true)}
-              >
-                Nuevo reparto
-              </ActionButton>
-            ) : undefined
-          }
-        />
-      </div>
+        <div>
+          <DataTable
+            columns={columns}
+            data={filtered}
+            isLoading={isLoading}
+            isError={isError}
+            onRetry={refetch}
+            getRowKey={(d) => d.id}
+            emptyTitle="Sin repartos"
+            emptyDescription="No hay repartos que coincidan con los filtros."
+            emptyAction={
+              !debouncedSearch && !filters.status ? (
+                <ActionButton
+                  variant="primary"
+                  size="sm"
+                  icon={<Plus size={13} />}
+                  onClick={() => setShowForm(true)}
+                >
+                  Nuevo reparto
+                </ActionButton>
+              ) : undefined
+            }
+          />
+        </div>
+      </Panel>
 
       {trackTarget && (
         <TruckLocationModal

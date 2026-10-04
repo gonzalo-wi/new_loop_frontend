@@ -78,7 +78,7 @@ export function RemitoActions({ controlId, variant = 'icon' }: Props) {
           <button
             onClick={handleView}
             disabled={!!busy}
-            className="rounded p-1 text-zinc-400 hover:bg-blue-50 hover:text-blue-600 disabled:opacity-40"
+            className="rounded-md p-1 text-zinc-400 hover:bg-blue-50 hover:text-blue-600 disabled:opacity-40"
             title="Ver remito (PDF)"
           >
             {busy === 'view' ? (
@@ -90,7 +90,7 @@ export function RemitoActions({ controlId, variant = 'icon' }: Props) {
           <button
             onClick={handlePrint}
             disabled={!!busy}
-            className="rounded p-1 text-zinc-400 hover:bg-blue-50 hover:text-blue-600 disabled:opacity-40"
+            className="rounded-md p-1 text-zinc-400 hover:bg-blue-50 hover:text-blue-600 disabled:opacity-40"
             title="Imprimir remito"
           >
             {busy === 'print' ? (
@@ -105,7 +105,7 @@ export function RemitoActions({ controlId, variant = 'icon' }: Props) {
           <button
             onClick={handleView}
             disabled={!!busy}
-            className="flex h-8 items-center gap-1.5 rounded-sm border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
+            className="flex h-8 items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
           >
             {busy === 'view' ? (
               <Loader2 size={13} className="animate-spin" />
@@ -117,7 +117,7 @@ export function RemitoActions({ controlId, variant = 'icon' }: Props) {
           <button
             onClick={handlePrint}
             disabled={!!busy}
-            className="flex h-8 items-center gap-1.5 rounded-sm border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
+            className="flex h-8 items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
           >
             {busy === 'print' ? (
               <Loader2 size={13} className="animate-spin" />
@@ -138,7 +138,7 @@ export function RemitoActions({ controlId, variant = 'icon' }: Props) {
               e.stopPropagation()
               setError(null)
             }}
-            className="shrink-0 rounded p-0.5 text-amber-600/70 hover:bg-amber-100 hover:text-amber-800"
+            className="shrink-0 rounded-md p-0.5 text-amber-600/70 hover:bg-amber-100 hover:text-amber-800"
           >
             <X size={13} />
           </button>

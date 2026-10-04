@@ -110,11 +110,11 @@ export function DeliveryFormModal({ delivery, onClose, onSuccess }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-end">
       <div className="absolute inset-0 bg-black/25" onClick={onClose} />
-      <div className="relative flex h-full w-full max-w-lg flex-col bg-white shadow-xl">
+      <div className="relative flex h-full w-full max-w-lg flex-col bg-white shadow-lg">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-zinc-200 bg-zinc-50/60 px-6 py-4">
           <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-zinc-900 text-white">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-zinc-900 text-white">
               <Route size={16} />
             </span>
             <div>
@@ -130,7 +130,7 @@ export function DeliveryFormModal({ delivery, onClose, onSuccess }: Props) {
           </div>
           <button
             onClick={onClose}
-            className="rounded-sm p-1.5 text-zinc-400 hover:bg-zinc-200/60 hover:text-zinc-700"
+            className="rounded-md p-1.5 text-zinc-400 hover:bg-zinc-200/60 hover:text-zinc-700"
           >
             <X size={16} />
           </button>
@@ -264,7 +264,7 @@ export function DeliveryFormModal({ delivery, onClose, onSuccess }: Props) {
           {/* Footer */}
           <div className="border-t border-zinc-200 bg-zinc-50/60 px-6 py-4">
             {errors.root && (
-              <p className="mb-3 rounded-sm border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+              <p className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
                 {errors.root.message}
               </p>
             )}
@@ -273,14 +273,14 @@ export function DeliveryFormModal({ delivery, onClose, onSuccess }: Props) {
                 type="button"
                 onClick={onClose}
                 disabled={mutation.isPending}
-                className="h-9 rounded-sm border border-zinc-200 bg-white px-5 text-sm text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
+                className="h-9 rounded-md border border-zinc-200 bg-white px-5 text-sm text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={mutation.isPending}
-                className="flex h-9 items-center gap-2 rounded-sm bg-blue-600 px-5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 hover:shadow disabled:opacity-50"
+                className="flex h-9 items-center gap-2 rounded-md bg-blue-600 px-5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 hover:shadow disabled:opacity-50"
               >
                 {mutation.isPending && <Loader2 size={13} className="animate-spin" />}
                 {mutation.isPending

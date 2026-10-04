@@ -20,11 +20,11 @@ export function StockControlDetail({ control, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-end">
       <div className="absolute inset-0 bg-black/20" onClick={onClose} />
-      <div className="relative flex h-full w-full max-w-2xl flex-col bg-white shadow-xl">
+      <div className="relative flex h-full w-full max-w-2xl flex-col bg-white shadow-lg">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-zinc-200 bg-zinc-50/60 px-6 py-4">
           <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-zinc-900 text-white">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-zinc-900 text-white">
               {isEntry ? <Route size={16} /> : <Truck size={16} />}
             </span>
             <div>
@@ -33,7 +33,7 @@ export function StockControlDetail({ control, onClose }: Props) {
                   {STOCK_CONTROL_TYPE_LABELS[control.type]}
                 </span>
                 <span
-                  className={`inline-flex items-center rounded-sm border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${statusCfg.cls}`}
+                  className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${statusCfg.cls}`}
                 >
                   {statusCfg.label}
                 </span>
@@ -43,7 +43,7 @@ export function StockControlDetail({ control, onClose }: Props) {
               </h2>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-sm p-1.5 text-zinc-400 hover:bg-zinc-200/60 hover:text-zinc-700">
+          <button onClick={onClose} className="rounded-md p-1.5 text-zinc-400 hover:bg-zinc-200/60 hover:text-zinc-700">
             <X size={16} />
           </button>
         </div>
@@ -63,15 +63,15 @@ export function StockControlDetail({ control, onClose }: Props) {
           {/* Summary */}
           <div className="grid grid-cols-3 gap-3 border-b border-zinc-200 bg-zinc-50 p-4">
             <div className="rounded-md border border-zinc-200 border-l-[3px] border-l-blue-500 bg-white px-3.5 py-2.5">
-              <p className="text-[9px] font-bold uppercase tracking-[0.1em] text-zinc-400">Productos</p>
+              <p className="text-xs font-medium text-zinc-500">Productos</p>
               <p className="mt-1 text-lg font-bold tabular-nums leading-none text-zinc-950">{control.items.length}</p>
             </div>
             <div className="rounded-md border border-zinc-200 border-l-[3px] border-l-zinc-300 bg-white px-3.5 py-2.5">
-              <p className="text-[9px] font-bold uppercase tracking-[0.1em] text-zinc-400">Unidades totales</p>
+              <p className="text-xs font-medium text-zinc-500">Unidades totales</p>
               <p className="mt-1 text-lg font-bold tabular-nums leading-none text-zinc-950">{totalUnits}</p>
             </div>
             <div className={`rounded-md border border-zinc-200 border-l-[3px] bg-white px-3.5 py-2.5 ${differencesCount > 0 ? 'border-l-red-500' : 'border-l-emerald-500'}`}>
-              <p className="text-[9px] font-bold uppercase tracking-[0.1em] text-zinc-400">Diferencias</p>
+              <p className="text-xs font-medium text-zinc-500">Diferencias</p>
               <p className={`mt-1 text-lg font-bold tabular-nums leading-none ${differencesCount > 0 ? 'text-red-700' : 'text-emerald-700'}`}>
                 {isEntry ? differencesCount : '—'}
               </p>

@@ -14,6 +14,7 @@ import {
   StatusBadge,
   ConfirmDialog,
   MetricBlock,
+  Panel,
 } from '@/shared/components/ui'
 import type { TableColumn } from '@/shared/types'
 import { ROLE_LABELS } from '@/shared/constants'
@@ -78,7 +79,7 @@ export function UsersPage() {
       header: 'Usuario',
       render: (u) => (
         <div className="flex items-center gap-3">
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm bg-zinc-800 text-xs font-semibold uppercase text-white">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-zinc-800 text-xs font-semibold uppercase text-white">
             {u.name.charAt(0)}
           </div>
           <div>
@@ -138,7 +139,7 @@ export function UsersPage() {
               setSelectedUser(u)
               setShowForm(true)
             }}
-            className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+            className="rounded-md p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
             title="Editar"
           >
             <Pencil size={13} />
@@ -149,7 +150,7 @@ export function UsersPage() {
                 e.stopPropagation()
                 setConfirmTarget({ user: u, action: 'deactivate' })
               }}
-              className="rounded p-1 text-zinc-400 hover:bg-red-50 hover:text-red-500"
+              className="rounded-md p-1 text-zinc-400 hover:bg-red-50 hover:text-red-500"
               title="Desactivar"
             >
               <UserX size={13} />
@@ -160,7 +161,7 @@ export function UsersPage() {
                 e.stopPropagation()
                 setConfirmTarget({ user: u, action: 'activate' })
               }}
-              className="rounded p-1 text-zinc-400 hover:bg-emerald-50 hover:text-emerald-600"
+              className="rounded-md p-1 text-zinc-400 hover:bg-emerald-50 hover:text-emerald-600"
               title="Activar"
             >
               <UserCheck size={13} />
@@ -175,7 +176,7 @@ export function UsersPage() {
     deactivateMutation.isPending || activateMutation.isPending
 
   return (
-    <div>
+    <div className="pb-8">
       <PageHeader
         title="Usuarios"
         description="Personal del sistema con acceso al panel."
@@ -193,7 +194,7 @@ export function UsersPage() {
         }
       />
 
-      <div className="grid grid-cols-3 gap-3 border-b border-zinc-200 bg-zinc-50 p-4">
+      <div className="grid grid-cols-3 gap-4 px-6">
         <MetricBlock
           label="Usuarios activos"
           icon={Users}
@@ -216,46 +217,48 @@ export function UsersPage() {
         />
       </div>
 
-      <ActionBar>
-        <SearchInput
-          value={search}
-          onChange={setSearch}
-          placeholder="Buscar por nombre o usuario..."
-          className="w-60"
-        />
-        <FilterBar
-          filters={[
-            { key: 'role', label: 'Rol', options: ROLE_OPTIONS },
-            {
-              key: 'status',
-              label: 'Estado',
-              options: [
-                { value: 'active',   label: 'Activo' },
-                { value: 'inactive', label: 'Inactivo' },
-              ],
-            },
-          ]}
-          activeFilters={filters}
-          onChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
-          onClearAll={() => setFilters({ role: '', status: '' })}
-        />
-        <span className="ml-auto text-xs text-zinc-400">
-          {filtered.length} usuario{filtered.length !== 1 ? 's' : ''}
-        </span>
-      </ActionBar>
+      <Panel className="mx-6 mt-5">
+        <ActionBar>
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Buscar por nombre o usuario..."
+            className="w-60"
+          />
+          <FilterBar
+            filters={[
+              { key: 'role', label: 'Rol', options: ROLE_OPTIONS },
+              {
+                key: 'status',
+                label: 'Estado',
+                options: [
+                  { value: 'active',   label: 'Activo' },
+                  { value: 'inactive', label: 'Inactivo' },
+                ],
+              },
+            ]}
+            activeFilters={filters}
+            onChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
+            onClearAll={() => setFilters({ role: '', status: '' })}
+          />
+          <span className="ml-auto text-xs text-zinc-400">
+            {filtered.length} usuario{filtered.length !== 1 ? 's' : ''}
+          </span>
+        </ActionBar>
 
-      <div className="border-b border-zinc-200">
-        <DataTable
-          columns={columns}
-          data={filtered}
-          isLoading={isLoading}
-          isError={isError}
-          onRetry={refetch}
-          getRowKey={(u) => u.id}
-          emptyTitle="Sin usuarios"
-          emptyDescription="No hay usuarios que coincidan con los filtros."
-        />
-      </div>
+        <div>
+          <DataTable
+            columns={columns}
+            data={filtered}
+            isLoading={isLoading}
+            isError={isError}
+            onRetry={refetch}
+            getRowKey={(u) => u.id}
+            emptyTitle="Sin usuarios"
+            emptyDescription="No hay usuarios que coincidan con los filtros."
+          />
+        </div>
+      </Panel>
 
       {showForm && (
         <UserFormModal

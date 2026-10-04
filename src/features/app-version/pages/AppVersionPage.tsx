@@ -10,7 +10,6 @@ import {
 } from 'lucide-react'
 import {
   PageHeader,
-  ActionBar,
   ActionButton,
   LoadingState,
   ErrorState,
@@ -35,7 +34,7 @@ export function AppVersionPage() {
   const downloadUrl = current?.downloadUrl ?? current?.url
 
   return (
-    <div>
+    <div className="pb-8">
       <PageHeader
         title="Versión de la app"
         description="Publicá y controlá el APK que usan los repartidores en la app móvil."
@@ -50,11 +49,9 @@ export function AppVersionPage() {
         }
       />
 
-      <ActionBar />
-
-      <div className="px-1 py-4">
+      <div className="px-6">
         {published && (
-          <div className="mb-4 flex items-start justify-between gap-3 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3">
+          <div className="mb-5 flex items-start justify-between gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3">
             <div className="flex items-start gap-2.5">
               <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-emerald-600" />
               <div>
@@ -68,7 +65,7 @@ export function AppVersionPage() {
             </div>
             <button
               onClick={() => setPublished(null)}
-              className="rounded p-1 text-emerald-600/70 hover:bg-emerald-100 hover:text-emerald-700"
+              className="rounded-md p-1 text-emerald-600/70 hover:bg-emerald-100 hover:text-emerald-700"
             >
               <X size={14} />
             </button>
@@ -87,13 +84,13 @@ export function AppVersionPage() {
             className="py-20"
           />
         ) : (
-          <div className="max-w-2xl rounded-md border border-zinc-200 bg-white">
+          <div className="max-w-2xl overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-card">
             <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3.5">
-              <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+              <span className="text-sm font-semibold text-zinc-900">
                 Versión vigente
               </span>
               {current.mandatory ? (
-                <span className="flex items-center gap-1 rounded-sm bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">
+                <span className="flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700">
                   <AlertTriangle size={11} /> Obligatoria
                 </span>
               ) : (
@@ -102,7 +99,7 @@ export function AppVersionPage() {
             </div>
 
             <div className="flex items-center gap-4 px-5 py-5">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-zinc-100 text-zinc-500">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
                 <Smartphone size={22} />
               </div>
               <div className="min-w-0 flex-1">
@@ -120,7 +117,7 @@ export function AppVersionPage() {
                   href={downloadUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-9 shrink-0 items-center gap-2 rounded-sm border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                  className="flex h-9 shrink-0 items-center gap-2 rounded-md border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 shadow-card hover:bg-zinc-50"
                 >
                   <Download size={14} />
                   Descargar
@@ -132,7 +129,7 @@ export function AppVersionPage() {
               <div className="space-y-2 border-t border-zinc-100 px-5 py-4">
                 {current.notes && (
                   <div>
-                    <p className="text-[11px] uppercase tracking-wide text-zinc-400">Notas</p>
+                    <p className="text-xs font-medium text-zinc-500">Notas</p>
                     <p className="mt-0.5 whitespace-pre-wrap text-sm text-zinc-700">
                       {current.notes}
                     </p>

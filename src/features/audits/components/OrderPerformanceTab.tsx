@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { AlertTriangle } from 'lucide-react'
 import { fetchOrders } from '@/features/orders/services/orders.service'
 import type { Order } from '@/features/orders/types'
-import { MetricBlock, DataTable, DatePicker } from '@/shared/components/ui'
+import { MetricBlock, DataTable, DatePicker, Panel } from '@/shared/components/ui'
 import { formatDuration } from '@/shared/lib/utils'
 import type { TableColumn } from '@/shared/types'
 
@@ -92,13 +92,13 @@ export function OrderPerformanceTab() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center gap-3 border-b border-zinc-200 bg-white px-6 py-3">
+      <div className="flex flex-wrap items-end gap-3 px-6 pb-5">
         <div className="flex flex-col gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Desde</span>
+          <span className="text-xs font-medium text-zinc-500">Desde</span>
           <DatePicker value={from} onChange={setFrom} placeholder="Fecha inicio" className="w-40" />
         </div>
         <div className="flex flex-col gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Hasta</span>
+          <span className="text-xs font-medium text-zinc-500">Hasta</span>
           <DatePicker value={to} onChange={setTo} placeholder="Fecha fin" className="w-40" />
         </div>
         {truncated && (
@@ -109,7 +109,7 @@ export function OrderPerformanceTab() {
         )}
       </div>
 
-      <div className="grid grid-cols-4 gap-3 border-b border-zinc-200 bg-zinc-50 p-4">
+      <div className="grid grid-cols-4 gap-4 px-6">
         <MetricBlock label="Pedidos en el rango" value={orders.length} />
         <MetricBlock label="Pedidos completados" value={ordersCompleted.length} accent="green" />
         <MetricBlock
@@ -124,16 +124,18 @@ export function OrderPerformanceTab() {
         />
       </div>
 
-      <DataTable
-        columns={columns}
-        data={userStats}
-        isLoading={isLoading}
-        isError={isError}
-        onRetry={() => refetch()}
-        getRowKey={(r) => r.name}
-        emptyTitle="Sin actividad de usuarios"
-        emptyDescription="No hay pedidos tomados o completados en el rango seleccionado."
-      />
+      <Panel className="mx-6 mt-5">
+        <DataTable
+          columns={columns}
+          data={userStats}
+          isLoading={isLoading}
+          isError={isError}
+          onRetry={() => refetch()}
+          getRowKey={(r) => r.name}
+          emptyTitle="Sin actividad de usuarios"
+          emptyDescription="No hay pedidos tomados o completados en el rango seleccionado."
+        />
+      </Panel>
     </div>
   )
 }

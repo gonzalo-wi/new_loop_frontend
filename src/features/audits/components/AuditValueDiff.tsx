@@ -129,14 +129,14 @@ function ItemsDiff({ before, after, resolveId }: { before: unknown; after: unkno
       <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Ítems</p>
       <div className="space-y-1.5">
         {entries.map((e) => (
-          <div key={e.id} className="rounded-sm border border-zinc-200 px-3 py-2">
+          <div key={e.id} className="rounded-md border border-zinc-200 px-3 py-2">
             <div className="mb-1 flex items-center gap-2">
               <span className="text-xs font-medium text-zinc-700">{itemLabel(e.item)}</span>
               {e.status === 'added' && (
-                <span className="rounded-sm bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700">Nuevo</span>
+                <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700">Nuevo</span>
               )}
               {e.status === 'removed' && (
-                <span className="rounded-sm bg-red-50 px-1.5 py-0.5 text-[10px] font-medium text-red-700">Eliminado</span>
+                <span className="rounded-md bg-red-50 px-1.5 py-0.5 text-[10px] font-medium text-red-700">Eliminado</span>
               )}
             </div>
             {e.status === 'changed' && (
@@ -171,7 +171,7 @@ function RawValueDiff({ oldValue, newValue }: Pick<Props, 'oldValue' | 'newValue
       {hasOld && (
         <div>
           <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Antes</p>
-          <pre className="overflow-auto rounded-sm border border-zinc-200 bg-white p-3 text-[11px] leading-relaxed text-zinc-600 max-h-48">
+          <pre className="overflow-auto rounded-md border border-zinc-200 bg-white p-3 text-[11px] leading-relaxed text-zinc-600 max-h-48">
             {safeParseJson(oldValue)}
           </pre>
         </div>
@@ -179,7 +179,7 @@ function RawValueDiff({ oldValue, newValue }: Pick<Props, 'oldValue' | 'newValue
       {hasNew && (
         <div>
           <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Después</p>
-          <pre className="overflow-auto rounded-sm border border-zinc-200 bg-white p-3 text-[11px] leading-relaxed text-zinc-600 max-h-48">
+          <pre className="overflow-auto rounded-md border border-zinc-200 bg-white p-3 text-[11px] leading-relaxed text-zinc-600 max-h-48">
             {safeParseJson(newValue)}
           </pre>
         </div>
@@ -239,7 +239,7 @@ export function AuditValueDiff({ oldValue, newValue, resolveId }: Props) {
                 {row.changed ? (
                   <>
                     <td className="py-1.5 px-3">
-                      <span className="rounded-sm bg-red-50 px-1.5 py-0.5 text-red-700 line-through decoration-red-300">
+                      <span className="rounded-md bg-red-50 px-1.5 py-0.5 text-red-700 line-through decoration-red-300">
                         {formatFieldValue(row.before, row.key, resolveId)}
                       </span>
                     </td>
@@ -247,7 +247,7 @@ export function AuditValueDiff({ oldValue, newValue, resolveId }: Props) {
                       <ArrowRight size={12} />
                     </td>
                     <td className="py-1.5 pl-3">
-                      <span className="rounded-sm bg-emerald-50 px-1.5 py-0.5 font-medium text-emerald-700">
+                      <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 font-medium text-emerald-700">
                         {formatFieldValue(row.after, row.key, resolveId)}
                       </span>
                     </td>

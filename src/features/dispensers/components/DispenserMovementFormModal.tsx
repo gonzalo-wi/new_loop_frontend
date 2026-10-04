@@ -157,11 +157,11 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 pt-16">
-      <div className="w-full max-w-xl rounded-sm border border-zinc-200 bg-white shadow-lg">
+      <div className="w-full max-w-xl rounded-md border border-zinc-200 bg-white shadow-lg">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-zinc-200 bg-zinc-50/60 px-5 py-3.5">
           <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-zinc-900 text-white">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-zinc-900 text-white">
               <Droplets size={16} />
             </span>
             <div>
@@ -175,7 +175,7 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
           </div>
           <button
             onClick={onClose}
-            className="rounded-sm p-1.5 text-zinc-400 hover:bg-zinc-200/60 hover:text-zinc-700"
+            className="rounded-md p-1.5 text-zinc-400 hover:bg-zinc-200/60 hover:text-zinc-700"
           >
             <X size={16} />
           </button>
@@ -197,7 +197,7 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
                         type="button"
                         onClick={() => field.onChange(t)}
                         className={[
-                          'flex-1 rounded-sm border py-2 text-xs font-semibold uppercase tracking-wide transition-colors',
+                          'flex-1 rounded-md border py-2 text-xs font-semibold uppercase tracking-wide transition-colors',
                           field.value === t
                             ? t === 'LOAD'
                               ? 'border-blue-300 bg-blue-50 text-blue-700'
@@ -220,7 +220,7 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
                   <input
                     {...register('routeCode')}
                     placeholder="Ej: R001"
-                    className="h-8 w-full rounded-sm border border-zinc-200 px-2.5 text-xs text-zinc-900 focus:border-zinc-400 focus:outline-none"
+                    className="h-8 w-full rounded-md border border-zinc-200 px-2.5 text-xs text-zinc-900 focus:border-zinc-400 focus:outline-none"
                   />
                 </FormField>
 
@@ -228,7 +228,7 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
                   <input
                     {...register('technician')}
                     placeholder="Nombre del técnico"
-                    className="h-8 w-full rounded-sm border border-zinc-200 px-2.5 text-xs text-zinc-900 focus:border-zinc-400 focus:outline-none"
+                    className="h-8 w-full rounded-md border border-zinc-200 px-2.5 text-xs text-zinc-900 focus:border-zinc-400 focus:outline-none"
                   />
                 </FormField>
 
@@ -298,12 +298,12 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
                     onChange={(e) => setSerialInput(e.target.value)}
                     onKeyDown={handleSerialKeyDown}
                     placeholder="Ingresar serial y presionar Enter"
-                    className="h-8 flex-1 rounded-sm border border-zinc-200 px-2.5 text-xs text-zinc-900 focus:border-zinc-400 focus:outline-none"
+                    className="h-8 flex-1 rounded-md border border-zinc-200 px-2.5 text-xs text-zinc-900 focus:border-zinc-400 focus:outline-none"
                   />
                   <button
                     type="button"
                     onClick={addSerial}
-                    className="flex h-8 items-center gap-1.5 rounded-sm border border-zinc-200 bg-white px-3 text-xs text-zinc-600 hover:border-zinc-300 hover:text-zinc-900"
+                    className="flex h-8 items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 text-xs text-zinc-600 hover:border-zinc-300 hover:text-zinc-900"
                   >
                     <Plus size={13} />
                     Agregar
@@ -315,7 +315,7 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
                 )}
 
                 {serials && serials.length > 0 && (
-                  <div className="max-h-40 overflow-y-auto rounded-sm border border-zinc-100 bg-zinc-50">
+                  <div className="max-h-40 overflow-y-auto rounded-md border border-zinc-100 bg-zinc-50">
                     {serials.map((s) => (
                       <div
                         key={s}
@@ -325,7 +325,7 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
                         <button
                           type="button"
                           onClick={() => removeSerial(s)}
-                          className="rounded p-0.5 text-zinc-300 hover:text-red-500"
+                          className="rounded-md p-0.5 text-zinc-300 hover:text-red-500"
                         >
                           <Trash2 size={12} />
                         </button>
@@ -352,14 +352,14 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
             <button
               type="button"
               onClick={onClose}
-              className="h-8 rounded-sm border border-zinc-200 bg-white px-4 text-xs text-zinc-700 hover:border-zinc-300"
+              className="h-8 rounded-md border border-zinc-200 bg-white px-4 text-xs text-zinc-700 hover:border-zinc-300"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="flex h-8 items-center gap-1.5 rounded-sm bg-blue-600 px-4 text-xs font-medium text-white shadow-sm hover:bg-blue-700 hover:shadow disabled:opacity-50"
+              className="flex h-8 items-center gap-1.5 rounded-md bg-blue-600 px-4 text-xs font-medium text-white shadow-sm hover:bg-blue-700 hover:shadow disabled:opacity-50"
             >
               {isPending && <Loader2 size={12} className="animate-spin" />}
               {isEditing ? 'Guardar corrección' : 'Registrar'}
