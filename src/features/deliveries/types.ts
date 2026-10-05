@@ -15,6 +15,21 @@ export type Delivery = {
   updatedAt: string
 }
 
+export type DeliveryBranchSummary = {
+  branchId: string
+  branchName: string
+  active: number
+  inactive: number
+}
+
+// Route counts computed by the backend, so screens that only need totals don't load every route.
+export type DeliverySummary = {
+  total: number
+  active: number
+  inactive: number
+  byBranch: DeliveryBranchSummary[]
+}
+
 export type DeliveryFormData = {
   code: string
   branchId: string

@@ -1,5 +1,5 @@
 import { api } from '@/shared/lib/api'
-import type { Delivery, DeliveryFormData } from '../types'
+import type { Delivery, DeliveryFormData, DeliverySummary } from '../types'
 
 // ── Backend DTOs ──────────────────────────────────────────────────────────────
 
@@ -16,6 +16,13 @@ type RouteDto = {
   observations?: string
   createdAt: string
   updatedAt: string
+}
+
+type RouteSummaryDto = {
+  total: number
+  active: number
+  inactive: number
+  byBranch: { branchId: string; branchName: string; active: number; inactive: number }[]
 }
 
 type SpringPage<T> = {
@@ -41,6 +48,20 @@ function fromDto(dto: RouteDto): Delivery {
     observations: dto.observations,
     createdAt:    dto.createdAt,
     updatedAt:    dto.updatedAt,
+  }
+}
+
+function summaryFromDto(dto: RouteSummaryDto): DeliverySummary {
+  return {
+    total:    dto.total,
+    active:   dto.active,
+    inactive: dto.inactive,
+    byBranch: dto.byBranch.map((b) => ({
+      branchId:   b.branchId,
+      branchName: b.branchName,
+      active:     b.active,
+      inactive:   b.inactive,
+    })),
   }
 }
 
@@ -88,6 +109,11 @@ export async function fetchDeliveries(): Promise<Delivery[]> {
     all.push(...next.data.data.content)
   }
   return all.map(fromDto)
+}
+
+export async function fetchDeliverySummary(): Promise<DeliverySummary> {
+  const { data } = await api.get<ApiResponse<RouteSummaryDto>>('/routes/summary')
+  return summaryFromDto(data.data)
 }
 
 export async function createDelivery(formData: DeliveryFormData): Promise<Delivery> {

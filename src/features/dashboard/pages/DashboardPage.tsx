@@ -19,7 +19,7 @@ import { ROUTES } from '@/shared/constants'
 import { cn } from '@/shared/lib/utils'
 import { fetchPendingArrivals } from '@/features/stock/services/stock-controls.service'
 import { fetchStockControls } from '@/features/stock/services/stock-controls.service'
-import { fetchDeliveries } from '@/features/deliveries/services/deliveries.service'
+import { fetchDeliverySummary } from '@/features/deliveries/services/deliveries.service'
 import { fetchBranches } from '@/features/branches/services/branches.service'
 import { fetchOrders } from '@/features/orders/services/orders.service'
 
@@ -63,9 +63,9 @@ export function DashboardPage() {
     refetchInterval: 30_000,
   })
 
-  const { data: deliveries = [], isLoading: loadingDeliveries } = useQuery({
-    queryKey: ['deliveries'],
-    queryFn:  fetchDeliveries,
+  const { data: deliverySummary, isLoading: loadingDeliveries } = useQuery({
+    queryKey: ['deliveries', 'summary'],
+    queryFn:  fetchDeliverySummary,
     staleTime: 60_000,
   })
 
@@ -118,7 +118,7 @@ export function DashboardPage() {
   }, [pendingArrivals])
 
   // Derived values
-  const activeDeliveries  = deliveries.filter((d) => d.status === 'active').length
+  const activeDeliveries  = deliverySummary?.active ?? 0
   const activeBranches    = branches.filter((b) => b.status === 'active').length
   const pendingArrCount   = pendingArrivals?.pending ?? 0
   const totalExpected     = pendingArrivals?.totalExpected ?? 0
