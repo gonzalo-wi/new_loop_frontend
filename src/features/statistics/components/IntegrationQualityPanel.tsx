@@ -12,6 +12,13 @@ const ISSUE_LABEL: Record<DispenserIssueKind, { label: string; cls: string }> = 
   excluded:    { label: 'Seriales excluidos',     cls: 'border-amber-200 bg-amber-50 text-amber-700' },
 }
 
+// Fallback for an issue kind the backend adds before the panel knows it: show it neutral instead of crashing.
+const UNKNOWN_ISSUE_CLS = 'border-zinc-200 bg-zinc-50 text-zinc-600'
+
+function issueLabel(kind: DispenserIssueKind) {
+  return ISSUE_LABEL[kind] ?? { label: kind, cls: UNKNOWN_ISSUE_CLS }
+}
+
 const PAGE = 25
 
 function share(n: number, total: number) {
@@ -71,8 +78,8 @@ export function IntegrationQualityPanel({ quality }: Props) {
       render: (r) => (
         <div className="flex flex-wrap gap-1.5">
           {r.kinds.map((k) => (
-            <span key={k} className={cn('inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium', ISSUE_LABEL[k].cls)}>
-              {ISSUE_LABEL[k].label}
+            <span key={k} className={cn('inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium', issueLabel(k).cls)}>
+              {issueLabel(k).label}
               {k === 'excluded' && <span className="ml-1 tabular-nums">({r.excludedCount})</span>}
             </span>
           ))}

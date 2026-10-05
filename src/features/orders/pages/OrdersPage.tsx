@@ -18,6 +18,9 @@ import { useDebounce } from '@/shared/hooks/useDebounce'
 
 const PAGE_SIZE = 20
 
+// Fallback for a status the backend adds before the panel knows it: show it neutral instead of crashing.
+const UNKNOWN_CLS = 'text-zinc-600 bg-zinc-50 border-zinc-200'
+
 const STATUS_CONFIG: Record<OrderStatus, { label: string; cls: string }> = {
   PENDING:     { label: 'Pendiente',    cls: 'text-amber-700 bg-amber-50 border-amber-200' },
   IN_PROGRESS: { label: 'En proceso',   cls: 'text-blue-700 bg-blue-50 border-blue-200' },
@@ -197,7 +200,7 @@ export function OrdersPage() {
               )}
               {filtered.map((order) => {
                 const isExpanded  = expandedId === order.id
-                const statusCfg   = STATUS_CONFIG[order.status]
+                const statusCfg   = STATUS_CONFIG[order.status] ?? { label: order.status, cls: UNKNOWN_CLS }
 
                 return (
                   <>
