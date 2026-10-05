@@ -32,3 +32,29 @@ export type AuditParams = {
   page: number
   size: number
 }
+
+// ── Integration issues (GET /integration-logs/issues) ────────────────────────
+
+export type IntegrationIssueKind = 'RETRIES_EXHAUSTED' | 'STUCK' | 'NEVER_SENT' | 'RETRYING'
+
+export type IntegrationIssue = {
+  kind: IntegrationIssueKind
+  integration: string          // AGUAS | ODOO
+  operation: string | null     // null when no send was ever attempted
+  entityName: string           // StockControl | DispenserMovement
+  entityId: string
+  routeCode: string | null
+  entityKind: string | null    // EXIT/ENTRY or LOAD/UNLOAD
+  entityDate: string | null
+  logId: string | null         // null for NEVER_SENT: nothing to retry
+  retryCount: number
+  maxRetries: number
+  lastError: string | null
+  since: string
+}
+
+export type IntegrationIssues = {
+  summary: { retriesExhausted: number; stuck: number; neverSent: number; retrying: number }
+  issues: IntegrationIssue[]
+  truncated: boolean           // the backend hit its row limit: list and counts are partial
+}

@@ -12,6 +12,7 @@ export const ENTITY_LABELS: Record<string, string> = {
   Route:              'Reparto',
   OrderableProduct:   'Producto pedible',
   DispenserMovement:  'Movimiento de dispenser',
+  IntegrationLog:     'Envío a Aguas/Odoo',
 }
 
 export const ENTITY_OPTIONS = [
@@ -57,6 +58,8 @@ export const ACTION_LABELS: Record<string, string> = {
   CREATE_DISPENSER_MOVEMENT: 'Registrar movimiento de dispenser',
   UPDATE_DISPENSER_MOVEMENT: 'Actualizar movimiento de dispenser',
   CANCEL_DISPENSER_MOVEMENT: 'Cancelar movimiento de dispenser',
+
+  RETRY_INTEGRATION: 'Reintentar envío a Aguas/Odoo',
 }
 
 export const ACTION_OPTIONS = [
