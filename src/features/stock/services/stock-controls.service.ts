@@ -15,9 +15,19 @@ type SpringPage<T> = {
   page: { size: number; number: number; totalElements: number; totalPages: number }
 }
 
+// The backend has no error codes: "already exists" only appears in its duplicate-control 409
+// (same type, route and date). Other 409s (e.g. control not editable in its status) keep their message.
+const DUPLICATE_CONTROL_HINT    = 'already exists'
+const DUPLICATE_CONTROL_MESSAGE =
+  'Ya existe otro control del mismo tipo para este reparto en esa fecha. Editá o anulá ese control en lugar de cargar uno nuevo.'
+
 function extractMessage(err: unknown): string {
-  const e = err as { response?: { data?: { message?: string } } }
-  return e?.response?.data?.message ?? 'Error inesperado'
+  const e = err as { response?: { status?: number; data?: { message?: string } } }
+  const message = e?.response?.data?.message
+  if (e?.response?.status === 409 && message?.includes(DUPLICATE_CONTROL_HINT)) {
+    return DUPLICATE_CONTROL_MESSAGE
+  }
+  return message ?? 'Error inesperado'
 }
 
 export async function fetchStockControls(params: StockControlParams): Promise<StockControlPage> {
