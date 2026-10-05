@@ -5,6 +5,7 @@ import { fetchAuditLogs } from '../services/audits.service'
 import { fetchStockControlById } from '@/features/stock/services/stock-controls.service'
 import { fetchUsers } from '@/features/users/services/users.service'
 import type { StockControl } from '@/features/stock/types'
+import type { AuditLog } from '../types'
 import { STOCK_CONTROL_TYPE_LABELS as TYPE_LABELS } from '@/features/stock/constants'
 import { humanizeRole } from '../constants'
 import { AuditValueDiff } from './AuditValueDiff'
@@ -35,7 +36,10 @@ export function StockControlCorrectionsTab() {
   // Corrections are stock-control events with a mandatory reason — every other
   // write to StockControl (create, plain update) leaves reason null.
   const corrections = useMemo(
-    () => (data?.content ?? []).filter((l) => !!l.reason),
+    // Corrections always point at a control; the guard only narrows the type.
+    () => (data?.content ?? []).filter(
+      (l): l is AuditLog & { entityId: string } => !!l.reason && l.entityId !== null
+    ),
     [data]
   )
   const truncated = (data?.page.totalElements ?? 0) > (data?.content.length ?? 0)

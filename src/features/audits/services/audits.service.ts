@@ -15,6 +15,8 @@ export async function fetchAuditLogs(params: AuditParams): Promise<AuditPage> {
   if (params.entityName) q.set('entityName', params.entityName)
   if (params.action)     q.set('action', params.action)
   if (params.entityId)   q.set('entityId', params.entityId)
+  if (params.userId)     q.set('userId', params.userId)
+  if (params.source)     q.set('source', params.source)
   if (params.from)       q.set('from', params.from)
   if (params.to)         q.set('to', params.to)
   q.set('page', String(params.page))

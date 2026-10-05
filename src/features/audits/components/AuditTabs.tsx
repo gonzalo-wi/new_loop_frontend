@@ -1,10 +1,11 @@
 import { cn } from '@/shared/lib/utils'
 
-export type AuditTabKey = 'integrations' | 'events' | 'corrections' | 'performance'
+export type AuditTabKey = 'integrations' | 'serials' | 'events' | 'corrections' | 'performance'
 
 const TABS: { key: AuditTabKey; label: string }[] = [
   { key: 'integrations', label: 'Integraciones' },
-  { key: 'events',      label: 'Log de eventos' },
+  { key: 'serials',     label: 'Trazabilidad de dispensers' },
+  { key: 'events',      label: 'Actividad' },
   { key: 'corrections', label: 'Correcciones de controles' },
   { key: 'performance', label: 'Rendimiento de pedidos' },
 ]

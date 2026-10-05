@@ -9,6 +9,8 @@ export const api = axios.create({
   timeout: 15_000,
   headers: {
     'Content-Type': 'application/json',
+    // Lets the backend audit log tell panel actions apart from mobile app ones.
+    'X-Client-App': 'web',
   },
 })
 

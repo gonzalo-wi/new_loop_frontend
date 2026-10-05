@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { ChevronRight, ChevronDown } from 'lucide-react'
 import { fetchAuditLogs } from '../services/audits.service'
@@ -9,20 +9,18 @@ import {
   ENTITY_OPTIONS,
   ACTION_OPTIONS,
   SOURCE_LABELS,
+  SOURCE_OPTIONS,
   humanizeAction,
   getActionStyle,
   humanizeRole,
 } from '../constants'
 import { AuditValueDiff } from './AuditValueDiff'
+import { actorName, describeEvent, eventDetail, showsReasonSeparately } from '../activity'
 import { ActionBar, SearchInput, DatePicker, selectClassName, Panel } from '@/shared/components/ui'
 import { formatDateTime, truncate } from '@/shared/lib/utils'
 import { useDebounce } from '@/shared/hooks/useDebounce'
 
 const PAGE_SIZE = 50
-
-function truncateUuid(uuid: string) {
-  return uuid.length > 12 ? `${uuid.slice(0, 8)}…` : uuid
-}
 
 // ── Expanded detail ───────────────────────────────────────────────────────────
 
@@ -35,8 +33,10 @@ function LogDetail({ log, resolveId }: { log: AuditLog; resolveId: (key: string,
           {/* Meta */}
           <div className="flex flex-wrap gap-4 text-xs text-zinc-500">
             <span>
-              <span className="font-medium text-zinc-700">ID entidad:</span>{' '}
-              <span className="font-mono">{log.entityId}</span>
+              <span className="font-medium text-zinc-700">
+                {ENTITY_LABELS[log.entityName] ?? log.entityName}:
+              </span>{' '}
+              <span className="font-mono">{log.entityId ?? '—'}</span>
             </span>
             {log.userId && (
               <span>
@@ -53,7 +53,7 @@ function LogDetail({ log, resolveId }: { log: AuditLog; resolveId: (key: string,
           </div>
 
           {/* Reason */}
-          {log.reason && (
+          {showsReasonSeparately(log) && (
             <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2">
               <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-600">
                 Motivo declarado
@@ -74,6 +74,8 @@ function LogDetail({ log, resolveId }: { log: AuditLog; resolveId: (key: string,
 export function AuditEventsTab() {
   const [entityName, setEntityName] = useState('')
   const [action, setAction]         = useState('')
+  const [userId, setUserId]         = useState('')
+  const [source, setSource]         = useState('')
   const [from, setFrom]             = useState('')
   const [to, setTo]                 = useState('')
   const [search, setSearch]         = useState('')
@@ -90,9 +92,9 @@ export function AuditEventsTab() {
   }
 
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ['audits', { entityName, action, from, to, page }],
+    queryKey: ['audits', { entityName, action, userId, source, from, to, page }],
     queryFn: () =>
-      fetchAuditLogs({ entityName, action, from, to, page, size: PAGE_SIZE }),
+      fetchAuditLogs({ entityName, action, userId, source, from, to, page, size: PAGE_SIZE }),
     refetchInterval: 30_000,
   })
 
@@ -102,21 +104,26 @@ export function AuditEventsTab() {
     staleTime: 60_000,
   })
   const userMap = new Map(users.map((u) => [u.id, u]))
+  const nameById = (id: string) => userMap.get(id)?.name
+  const sortedUsers = [...users].sort((a, b) => a.name.localeCompare(b.name))
 
   const logs = data?.content ?? []
   const meta = data?.page
 
-  const filtered = debouncedSearch
-    ? logs.filter(
-        (l) =>
-          l.action.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-          l.entityName.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-          l.entityId.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-          (l.reason ?? '').toLowerCase().includes(debouncedSearch.toLowerCase())
+  const needle   = debouncedSearch.toLowerCase()
+  const filtered = needle
+    ? logs.filter((l) =>
+        [
+          describeEvent(l, actorName(l, nameById)),
+          eventDetail(l),
+          humanizeAction(l.action),
+          l.entityId,
+          l.reason,
+        ].some((text) => (text ?? '').toLowerCase().includes(needle))
       )
     : logs
 
-  const hasValues = (l: AuditLog) => l.oldValue !== null || l.newValue !== null
+  const hasValues = (l: AuditLog) => l.oldValue !== null || l.newValue !== null || l.ipAddress !== null
 
   return (
     <div>
@@ -149,6 +156,33 @@ export function AuditEventsTab() {
             </select>
           </div>
 
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-medium text-zinc-500">Usuario</span>
+            <select
+              value={userId}
+              onChange={(e) => setFilter(setUserId)(e.target.value)}
+              className={`${selectClassName} h-8 w-44 text-xs`}
+            >
+              <option value="">Todos los usuarios</option>
+              {sortedUsers.map((u) => (
+                <option key={u.id} value={u.id}>{u.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-medium text-zinc-500">Origen</span>
+            <select
+              value={source}
+              onChange={(e) => setFilter(setSource)(e.target.value)}
+              className={`${selectClassName} h-8 w-36 text-xs`}
+            >
+              {SOURCE_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </div>
+
           <div className="h-8 w-px self-end bg-zinc-100" />
 
           <div className="flex flex-col gap-1">
@@ -161,11 +195,13 @@ export function AuditEventsTab() {
             <DatePicker value={to} onChange={setFilter(setTo)} placeholder="Fecha fin" className="w-40" />
           </div>
 
-          {(entityName || action || from || to) && (
+          {(entityName || action || userId || source || from || to) && (
             <button
               onClick={() => {
                 setFilter(setEntityName)('')
                 setAction('')
+                setUserId('')
+                setSource('')
                 setFrom('')
                 setTo('')
               }}
@@ -203,11 +239,11 @@ export function AuditEventsTab() {
                 <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500 w-36">
                   Fecha / Hora
                 </th>
+                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                  Qué pasó
+                </th>
                 <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500 w-52">
                   Acción
-                </th>
-                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
-                  Entidad
                 </th>
                 <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500 w-36">
                   Usuario
@@ -251,12 +287,12 @@ export function AuditEventsTab() {
               {filtered.map((log) => {
                 const isExpanded = expandedId === log.id
                 const canExpand  = hasValues(log)
-                const user       = log.userId ? userMap.get(log.userId) : undefined
+                const actor      = actorName(log, nameById)
+                const detail     = eventDetail(log)
 
                 return (
-                  <>
+                  <Fragment key={log.id}>
                     <tr
-                      key={log.id}
                       onClick={() => canExpand && setExpandedId(isExpanded ? null : log.id)}
                       className={`border-b border-zinc-100 transition-colors ${
                         canExpand ? 'cursor-pointer hover:bg-zinc-50' : ''
@@ -280,6 +316,11 @@ export function AuditEventsTab() {
                       </td>
 
                       <td className="px-4 py-3">
+                        <p className="text-sm text-zinc-800">{describeEvent(log, actor)}</p>
+                        {detail && <p className="text-xs text-zinc-500">{detail}</p>}
+                      </td>
+
+                      <td className="px-4 py-3">
                         <span
                           className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide border ${getActionStyle(log.action)}`}
                         >
@@ -288,29 +329,18 @@ export function AuditEventsTab() {
                       </td>
 
                       <td className="px-4 py-3">
-                        <p className="text-xs font-medium text-zinc-700">
-                          {ENTITY_LABELS[log.entityName] ?? log.entityName}
-                        </p>
-                        <p className="font-mono text-[10px] text-zinc-400">
-                          {truncateUuid(log.entityId)}
-                        </p>
-                      </td>
-
-                      <td className="px-4 py-3">
                         {log.userId ? (
                           <>
-                            <p className="text-xs font-medium text-zinc-700">
-                              {user?.name ?? truncateUuid(log.userId)}
-                            </p>
+                            <p className="text-xs font-medium text-zinc-700">{actor}</p>
                             <p className="text-[10px] text-zinc-400">{humanizeRole(log.userRole)}</p>
                           </>
                         ) : (
-                          <span className="text-xs text-zinc-400">Sistema</span>
+                          <span className="text-xs text-zinc-400">{log.username ?? 'Sistema'}</span>
                         )}
                       </td>
 
                       <td className="px-4 py-3">
-                        {log.reason ? (
+                        {showsReasonSeparately(log) && log.reason ? (
                           <span
                             className="text-xs text-amber-700"
                             title={log.reason}
@@ -330,13 +360,9 @@ export function AuditEventsTab() {
                     </tr>
 
                     {isExpanded && (
-                      <LogDetail
-                        key={`${log.id}-detail`}
-                        log={log}
-                        resolveId={(_, id) => userMap.get(id)?.name}
-                      />
+                      <LogDetail log={log} resolveId={(_, id) => nameById(id)} />
                     )}
-                  </>
+                  </Fragment>
                 )
               })}
             </tbody>

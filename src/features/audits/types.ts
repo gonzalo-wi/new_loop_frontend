@@ -1,10 +1,11 @@
 export type AuditLog = {
   id: string
   userId: string | null
+  username: string | null      // also set for failed logins, where there is no userId
   userRole: string | null
   action: string
   entityName: string
-  entityId: string
+  entityId: string | null       // null for failed logins
   oldValue: string | null
   newValue: string | null
   reason: string | null
@@ -27,6 +28,8 @@ export type AuditParams = {
   entityName?: string
   action?: string
   entityId?: string
+  userId?: string
+  source?: string
   from?: string
   to?: string
   page: number
@@ -57,4 +60,30 @@ export type IntegrationIssues = {
   summary: { retriesExhausted: number; stuck: number; neverSent: number; retrying: number }
   issues: IntegrationIssue[]
   truncated: boolean           // the backend hit its row limit: list and counts are partial
+}
+
+// ── Serial history (GET /dispenser-movements/serials/{serial}/history) ─────────
+
+export type SerialDeliveryStatus = 'SENT' | 'PENDING' | 'ERROR' | 'EXCLUDED' | 'SKIPPED' | 'CANCELLED'
+
+export type SerialHistoryEntry = {
+  movementId: string
+  type: string                 // LOAD | UNLOAD
+  movementStatus: string
+  routeCode: string
+  technician: string
+  movementDate: string
+  registeredByUsername: string | null
+  createdAt: string
+  excluded: boolean
+  exclusionReason: string | null  // UNREGISTERED_IN_JMOBILE | UNAVAILABLE_IN_ODOO
+  aguas: SerialDeliveryStatus
+  odoo: SerialDeliveryStatus
+  odooPickingName: string | null
+}
+
+export type SerialHistory = {
+  serial: string
+  entries: SerialHistoryEntry[]
+  truncated: boolean
 }

@@ -11,6 +11,7 @@ export const ENTITY_LABELS: Record<string, string> = {
   Order:              'Pedido',
   Route:              'Reparto',
   OrderableProduct:   'Producto pedible',
+  AppVersion:         'Versión de la app',
   DispenserMovement:  'Movimiento de dispenser',
   IntegrationLog:     'Envío a Aguas/Odoo',
 }
@@ -60,6 +61,19 @@ export const ACTION_LABELS: Record<string, string> = {
   CANCEL_DISPENSER_MOVEMENT: 'Cancelar movimiento de dispenser',
 
   RETRY_INTEGRATION: 'Reintentar envío a Aguas/Odoo',
+
+  SEND_TO_AGUAS:                'Control enviado a Aguas',
+  AGUAS_ERROR:                  'Error de envío a Aguas',
+  SEND_DISPENSER_TO_AGUAS:      'Dispensers enviados a Aguas',
+  DISPENSER_AGUAS_ERROR:        'Error de dispensers en Aguas',
+  SEND_DISPENSER_TO_ODOO:       'Dispensers enviados a Odoo',
+  SEND_NO_NORMALIZADOS_TO_ODOO: 'No normalizados enviados a Odoo',
+  ODOO_ERROR:                   'Error de envío a Odoo',
+
+  PUBLISH_APP_VERSION: 'Publicar versión de la app',
+
+  LOGIN:        'Ingreso al sistema',
+  LOGIN_FAILED: 'Ingreso fallido',
 }
 
 export const ACTION_OPTIONS = [
@@ -71,7 +85,13 @@ export const SOURCE_LABELS: Record<string, string> = {
   ADMIN_WEB:  'Web',
   MOBILE_APP: 'Mobile',
   SYSTEM:     'Sistema',
+  UNKNOWN:    'Desconocido',
 }
+
+export const SOURCE_OPTIONS = [
+  { value: '', label: 'Todos los orígenes' },
+  ...Object.entries(SOURCE_LABELS).map(([value, label]) => ({ value, label })),
+]
 
 // Falls back to a readable label for actions not yet in ACTION_LABELS instead
 // of showing the raw backend enum string.
@@ -84,6 +104,8 @@ export function humanizeAction(action: string): string {
 }
 
 export function getActionStyle(action: string): string {
+  if (action.endsWith('_ERROR') || action === 'LOGIN_FAILED')
+    return 'text-red-700 bg-red-50 border border-red-200'
   if (action.startsWith('CORRECT_'))
     return 'text-amber-700 bg-amber-50 border border-amber-200'
   if (action.startsWith('CREATE_'))
