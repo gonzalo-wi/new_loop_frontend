@@ -23,4 +23,4 @@ export type UserFormData = {
 
 // Roles that require a branch assigned. The backend enforces this too (400),
 // this just drives the UI (required field + client-side validation).
-export const BRANCH_REQUIRED_ROLES: UserRole[] = ['controller', 'picker']
+export const BRANCH_REQUIRED_ROLES: UserRole[] = ['controller', 'picker', 'loader']
