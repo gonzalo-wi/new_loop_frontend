@@ -20,6 +20,8 @@ import {
 import { formatDateTime } from '@/shared/lib/utils'
 import { useDebounce } from '@/shared/hooks/useDebounce'
 import { isBagged } from '../bagged'
+import { canManageDispenserMovements } from '../permissions'
+import { useAuthStore } from '@/features/auth/store/auth.store'
 
 const TODAY = new Date().toISOString().split('T')[0]
 const PAGE_SIZE = 20
@@ -68,6 +70,7 @@ export function DispenserMovementsPage() {
   const [modalOpen,      setModalOpen]      = useState(false)
   const [editTarget,     setEditTarget]     = useState<DispenserMovement | null>(null)
   const [cancelTarget,   setCancelTarget]   = useState<DispenserMovement | null>(null)
+  const canManage = useAuthStore((s) => canManageDispenserMovements(s.user?.role))
 
   const debouncedSearch = useDebounce(search)
 
@@ -302,7 +305,7 @@ export function DispenserMovementsPage() {
                         <span className="text-xs text-zinc-400">{formatDateTime(m.createdAt)}</span>
                       </td>
                       <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                        {!isCancelled && (
+                        {!isCancelled && canManage && (
                           <div className="flex justify-end gap-2">
                             <button
                               onClick={() => openEdit(m)}
