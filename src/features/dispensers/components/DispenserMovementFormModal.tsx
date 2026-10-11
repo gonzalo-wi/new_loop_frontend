@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { X, Loader2, Plus, Trash2, Droplets, ArrowLeftRight, ClipboardList, Settings2, Hash } from 'lucide-react'
+import { X, Loader2, Plus, Trash2, Droplets, ArrowLeftRight, ClipboardList, Settings2, Hash, ShoppingBag } from 'lucide-react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { DispenserMovement, DispenserMovementFormData, DispenserMovementType } from '../types'
 import {
@@ -11,7 +11,7 @@ import {
   createDispenserMovement,
   updateDispenserMovement,
 } from '../services/dispensers.service'
-import { baggedSerialsToSend, isBagged } from '../bagged'
+import { baggedSerialsToSend, isBagged, toggleBagged } from '../bagged'
 import {
   FormSection,
   FormField,
@@ -31,7 +31,7 @@ const schema = z.object({
   stateId:      z.coerce.number().optional(),
   movementDate: z.string().min(1, 'Seleccionar fecha'),
   serials:      z.array(z.string()).min(1, 'Ingresar al menos un serial'),
-  // Not editable here (marked from the mobile app); carried so editing an unload does not drop the marks.
+  // Unload only; also carried on edit so updating an unload (cancel + recreate) does not drop the marks.
   baggedSerials: z.array(z.string()),
 })
 
@@ -73,11 +73,24 @@ function buildDefaults(movement: DispenserMovement | null): FormData {
   }
 }
 
-function BaggedTag() {
+function BaggedToggle({ serial, checked, onToggle }: { serial: string; checked: boolean; onToggle: () => void }) {
   return (
-    <span className="rounded border border-amber-200 bg-amber-50 px-1.5 py-px text-[10px] font-medium uppercase tracking-wide text-amber-700">
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={checked}
+      aria-label={`Embolsado ${serial}`}
+      title={checked ? 'Volvió embolsado: no necesita pasar por reparación' : 'Marcar como embolsado'}
+      onClick={onToggle}
+      className={`inline-flex items-center gap-1 rounded border px-1.5 py-px text-[10px] font-medium uppercase tracking-wide transition-colors ${
+        checked
+          ? 'border-amber-300 bg-amber-50 text-amber-700'
+          : 'border-zinc-200 bg-white text-zinc-400 hover:border-amber-200 hover:text-amber-700'
+      }`}
+    >
+      <ShoppingBag size={10} />
       Embolsado
-    </span>
+    </button>
   )
 }
 
@@ -162,6 +175,8 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
 
   function removeSerial(s: string) {
     setValue('serials', (serials ?? []).filter((x) => x !== s), { shouldValidate: true })
+    // So a removed serial does not come back already marked if it is added again.
+    setValue('baggedSerials', (bagged ?? []).filter((b) => b.toUpperCase() !== s.toUpperCase()))
   }
 
   function handleSerialKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -342,7 +357,13 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
                       >
                         <span className="flex items-center gap-2">
                           <span className="font-mono text-xs text-zinc-700">{s}</span>
-                          {type === 'UNLOAD' && isBagged(s, bagged ?? []) && <BaggedTag />}
+                          {type === 'UNLOAD' && (
+                            <BaggedToggle
+                              serial={s}
+                              checked={isBagged(s, bagged ?? [])}
+                              onToggle={() => setValue('baggedSerials', toggleBagged(s, bagged ?? []))}
+                            />
+                          )}
                         </span>
                         <button
                           type="button"

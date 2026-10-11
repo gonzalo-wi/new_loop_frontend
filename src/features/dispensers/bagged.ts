@@ -1,7 +1,7 @@
 import type { DispenserMovementType } from './types'
 
 // "Embolsado": an unload serial that came back still bagged (a new dispenser the driver could not deliver),
-// so the plant can skip repair for it. Marked from the mobile app; the backend matches serials ignoring case.
+// so the plant can skip repair for it. Marked from the mobile app or the panel; the backend matches serials ignoring case.
 
 export function isBagged(serial: string, baggedSerials: string[]): boolean {
   const target = serial.toUpperCase()
@@ -16,4 +16,10 @@ export function baggedSerialsToSend(
 ): string[] {
   if (type !== 'UNLOAD') return []
   return baggedSerials.filter((b) => isBagged(b, serials))
+}
+
+export function toggleBagged(serial: string, baggedSerials: string[]): string[] {
+  return isBagged(serial, baggedSerials)
+    ? baggedSerials.filter((s) => s.toUpperCase() !== serial.toUpperCase())
+    : [...baggedSerials, serial]
 }
