@@ -19,6 +19,7 @@ import {
 } from '@/shared/components/ui'
 import { formatDateTime } from '@/shared/lib/utils'
 import { useDebounce } from '@/shared/hooks/useDebounce'
+import { isBagged } from '../bagged'
 
 const TODAY = new Date().toISOString().split('T')[0]
 const PAGE_SIZE = 20
@@ -256,6 +257,7 @@ export function DispenserMovementsPage() {
                 const typeCfg    = TYPE_CONFIG[m.type] ?? { label: m.type, cls: UNKNOWN_CLS }
                 const statusCfg  = STATUS_CONFIG[m.status] ?? { label: m.status, cls: UNKNOWN_CLS }
                 const isCancelled = m.status === 'CANCELLED'
+                const baggedCount = m.serials.filter((s) => isBagged(s, m.baggedSerials ?? [])).length
 
                 return (
                   <>
@@ -328,15 +330,31 @@ export function DispenserMovementsPage() {
                               Seriales ({m.serials.length})
                             </p>
                             <div className="flex flex-wrap gap-1.5">
-                              {m.serials.map((s) => (
-                                <span
-                                  key={s}
-                                  className="rounded-md border border-zinc-200 bg-white px-2 py-0.5 font-mono text-[11px] text-zinc-700"
-                                >
-                                  {s}
-                                </span>
-                              ))}
+                              {m.serials.map((s) =>
+                                isBagged(s, m.baggedSerials ?? []) ? (
+                                  <span
+                                    key={s}
+                                    title="Volvió embolsado: no necesita pasar por reparación"
+                                    className="inline-flex items-center gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 font-mono text-[11px] text-amber-800"
+                                  >
+                                    {s}
+                                    <span className="font-sans text-[9px] font-semibold uppercase tracking-wide">Embolsado</span>
+                                  </span>
+                                ) : (
+                                  <span
+                                    key={s}
+                                    className="rounded-md border border-zinc-200 bg-white px-2 py-0.5 font-mono text-[11px] text-zinc-700"
+                                  >
+                                    {s}
+                                  </span>
+                                ),
+                              )}
                             </div>
+                            {baggedCount > 0 && (
+                              <p className="text-[11px] text-amber-700">
+                                {baggedCount} embolsado{baggedCount !== 1 ? 's' : ''}: volvieron sin usar, no necesitan reparación.
+                              </p>
+                            )}
                             {m.aguasMovementId && (
                               <p className="mt-1 text-[11px] text-zinc-400">
                                 ID Aguas: <span className="font-mono text-zinc-600">{m.aguasMovementId}</span>

@@ -28,6 +28,8 @@ export type DispenserMovement = {
   serials: string[]
   // Serials the backend left out of the Aguas/Odoo sync (e.g. not registered in Aguas).
   excludedSerials: string[]
+  // Unload serials that came back still bagged (internal only, not sent to Aguas/Odoo).
+  baggedSerials: string[]
   aguasMovementId: string | null
   odooStatus: 'SENT' | 'ERROR' | null
   registeredBy: string | null
@@ -52,6 +54,7 @@ export type DispenserMovementFormData = {
   stateId?: number
   movementDate: string
   serials: string[]
+  baggedSerials: string[]
 }
 
 export type DispenserMovementParams = {

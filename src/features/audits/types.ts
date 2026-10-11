@@ -75,6 +75,7 @@ export type SerialHistoryEntry = {
   movementDate: string
   registeredByUsername: string | null
   createdAt: string
+  bagged: boolean              // came back still bagged on this unload: no repair needed
   excluded: boolean
   exclusionReason: string | null  // UNREGISTERED_IN_JMOBILE | UNAVAILABLE_IN_ODOO
   aguas: SerialDeliveryStatus

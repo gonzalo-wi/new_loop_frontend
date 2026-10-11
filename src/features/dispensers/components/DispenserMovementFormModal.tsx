@@ -11,6 +11,7 @@ import {
   createDispenserMovement,
   updateDispenserMovement,
 } from '../services/dispensers.service'
+import { baggedSerialsToSend, isBagged } from '../bagged'
 import {
   FormSection,
   FormField,
@@ -30,6 +31,8 @@ const schema = z.object({
   stateId:      z.coerce.number().optional(),
   movementDate: z.string().min(1, 'Seleccionar fecha'),
   serials:      z.array(z.string()).min(1, 'Ingresar al menos un serial'),
+  // Not editable here (marked from the mobile app); carried so editing an unload does not drop the marks.
+  baggedSerials: z.array(z.string()),
 })
 
 type FormData = z.infer<typeof schema>
@@ -55,6 +58,7 @@ function buildDefaults(movement: DispenserMovement | null): FormData {
       stateId:      movement.stateId,
       movementDate: movement.movementDate,
       serials:      movement.serials,
+      baggedSerials: movement.baggedSerials ?? [],
     }
   }
   return {
@@ -65,7 +69,16 @@ function buildDefaults(movement: DispenserMovement | null): FormData {
     stateId:      TYPE_DEFAULTS.LOAD.stateId,
     movementDate: TODAY,
     serials:      [],
+    baggedSerials: [],
   }
+}
+
+function BaggedTag() {
+  return (
+    <span className="rounded border border-amber-200 bg-amber-50 px-1.5 py-px text-[10px] font-medium uppercase tracking-wide text-amber-700">
+      Embolsado
+    </span>
+  )
 }
 
 export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Props) {
@@ -101,6 +114,7 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
 
   const type     = watch('type')
   const serials  = watch('serials')
+  const bagged   = watch('baggedSerials')
 
   // When type changes, reset location/state to sensible defaults (only on new)
   useEffect(() => {
@@ -132,7 +146,7 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
   })
 
   function onSubmit(data: FormData) {
-    save(data as DispenserMovementFormData)
+    save({ ...data, baggedSerials: baggedSerialsToSend(data.type, data.serials, data.baggedSerials) } as DispenserMovementFormData)
   }
 
   function addSerial() {
@@ -326,7 +340,10 @@ export function DispenserMovementFormModal({ movement, onClose, onSuccess }: Pro
                         key={s}
                         className="flex items-center justify-between border-b border-zinc-100 px-3 py-1.5 last:border-0"
                       >
-                        <span className="font-mono text-xs text-zinc-700">{s}</span>
+                        <span className="flex items-center gap-2">
+                          <span className="font-mono text-xs text-zinc-700">{s}</span>
+                          {type === 'UNLOAD' && isBagged(s, bagged ?? []) && <BaggedTag />}
+                        </span>
                         <button
                           type="button"
                           onClick={() => removeSerial(s)}

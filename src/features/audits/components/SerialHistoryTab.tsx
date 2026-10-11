@@ -38,8 +38,16 @@ const columns: TableColumn<SerialHistoryEntry>[] = [
     header: 'Movimiento',
     render: (e) => (
       <div className="flex flex-col">
-        <span className="text-sm font-medium text-zinc-800">
+        <span className="flex items-center gap-2 text-sm font-medium text-zinc-800">
           {movementTypeLabel(e)} · {e.routeCode}
+          {e.bagged && (
+            <span
+              title="Volvió embolsado: no necesita pasar por reparación"
+              className="rounded border border-amber-200 bg-amber-50 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-amber-700"
+            >
+              Embolsado
+            </span>
+          )}
         </span>
         <span className="text-xs text-zinc-500">Técnico: {e.technician}</span>
       </div>

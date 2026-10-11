@@ -69,6 +69,7 @@ export async function createDispenserMovement(
       stateId:      formData.stateId,
       movementDate: formData.movementDate,
       serials:      formData.serials,
+      baggedSerials: formData.baggedSerials,
     })
     return data.data
   } catch (err) {
@@ -89,6 +90,7 @@ export async function updateDispenserMovement(
       stateId:      formData.stateId,
       movementDate: formData.movementDate,
       serials:      formData.serials,
+      baggedSerials: formData.baggedSerials,
     })
     return data.data
   } catch (err) {
