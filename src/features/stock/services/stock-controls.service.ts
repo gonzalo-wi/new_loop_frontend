@@ -37,6 +37,8 @@ export async function fetchStockControls(params: StockControlParams): Promise<St
   if (params.controllerId) q.set('controllerId', params.controllerId)
   if (params.from)         q.set('from', params.from)
   if (params.to)           q.set('to', params.to)
+  if (params.createdFrom)  q.set('createdFrom', params.createdFrom)
+  if (params.createdTo)    q.set('createdTo', params.createdTo)
   q.set('page', String(params.page))
   q.set('size', String(params.size))
   q.set('sort', 'createdAt,desc')

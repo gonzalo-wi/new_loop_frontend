@@ -20,7 +20,7 @@ import {
   Panel,
 } from '@/shared/components/ui'
 import type { TableColumn } from '@/shared/types'
-import { formatDate } from '@/shared/lib/utils'
+import { formatDate, formatDateTime, localISODate } from '@/shared/lib/utils'
 import { useDebounce } from '@/shared/hooks/useDebounce'
 import { StockControlFormModal } from './StockControlFormModal'
 import { StockControlDetail } from './StockControlDetail'
@@ -35,7 +35,7 @@ type Props = {
   createLabel: string
 }
 
-const TODAY = new Date().toISOString().split('T')[0]
+const TODAY = localISODate()
 
 export function StockControlsPage({ type, title, description, createLabel }: Props) {
   const queryClient = useQueryClient()
@@ -57,8 +57,10 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
   }
 
   const { data, isLoading, isError, refetch } = useQuery({
+    // Operators look for what was loaded today, so the range applies to the
+    // creation date; an EXIT's controlDate is the next delivery day.
     queryKey: ['stock-controls', type, { statusFilter, from, to, page }],
-    queryFn: () => fetchStockControls({ type, from, to, page, size: PAGE_SIZE }),
+    queryFn: () => fetchStockControls({ type, createdFrom: from, createdTo: to, page, size: PAGE_SIZE }),
     refetchInterval: 30_000,
   })
 
@@ -119,11 +121,19 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
 
   const columns: TableColumn<StockControl>[] = [
     {
+      key: 'createdAt',
+      header: 'Cargado',
+      width: '130px',
+      render: (c) => (
+        <span className="text-xs font-medium tabular-nums text-zinc-700">{formatDateTime(c.createdAt)}</span>
+      ),
+    },
+    {
       key: 'controlDate',
-      header: 'Fecha',
+      header: type === 'EXIT' ? 'Para el' : 'Fecha control',
       width: '110px',
       render: (c) => (
-        <span className="text-xs font-medium tabular-nums text-zinc-700">{formatDate(c.controlDate)}</span>
+        <span className="text-xs tabular-nums text-zinc-500">{formatDate(c.controlDate)}</span>
       ),
     },
     {
@@ -167,12 +177,6 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
       width: '70px',
       align: 'right',
       render: (c) => <span className="text-xs tabular-nums text-zinc-500">{c.items.length}</span>,
-    },
-    {
-      key: 'createdAt',
-      header: 'Registrado',
-      width: '110px',
-      render: (c) => <span className="text-xs text-zinc-400">{formatDate(c.createdAt)}</span>,
     },
     {
       key: 'actions',
@@ -368,6 +372,7 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
             onClearAll={() => resetPage(setStatus)('')}
           />
           <div className="flex items-center gap-1.5 border-l border-zinc-200 pl-3">
+            <span className="text-xs font-medium text-zinc-500">Cargados</span>
             <DatePicker value={from} onChange={resetPage(setFrom)} placeholder="Desde" className="w-32" />
             <span className="text-xs text-zinc-300">–</span>
             <DatePicker value={to} onChange={resetPage(setTo)} placeholder="Hasta" className="w-32" />

@@ -77,13 +77,13 @@ export function DashboardPage() {
 
   const { data: todayEntries, isLoading: loadingEntries } = useQuery({
     queryKey: ['stock-controls', 'ENTRY', 'today', today],
-    queryFn:  () => fetchStockControls({ type: 'ENTRY', from: today, to: today, page: 0, size: 1 }),
+    queryFn:  () => fetchStockControls({ type: 'ENTRY', createdFrom: today, createdTo: today, page: 0, size: 1 }),
     refetchInterval: 30_000,
   })
 
   const { data: todayExits, isLoading: loadingExits } = useQuery({
     queryKey: ['stock-controls', 'EXIT', 'today', today],
-    queryFn:  () => fetchStockControls({ type: 'EXIT', from: today, to: today, page: 0, size: 1 }),
+    queryFn:  () => fetchStockControls({ type: 'EXIT', createdFrom: today, createdTo: today, page: 0, size: 1 }),
     refetchInterval: 30_000,
   })
 

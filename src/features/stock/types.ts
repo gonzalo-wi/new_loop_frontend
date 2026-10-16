@@ -81,6 +81,8 @@ export type StockControlParams = {
   controllerId?: string
   from?: string
   to?: string
+  createdFrom?: string
+  createdTo?: string
   page: number
   size: number
 }
