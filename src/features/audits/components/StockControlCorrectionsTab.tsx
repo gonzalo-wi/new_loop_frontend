@@ -10,11 +10,10 @@ import { STOCK_CONTROL_TYPE_LABELS as TYPE_LABELS } from '@/features/stock/const
 import { humanizeRole } from '../constants'
 import { AuditValueDiff } from './AuditValueDiff'
 import { MetricBlock, DatePicker, Panel } from '@/shared/components/ui'
-import { formatDateTime, formatDuration, truncate } from '@/shared/lib/utils'
+import { formatDateTime, formatDuration, localISODate, localISODateDaysAgo, truncate } from '@/shared/lib/utils'
 
-const today = new Date()
-const DEFAULT_FROM = new Date(today.getTime() - 30 * 24 * 3_600_000).toISOString().split('T')[0]
-const DEFAULT_TO   = today.toISOString().split('T')[0]
+const DEFAULT_FROM = localISODateDaysAgo(30)
+const DEFAULT_TO   = localISODate()
 
 export function StockControlCorrectionsTab() {
   const [from, setFrom]             = useState(DEFAULT_FROM)

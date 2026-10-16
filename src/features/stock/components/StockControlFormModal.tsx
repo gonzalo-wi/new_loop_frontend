@@ -17,6 +17,7 @@ import {
   SearchInput,
 } from '@/shared/components/ui'
 import { useEscapeKey } from '@/shared/hooks/useEscapeKey'
+import { localISODate } from '@/shared/lib/utils'
 
 // Premium input treatment — same language introduced in the Products/Deliveries
 // modals: soft resting background, larger focus "glow", softer corners.
@@ -89,7 +90,7 @@ export function StockControlFormModal({ type, control, onClose, onSuccess }: Pro
     })
   }
 
-  const todayISO = new Date().toISOString().slice(0, 10)
+  const todayISO = localISODate()
 
   function buildDefaultValues(): FormData {
     if (control) {

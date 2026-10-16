@@ -4,12 +4,11 @@ import { AlertTriangle } from 'lucide-react'
 import { fetchOrders } from '@/features/orders/services/orders.service'
 import type { Order } from '@/features/orders/types'
 import { MetricBlock, DataTable, DatePicker, Panel } from '@/shared/components/ui'
-import { formatDuration } from '@/shared/lib/utils'
+import { formatDuration, localISODate, localISODateDaysAgo } from '@/shared/lib/utils'
 import type { TableColumn } from '@/shared/types'
 
-const today = new Date()
-const DEFAULT_FROM = new Date(today.getTime() - 7 * 24 * 3_600_000).toISOString().split('T')[0]
-const DEFAULT_TO   = today.toISOString().split('T')[0]
+const DEFAULT_FROM = localISODateDaysAgo(7)
+const DEFAULT_TO   = localISODate()
 const PAGE_SIZE    = 300
 
 type UserStats = {

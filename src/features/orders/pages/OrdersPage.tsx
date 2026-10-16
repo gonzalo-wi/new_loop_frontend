@@ -13,7 +13,7 @@ import {
   Combobox,
   Panel,
 } from '@/shared/components/ui'
-import { formatDateTime } from '@/shared/lib/utils'
+import { formatDateTime, localISODate } from '@/shared/lib/utils'
 import { useDebounce } from '@/shared/hooks/useDebounce'
 
 const PAGE_SIZE = 20
@@ -34,7 +34,7 @@ const STATUS_OPTIONS = [
   { value: 'COMPLETED',   label: 'Completado' },
 ]
 
-const TODAY = new Date().toISOString().split('T')[0]
+const TODAY = localISODate()
 
 export function OrdersPage() {
   const [routeId, setRouteId]     = useState('')

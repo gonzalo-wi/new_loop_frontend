@@ -20,8 +20,9 @@ import {
   DatePicker,
 } from '@/shared/components/ui'
 import { useEscapeKey } from '@/shared/hooks/useEscapeKey'
+import { localISODate } from '@/shared/lib/utils'
 
-const TODAY = new Date().toISOString().split('T')[0]
+const TODAY = localISODate()
 
 const schema = z.object({
   type:         z.enum(['LOAD', 'UNLOAD']),

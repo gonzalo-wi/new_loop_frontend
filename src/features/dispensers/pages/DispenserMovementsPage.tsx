@@ -17,13 +17,13 @@ import {
   selectClassName,
   Panel,
 } from '@/shared/components/ui'
-import { formatDateTime } from '@/shared/lib/utils'
+import { formatDateTime, localISODate } from '@/shared/lib/utils'
 import { useDebounce } from '@/shared/hooks/useDebounce'
 import { isBagged } from '../bagged'
 import { canManageDispenserMovements } from '../permissions'
 import { useAuthStore } from '@/features/auth/store/auth.store'
 
-const TODAY = new Date().toISOString().split('T')[0]
+const TODAY = localISODate()
 const PAGE_SIZE = 20
 
 const STATUS_CONFIG: Record<DispenserMovementStatus, { label: string; cls: string }> = {

@@ -16,14 +16,14 @@ import {
 import { Link } from 'react-router-dom'
 import { PageHeader, MetricBlock, Panel } from '@/shared/components/ui'
 import { ROUTES } from '@/shared/constants'
-import { cn } from '@/shared/lib/utils'
+import { cn, localISODate } from '@/shared/lib/utils'
 import { fetchPendingArrivals } from '@/features/stock/services/stock-controls.service'
 import { fetchStockControls } from '@/features/stock/services/stock-controls.service'
 import { fetchDeliverySummary } from '@/features/deliveries/services/deliveries.service'
 import { fetchBranches } from '@/features/branches/services/branches.service'
 import { fetchOrders } from '@/features/orders/services/orders.service'
 
-const today = new Date().toISOString().split('T')[0]
+const today = localISODate()
 
 // ── Quick action link ─────────────────────────────────────────────────────────
 

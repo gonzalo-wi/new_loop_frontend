@@ -17,8 +17,10 @@ export async function fetchAuditLogs(params: AuditParams): Promise<AuditPage> {
   if (params.entityId)   q.set('entityId', params.entityId)
   if (params.userId)     q.set('userId', params.userId)
   if (params.source)     q.set('source', params.source)
-  if (params.from)       q.set('from', params.from)
-  if (params.to)         q.set('to', params.to)
+  // The endpoint filters on a timestamp, so a bare date must be widened to the
+  // whole day — otherwise "to = today" cuts off at midnight and hides today.
+  if (params.from)       q.set('from', `${params.from}T00:00:00`)
+  if (params.to)         q.set('to', `${params.to}T23:59:59`)
   q.set('page', String(params.page))
   q.set('size', String(params.size))
   q.set('sort', 'createdAt,desc')
