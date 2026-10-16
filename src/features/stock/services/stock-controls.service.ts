@@ -5,6 +5,7 @@ import type {
   StockControlParams,
   StockControlFormData,
   StockControlUpdateData,
+  StockControlCorrectionData,
   PendingArrivals,
 } from '../types'
 
@@ -137,6 +138,29 @@ export async function updateStockControl(
       observations: payload.observations || undefined,
       truckOrdered: payload.truckOrdered,
       items: payload.items?.map((item) => ({
+        productId:        item.productId,
+        totalQuantity:    item.totalQuantity,
+        fullQuantity:     item.fullQuantity,
+        exchangeQuantity: item.exchangeQuantity,
+        observations:     item.observations || undefined,
+      })),
+    })
+    return data.data
+  } catch (err) {
+    throw new Error(extractMessage(err))
+  }
+}
+
+export async function correctStockControl(
+  id: string,
+  payload: StockControlCorrectionData
+): Promise<StockControl> {
+  try {
+    const { data } = await api.post<ApiResponse<StockControl>>(`/stock-controls/${id}/correct`, {
+      reason:       payload.reason,
+      observations: payload.observations || undefined,
+      truckOrdered: payload.truckOrdered,
+      items: payload.items.map((item) => ({
         productId:        item.productId,
         totalQuantity:    item.totalQuantity,
         fullQuantity:     item.fullQuantity,

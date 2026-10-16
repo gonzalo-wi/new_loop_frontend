@@ -75,6 +75,13 @@ export type StockControlUpdateData = {
   items?: StockControlItemFormData[]
 }
 
+export type StockControlCorrectionData = {
+  reason: string
+  observations?: string
+  truckOrdered?: boolean
+  items: StockControlItemFormData[]
+}
+
 export type StockControlParams = {
   type?: StockControlType
   routeId?: string

@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { X, Loader2, ArrowDownToLine, ArrowUpFromLine, ClipboardCheck, Truck, Eraser } from 'lucide-react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import type { StockControl, StockControlType } from '../types'
-import { createStockControl, updateStockControl } from '../services/stock-controls.service'
+import { correctStockControl, createStockControl, updateStockControl } from '../services/stock-controls.service'
 import { fetchBranches } from '@/features/branches/services/branches.service'
 import { fetchDeliveries } from '@/features/deliveries/services/deliveries.service'
 import { fetchProducts } from '@/features/products/services/products.service'
@@ -42,6 +42,11 @@ const schema = z.object({
   observations: z.string().max(500).optional(),
   truckOrdered: z.boolean(),
   items:        z.array(itemSchema),
+  reason:       z.string().max(500, 'Máximo 500 caracteres').optional(),
+})
+
+const correctionSchema = schema.extend({
+  reason: z.string().trim().min(1, 'Indicá el motivo de la corrección').max(500, 'Máximo 500 caracteres'),
 })
 
 type FormData = z.infer<typeof schema>
@@ -49,14 +54,17 @@ type FormData = z.infer<typeof schema>
 type Props = {
   type: StockControlType
   control: StockControl | null
+  /** The control already reached Aguas: save through the audited correction flow, which re-sends it. */
+  correcting?: boolean
   onClose: () => void
   onSuccess: () => void
 }
 
 type QuantityField = 'totalQuantity' | 'fullQuantity' | 'exchangeQuantity'
 
-export function StockControlFormModal({ type, control, onClose, onSuccess }: Props) {
+export function StockControlFormModal({ type, control, correcting = false, onClose, onSuccess }: Props) {
   const isEditing = !!control
+  const isCorrecting = isEditing && correcting
   const [productSearch, setProductSearch] = useState('')
 
   // Exits only track the total; full/exchange are an entry-side concept and are
@@ -101,6 +109,7 @@ export function StockControlFormModal({ type, control, onClose, onSuccess }: Pro
         observations: control.observations ?? '',
         truckOrdered: control.truckOrdered,
         items:        buildItems(control.items),
+        reason:       '',
       }
     }
     return {
@@ -118,7 +127,10 @@ export function StockControlFormModal({ type, control, onClose, onSuccess }: Pro
     getValues,
     setError,
     formState: { errors },
-  } = useForm<FormData>({ resolver: zodResolver(schema), defaultValues: buildDefaultValues() })
+  } = useForm<FormData>({
+    resolver: zodResolver(isCorrecting ? correctionSchema : schema),
+    defaultValues: buildDefaultValues(),
+  })
 
   const { fields, update } = useFieldArray({ control: formControl, name: 'items' })
   const watchedItems = useWatch({ control: formControl, name: 'items' })
@@ -150,6 +162,14 @@ export function StockControlFormModal({ type, control, onClose, onSuccess }: Pro
         exchangeQuantity: isExit ? 0 : item.exchangeQuantity,
       }))
 
+      if (isCorrecting) {
+        return correctStockControl(control.id, {
+          reason:       data.reason?.trim() ?? '',
+          observations: data.observations || undefined,
+          truckOrdered: data.truckOrdered,
+          items,
+        })
+      }
       if (isEditing) {
         return updateStockControl(control.id, {
           controlDate:  data.controlDate  || undefined,
@@ -199,7 +219,9 @@ export function StockControlFormModal({ type, control, onClose, onSuccess }: Pro
             </span>
             <div>
               <h2 className="text-base font-semibold text-zinc-900">
-                {isEditing ? `Editar control de ${typeLabel}` : `Nuevo control de ${typeLabel}`}
+                {isCorrecting
+                  ? `Corregir control de ${typeLabel}`
+                  : isEditing ? `Editar control de ${typeLabel}` : `Nuevo control de ${typeLabel}`}
               </h2>
               <p className="mt-0.5 text-sm text-zinc-500">
                 {isEditing
@@ -222,6 +244,18 @@ export function StockControlFormModal({ type, control, onClose, onSuccess }: Pro
           className="flex flex-1 flex-col overflow-hidden"
         >
           <div className="flex-1 space-y-6 overflow-y-auto px-6 py-6">
+            {isCorrecting && (
+              <div className="space-y-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                <p className="text-xs text-amber-800">
+                  Este control ya fue enviado a Aguas. Al guardar, la corrección queda auditada
+                  y el control se vuelve a enviar con los datos nuevos.
+                </p>
+                <FormField label="Motivo de la corrección" htmlFor="reason" required error={errors.reason?.message} fullWidth>
+                  <textarea id="reason" rows={2} className={fancyTextarea} {...register('reason')} />
+                </FormField>
+              </div>
+            )}
+
             {/* Control info */}
             <FormSection title="Control" icon={ClipboardCheck}>
               <FormField label="Sucursal" htmlFor="branchId" required error={errors.branchId?.message}>
@@ -467,7 +501,9 @@ export function StockControlFormModal({ type, control, onClose, onSuccess }: Pro
                   {mutation.isPending && <Loader2 size={13} className="animate-spin" />}
                   {mutation.isPending
                     ? 'Guardando...'
-                    : isEditing
+                    : isCorrecting
+                      ? 'Corregir y reenviar'
+                      : isEditing
                       ? 'Guardar cambios'
                       : `Registrar ${typeLabel}`}
                 </button>

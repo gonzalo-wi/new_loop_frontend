@@ -25,6 +25,8 @@ import { useDebounce } from '@/shared/hooks/useDebounce'
 import { StockControlFormModal } from './StockControlFormModal'
 import { StockControlDetail } from './StockControlDetail'
 import { RemitoActions } from './RemitoActions'
+import { canCorrectStockControl } from '../permissions'
+import { useAuthStore } from '@/features/auth/store/auth.store'
 
 const PAGE_SIZE = 20
 
@@ -39,6 +41,7 @@ const TODAY = localISODate()
 
 export function StockControlsPage({ type, title, description, createLabel }: Props) {
   const queryClient = useQueryClient()
+  const role = useAuthStore((s) => s.user?.role)
 
   const [search, setSearch]         = useState('')
   const [statusFilter, setStatus]   = useState('')
@@ -184,7 +187,8 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
       width: '110px',
       align: 'right',
       render: (c) => {
-        const canEdit = c.status === 'CONTROLLED'
+        const canEdit    = c.status === 'CONTROLLED'
+        const canCorrect = canCorrectStockControl(role, c)
         return (
           <div className="flex items-center justify-end gap-1">
             <button
@@ -199,6 +203,15 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
                 onClick={(e) => { e.stopPropagation(); setSelectedControl(c); setShowForm(true) }}
                 className="rounded-md p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
                 title="Editar"
+              >
+                <Pencil size={13} />
+              </button>
+            )}
+            {canCorrect && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setSelectedControl(c); setShowForm(true) }}
+                className="rounded-md p-1 text-zinc-400 hover:bg-amber-50 hover:text-amber-600"
+                title="Corregir y reenviar a Aguas"
               >
                 <Pencil size={13} />
               </button>
@@ -447,6 +460,7 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
         <StockControlFormModal
           type={type}
           control={selectedControl}
+          correcting={!!selectedControl && canCorrectStockControl(role, selectedControl)}
           onClose={() => { setShowForm(false); setSelectedControl(null) }}
           onSuccess={handleFormSuccess}
         />
