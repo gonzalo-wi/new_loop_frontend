@@ -18,7 +18,7 @@ const fancyInput =
   'h-10 w-full rounded-lg border border-zinc-200 bg-white shadow-card px-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 transition-all duration-150 hover:border-zinc-300 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 disabled:bg-zinc-100 disabled:text-zinc-400'
 
 const USER_ROLES = [
-  'admin', 'controller', 'delivery_driver', 'picker', 'loader', 'supervisor',
+  'admin', 'controller', 'delivery_driver', 'supervisor',
 ] as const
 
 const ROLE_OPTIONS = (Object.entries(ROLE_LABELS) as [UserRole, string][]).map(
@@ -33,7 +33,7 @@ const schema = z
     role:     z.enum(USER_ROLES),
     branchId: z.string().optional(),
   })
-  // Controller/picker must have a branch; enforced here for immediate feedback
+  // Controllers must have a branch; enforced here for immediate feedback
   // (the backend also returns 400 if it's missing).
   .superRefine((data, ctx) => {
     if (BRANCH_REQUIRED_ROLES.includes(data.role as UserRole) && !data.branchId) {
@@ -214,7 +214,7 @@ export function UserFormModal({ user, onClose, onSuccess }: Props) {
                 error={errors.branchId?.message}
                 hint={
                   branchRequired
-                    ? 'Obligatoria para controladores y pickers'
+                    ? 'Obligatoria para controladores'
                     : 'Opcional para este rol'
                 }
               >

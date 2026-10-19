@@ -23,12 +23,12 @@ export const MOCK_USERS: User[] = [
   },
   {
     id: '5', name: 'Roberto Sánchez', username: 'rsanchez',
-    role: 'picker',          status: 'active',
+    role: 'controller',      status: 'active',
     createdAt: '2023-04-05T00:00:00Z', updatedAt: '2024-06-22T07:00:00Z',
   },
   {
     id: '6', name: 'Luciana Gómez',   username: 'lgomez',
-    role: 'loader',          status: 'active',
+    role: 'controller',      status: 'active',
     createdAt: '2023-04-10T00:00:00Z', updatedAt: '2024-06-22T07:15:00Z',
   },
   {

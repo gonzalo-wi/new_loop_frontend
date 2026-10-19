@@ -130,9 +130,15 @@ export function safeParseJson(raw: string | null): string {
   }
 }
 
+// Old audit logs keep the roles that were merged into CONTROLADOR, so they still need a label.
+const LEGACY_ROLE_LABELS: Record<string, string> = {
+  PICKER:              'Picker',
+  CARGADOR_DISPENSERS: 'Cargador',
+}
+
 // AuditLog.userRole comes straight from the backend enum (e.g. "CONTROLADOR").
 export function humanizeRole(role: string | null): string {
   if (!role) return '—'
   const mapped = BACKEND_ROLE_MAP[role]
-  return mapped ? ROLE_LABELS[mapped] : role
+  return mapped ? ROLE_LABELS[mapped] : LEGACY_ROLE_LABELS[role] ?? role
 }

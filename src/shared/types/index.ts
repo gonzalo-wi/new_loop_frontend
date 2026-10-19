@@ -60,6 +60,4 @@ export type UserRole =
   | 'admin'
   | 'controller'
   | 'delivery_driver'
-  | 'picker'
-  | 'loader'
   | 'supervisor'

@@ -197,7 +197,7 @@ Antes de crear un componente nuevo, revisá `shared/components/ui/index.ts`. Ya 
 - **Guard de rutas:** `AdminLayout` sólo chequea `isAuthenticated`. Si no, redirige a login.
   **No hay guard por rol a nivel de ruta** (ver §12).
 - **Roles:** el backend usa strings en mayúscula/español (`ADMIN`, `CONTROLADOR`,
-  `REPARTIDOR`, `PICKER`, `CARGADOR_DISPENSERS`, `SUPERVISOR`). El front los mapea a
+  `REPARTIDOR`, `SUPERVISOR`; `PICKER` y `CARGADOR_DISPENSERS` se unificaron en `CONTROLADOR`). El front los mapea a
   valores internos en minúscula/inglés vía `BACKEND_ROLE_MAP` / `FRONTEND_ROLE_MAP`
   (`shared/constants/index.ts`). Si agregás un rol, tocá **los dos** mapas.
 - **Gating por rol en UI:** cada `NavGroup`/`NavItem` del Sidebar tiene un `roles?: UserRole[]`

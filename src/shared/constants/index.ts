@@ -31,8 +31,6 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   admin: 'Administrador',
   controller: 'Controlador',
   delivery_driver: 'Repartidor',
-  picker: 'Picker',
-  loader: 'Cargador',
   supervisor: 'Supervisor',
 }
 
@@ -41,8 +39,6 @@ export const BACKEND_ROLE_MAP: Record<string, UserRole> = {
   ADMIN:                'admin',
   CONTROLADOR:          'controller',
   REPARTIDOR:           'delivery_driver',
-  PICKER:               'picker',
-  CARGADOR_DISPENSERS:  'loader',
   SUPERVISOR:           'supervisor',
 }
 
@@ -50,8 +46,6 @@ export const FRONTEND_ROLE_MAP: Record<UserRole, string> = {
   admin:           'ADMIN',
   controller:      'CONTROLADOR',
   delivery_driver: 'REPARTIDOR',
-  picker:          'PICKER',
-  loader:          'CARGADOR_DISPENSERS',
   supervisor:      'SUPERVISOR',
 }
 

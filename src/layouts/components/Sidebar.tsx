@@ -38,10 +38,10 @@ import { fetchPendingArrivals } from '@/features/stock/services/stock-controls.s
 type NavItem = { to: string; icon: React.ElementType; label: string; roles?: UserRole[] }
 type NavGroup = { label: string; icon?: React.ElementType; roles?: UserRole[]; items: NavItem[] }
 
-// Controller, loader (dispenser loader) and picker only operate the floor —
+// Controllers only operate the floor —
 // they only need Entradas, Salidas, Pedidos and Dispensers plus the Dashboard.
 // BACK_OFFICE_ROLES is a subset of OPERATIONAL_ROLES (admin/supervisor see both tiers).
-const OPERATIONAL_ROLES: UserRole[] = ['admin', 'supervisor', 'controller', 'loader', 'picker']
+const OPERATIONAL_ROLES: UserRole[] = ['admin', 'supervisor', 'controller']
 const BACK_OFFICE_ROLES: UserRole[] = ['admin', 'supervisor']
 
 // Groups with an empty label render their items flat (no collapsible header).

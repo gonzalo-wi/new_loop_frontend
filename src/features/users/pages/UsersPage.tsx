@@ -213,7 +213,7 @@ export function UsersPage() {
           icon={AlertTriangle}
           accent={missingBranchCount > 0 ? 'amber' : 'default'}
           value={missingBranchCount}
-          note="controladores/pickers activos"
+          note="controladores activos"
         />
       </div>
 
