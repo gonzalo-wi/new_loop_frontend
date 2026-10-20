@@ -10,6 +10,7 @@ type ProductDto = {
   description?: string
   displayOrder: number
   packQuantity?: number
+  fullEqualsTotal?: boolean
   type: 'RETORNABLE' | 'DESCARTABLE'
   unit?: string
   active: boolean
@@ -44,6 +45,7 @@ function fromDto(dto: ProductDto): Product {
     description:  dto.description,
     displayOrder: dto.displayOrder,
     packQuantity: dto.packQuantity,
+    fullEqualsTotal: dto.fullEqualsTotal ?? false,
     type:         TYPE_FROM_API[dto.type],
     unit:         dto.unit,
     status:       dto.active ? 'active' : 'inactive',
@@ -59,6 +61,7 @@ function toCreateDto(data: ProductFormData) {
     description:  data.description,
     displayOrder: data.displayOrder,
     packQuantity: data.packQuantity,
+    fullEqualsTotal: data.fullEqualsTotal,
     type:         TYPE_TO_API[data.type],
     unit:         data.unit,
   }

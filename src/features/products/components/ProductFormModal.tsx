@@ -34,6 +34,7 @@ const schema = z.object({
   ),
   type: z.enum(['returnable', 'disposable']),
   unit: z.string().optional(),
+  fullEqualsTotal: z.boolean(),
 })
 
 type FormData = z.infer<typeof schema>
@@ -63,10 +64,11 @@ export function ProductFormModal({ product, onClose, onSuccess }: Props) {
           description:  product.description ?? '',
           displayOrder: product.displayOrder,
           packQuantity: product.packQuantity,
+          fullEqualsTotal: product.fullEqualsTotal,
           type:         product.type,
           unit:         product.unit ?? '',
         }
-      : { type: 'returnable', displayOrder: 1 },
+      : { type: 'returnable', displayOrder: 1, fullEqualsTotal: false },
   })
 
   useEffect(() => {
@@ -78,10 +80,11 @@ export function ProductFormModal({ product, onClose, onSuccess }: Props) {
             description:  product.description ?? '',
             displayOrder: product.displayOrder,
             packQuantity: product.packQuantity,
+            fullEqualsTotal: product.fullEqualsTotal,
             type:         product.type,
             unit:         product.unit ?? '',
           }
-        : { type: 'returnable', displayOrder: 1 }
+        : { type: 'returnable', displayOrder: 1, fullEqualsTotal: false }
     )
   }, [product, reset])
 
@@ -231,6 +234,19 @@ export function ProductFormModal({ product, onClose, onSuccess }: Props) {
                   className={fancyInput}
                   {...register('packQuantity')}
                 />
+              </FormField>
+              <FormField label="Llenos igual al total" fullWidth>
+                <label className="flex cursor-pointer items-start gap-2.5">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 h-4 w-4 rounded-md border-zinc-300 text-blue-600 focus:ring-blue-500"
+                    {...register('fullEqualsTotal')}
+                  />
+                  <span className="text-sm text-zinc-600">
+                    Vuelve siempre lleno (pallets, racks, carros, cajones). En el control de entrada
+                    no se pide "Llenos": se toma el mismo valor que el total.
+                  </span>
+                </label>
               </FormField>
             </FormSection>
           </div>

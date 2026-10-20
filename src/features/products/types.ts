@@ -9,6 +9,8 @@ export type Product = {
   description?: string
   displayOrder: number
   packQuantity?: number
+  /** Always comes back full: the app only asks for the total and full mirrors it. */
+  fullEqualsTotal: boolean
   type: ProductType
   unit?: string
   status: OperationalStatus
@@ -22,6 +24,8 @@ export type ProductFormData = {
   description?: string
   displayOrder: number
   packQuantity?: number
+  /** Always comes back full: the app only asks for the total and full mirrors it. */
+  fullEqualsTotal: boolean
   type: ProductType
   unit?: string
 }
