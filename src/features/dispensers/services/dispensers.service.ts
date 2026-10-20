@@ -6,6 +6,7 @@ import type {
   DispenserMovementFormData,
   AguasCatalog,
 } from '../types'
+import { LATER_RELOAD_MESSAGE } from '../reload'
 
 type ApiResponse<T> = { data: T; message: string }
 
@@ -15,9 +16,34 @@ type PageDto<T> = {
   page: { size: number; number: number; totalElements: number; totalPages: number }
 }
 
+// The backend has no error codes, so its known 409s are recognised by their text and shown in Spanish.
+// Any other 409 (e.g. the Aguas delete failed) keeps the backend message.
+const DUPLICATE_UNLOAD_HINT = 'already exists'
+const DUPLICATE_UNLOAD_MESSAGE =
+  'Ya hay una descarga para este reparto en esa fecha. Editá o cancelá la existente en lugar de cargar otra.'
+const LATER_RELOAD_HINT = 'has a later reload'
+const ALREADY_LOADED_HINT = 'already went out in an earlier load'
+// The backend lists the repeated serials as "[SN-1, SN-2]".
+const SERIAL_LIST_PATTERN = /\[([^\]]*)\]/
+
+function alreadyLoadedMessage(message: string): string {
+  const serials = SERIAL_LIST_PATTERN.exec(message)?.[1]
+  return (
+    'Estos dispensers ya salieron en otra carga de este reparto para esa fecha' +
+    (serials ? `: ${serials}` : '') +
+    '. Una recarga solo puede llevar dispensers nuevos.'
+  )
+}
+
 function extractMessage(err: unknown): string {
-  const e = err as { response?: { data?: { message?: string } } }
-  return e?.response?.data?.message ?? 'Error inesperado'
+  const e = err as { response?: { status?: number; data?: { message?: string } } }
+  const message = e?.response?.data?.message
+  if (e?.response?.status === 409 && message) {
+    if (message.includes(LATER_RELOAD_HINT))   return LATER_RELOAD_MESSAGE
+    if (message.includes(ALREADY_LOADED_HINT)) return alreadyLoadedMessage(message)
+    if (message.includes(DUPLICATE_UNLOAD_HINT)) return DUPLICATE_UNLOAD_MESSAGE
+  }
+  return message ?? 'Error inesperado'
 }
 
 // ── Aguas catalogs ────────────────────────────────────────────────────────────

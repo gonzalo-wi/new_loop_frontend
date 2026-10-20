@@ -24,6 +24,8 @@ export type DispenserMovement = {
   locationId: number
   stateId: number
   movementDate: string
+  // LOAD only: an earlier active load of the same route and date exists (a recarga).
+  reload?: boolean
   status: DispenserMovementStatus
   serials: string[]
   // Serials the backend left out of the Aguas/Odoo sync (e.g. not registered in Aguas).

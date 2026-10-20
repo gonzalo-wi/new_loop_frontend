@@ -21,6 +21,7 @@ import { formatDateTime, localISODate } from '@/shared/lib/utils'
 import { useDebounce } from '@/shared/hooks/useDebounce'
 import { isBagged } from '../bagged'
 import { canManageDispenserMovements } from '../permissions'
+import { hasLaterLoad, LATER_RELOAD_MESSAGE } from '../reload'
 import { useAuthStore } from '@/features/auth/store/auth.store'
 
 const TODAY = localISODate()
@@ -91,13 +92,20 @@ export function DispenserMovementsPage() {
     refetchInterval: 15_000,
   })
 
-  const { mutate: cancel, isPending: cancelling } = useMutation({
+  const { mutate: cancel, isPending: cancelling, error: cancelError, reset: resetCancel } = useMutation({
     mutationFn: (id: string) => cancelDispenserMovement(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dispenser-movements'] })
       setCancelTarget(null)
     },
+    // A 409 can mean a recarga came in meanwhile: refetch so the row shows it as locked.
+    onError: () => queryClient.invalidateQueries({ queryKey: ['dispenser-movements'] }),
   })
+
+  function closeCancel() {
+    setCancelTarget(null)
+    resetCancel()
+  }
 
   const movements = data?.content ?? []
   const meta      = data
@@ -261,6 +269,9 @@ export function DispenserMovementsPage() {
                 const statusCfg  = STATUS_CONFIG[m.status] ?? { label: m.status, cls: UNKNOWN_CLS }
                 const isCancelled = m.status === 'CANCELLED'
                 const baggedCount = m.serials.filter((s) => isBagged(s, m.baggedSerials ?? [])).length
+                // The list is newest first, so a later load of the same day is almost always on this page;
+                // if not, the backend still refuses with 409.
+                const locked = hasLaterLoad(m, movements)
 
                 return (
                   <>
@@ -280,9 +291,19 @@ export function DispenserMovementsPage() {
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${typeCfg.cls}`}>
-                          {typeCfg.label}
-                        </span>
+                        <div className="flex flex-wrap items-center gap-1">
+                          <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${typeCfg.cls}`}>
+                            {typeCfg.label}
+                          </span>
+                          {m.reload && (
+                            <span
+                              title="Otra carga del mismo reparto y fecha se registró antes"
+                              className="inline-flex items-center rounded-md border border-sky-200 bg-sky-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-sky-700"
+                            >
+                              Recarga
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-3">
                         <span className="font-mono text-xs font-medium text-zinc-700">{m.routeCode}</span>
@@ -305,7 +326,12 @@ export function DispenserMovementsPage() {
                         <span className="text-xs text-zinc-400">{formatDateTime(m.createdAt)}</span>
                       </td>
                       <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                        {!isCancelled && canManage && (
+                        {!isCancelled && canManage && locked && (
+                          <span title={LATER_RELOAD_MESSAGE} className="text-xs text-zinc-400">
+                            Tiene recarga
+                          </span>
+                        )}
+                        {!isCancelled && canManage && !locked && (
                           <div className="flex justify-end gap-2">
                             <button
                               onClick={() => openEdit(m)}
@@ -415,9 +441,9 @@ export function DispenserMovementsPage() {
       {/* Cancel confirm */}
       <ConfirmDialog
         open={!!cancelTarget}
-        onClose={() => setCancelTarget(null)}
+        onClose={closeCancel}
         title="Cancelar movimiento"
-        description={cancelTarget ? `¿Confirmar cancelación del movimiento de ${(TYPE_CONFIG[cancelTarget.type]?.label ?? cancelTarget.type).toLowerCase()} del reparto ${cancelTarget.routeCode}? Esta acción también cancela el registro en Aguas.` : ''}
+        description={cancelError ? (cancelError as Error).message : cancelTarget ? `¿Confirmar cancelación del movimiento de ${(TYPE_CONFIG[cancelTarget.type]?.label ?? cancelTarget.type).toLowerCase()} del reparto ${cancelTarget.routeCode}? Esta acción también cancela el registro en Aguas.` : ''}
         confirmLabel="Sí, cancelar"
         variant="danger"
         isLoading={cancelling}
