@@ -1,4 +1,4 @@
-import { X, Truck, Building2, Route, CalendarClock, Clock, MessageSquare, AlertTriangle } from 'lucide-react'
+import { X, Truck, Building2, Route, CalendarClock, Clock, MessageSquare, AlertTriangle, XCircle } from 'lucide-react'
 import type { StockControl } from '../types'
 import { STOCK_CONTROL_STATUS_CONFIG, STOCK_CONTROL_TYPE_LABELS } from '../constants'
 import { formatDate, formatDateTime } from '@/shared/lib/utils'
@@ -117,6 +117,15 @@ export function StockControlDetail({ control, onClose }: Props) {
                 </p>
               </div>
             </div>
+            {control.status === 'REJECTED_BY_DRIVER' && control.driverRejectionReason && (
+              <div className="col-span-2 flex items-start gap-2.5 rounded-md border border-red-200 bg-red-50 px-3 py-2.5">
+                <XCircle size={14} className="mt-0.5 shrink-0 text-red-600" />
+                <div>
+                  <p className="text-[10px] uppercase tracking-wide text-red-500">Rechazado por el repartidor</p>
+                  <p className="text-sm font-medium text-red-800">{control.driverRejectionReason}</p>
+                </div>
+              </div>
+            )}
             {control.observations && (
               <div className="col-span-2 flex items-start gap-2.5 rounded-md border border-zinc-100 bg-zinc-50/60 px-3 py-2.5">
                 <MessageSquare size={14} className="mt-0.5 shrink-0 text-zinc-400" />

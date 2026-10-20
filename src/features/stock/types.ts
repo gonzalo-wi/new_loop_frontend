@@ -39,6 +39,8 @@ export type StockControl = {
   observations?: string
   truckOrdered: boolean
   items: StockControlItem[]
+  /** Why the driver rejected it; only set while status is REJECTED_BY_DRIVER. */
+  driverRejectionReason?: string | null
   createdAt: string
   updatedAt: string
 }
