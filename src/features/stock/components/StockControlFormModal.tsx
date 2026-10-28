@@ -114,7 +114,7 @@ export function StockControlFormModal({ type, control, correcting = false, onClo
     }
     return {
       branchId: '', routeId: '', controlDate: type === 'ENTRY' ? todayISO : '',
-      observations: '', truckOrdered: true,
+      observations: '', truckOrdered: false,
       items:    buildItems(),
     }
   }
