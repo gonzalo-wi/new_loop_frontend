@@ -18,6 +18,7 @@ import { OrdersPage } from '@/features/orders/pages/OrdersPage'
 import { DispenserMovementsPage } from '@/features/dispensers/pages/DispenserMovementsPage'
 import { AppVersionPage } from '@/features/app-version/pages/AppVersionPage'
 import { DispenserStatisticsPage } from '@/features/statistics/pages/DispenserStatisticsPage'
+import { PerformancePage } from '@/features/performance/pages/PerformancePage'
 import { ROUTES } from '@/shared/constants'
 
 export const router = createBrowserRouter([
@@ -42,6 +43,7 @@ export const router = createBrowserRouter([
       { path: 'app-version', element: <AppVersionPage /> },
       { path: 'statistics', element: <Navigate to={ROUTES.STATISTICS_DISPENSERS} replace /> },
       { path: 'statistics/dispensers', element: <DispenserStatisticsPage /> },
+      { path: 'statistics/performance', element: <PerformancePage /> },
     ],
   },
   {

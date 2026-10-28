@@ -25,6 +25,7 @@ export const ROUTES = {
   APP_VERSION: '/app-version',
   STATISTICS: '/statistics',
   STATISTICS_DISPENSERS: '/statistics/dispensers',
+  STATISTICS_PERFORMANCE: '/statistics/performance',
 } as const
 
 export const ROLE_LABELS: Record<UserRole, string> = {

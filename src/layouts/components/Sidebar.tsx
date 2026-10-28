@@ -22,6 +22,7 @@ import {
   ShieldCheck,
   Settings,
   BarChart3,
+  Gauge,
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { ROUTES } from '@/shared/constants'
@@ -95,6 +96,7 @@ const NAV_GROUPS: NavGroup[] = [
     roles: BACK_OFFICE_ROLES,
     items: [
       { to: ROUTES.STATISTICS_DISPENSERS, icon: Droplets, label: 'Dispensers' },
+      { to: ROUTES.STATISTICS_PERFORMANCE, icon: Gauge, label: 'Desempeño' },
     ],
   },
   {
