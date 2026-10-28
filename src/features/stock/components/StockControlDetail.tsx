@@ -51,7 +51,7 @@ export function StockControlDetail({ control, onClose }: Props) {
         {/* Remito toolbar — exits only */}
         {isExit && (
           <div className="flex items-center gap-2 border-b border-zinc-100 bg-zinc-50 px-6 py-2.5">
-            <RemitoActions controlId={control.id} variant="button" />
+            <RemitoActions controlId={control.id} printed={control.remitoPrinted} variant="button" />
             <span className="ml-auto text-[11px] text-zinc-400">
               Remito de carga
             </span>

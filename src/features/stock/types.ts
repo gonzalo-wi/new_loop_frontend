@@ -41,6 +41,8 @@ export type StockControl = {
   items: StockControlItem[]
   /** Why the driver rejected it; only set while status is REJECTED_BY_DRIVER. */
   driverRejectionReason?: string | null
+  /** Exits only: set once someone sends the remito to the printer from the panel. */
+  remitoPrinted: boolean
   createdAt: string
   updatedAt: string
 }

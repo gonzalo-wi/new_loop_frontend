@@ -127,6 +127,11 @@ export async function fetchRemitoPdf(controlId: string): Promise<Blob> {
   }
 }
 
+export async function markRemitoPrinted(controlId: string): Promise<StockControl> {
+  const { data } = await api.post<ApiResponse<StockControl>>(`/stock-controls/${controlId}/remito/printed`)
+  return data.data
+}
+
 export async function updateStockControl(
   id: string,
   payload: StockControlUpdateData

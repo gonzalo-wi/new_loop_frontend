@@ -1,6 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { FileText, Printer, Loader2, AlertTriangle, X } from 'lucide-react'
-import { fetchRemitoPdf } from '../services/stock-controls.service'
+import { ConfirmDialog } from '@/shared/components/ui'
+import { cn } from '@/shared/lib/utils'
+import { fetchRemitoPdf, markRemitoPrinted } from '../services/stock-controls.service'
 
 // The endpoint needs a Bearer token, so the PDF can't be linked to directly —
 // it has to be fetched through the axios client and handed to the browser as a
@@ -9,13 +12,20 @@ const BLOB_TTL_MS = 60_000
 
 type Props = {
   controlId: string
+  /** Several operators share one panel session; this tells them someone already printed it. */
+  printed: boolean
   /** 'icon' for table rows, 'button' for the detail header. */
   variant?: 'icon' | 'button'
 }
 
-export function RemitoActions({ controlId, variant = 'icon' }: Props) {
+export function RemitoActions({ controlId, printed, variant = 'icon' }: Props) {
+  const queryClient = useQueryClient()
   const [busy, setBusy] = useState<'view' | 'print' | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [isPrinted, setIsPrinted] = useState(printed)
+  const [confirmReprint, setConfirmReprint] = useState(false)
+
+  useEffect(() => setIsPrinted(printed), [printed])
 
   function fail(err: unknown) {
     setError(err instanceof Error ? err.message : 'No se pudo obtener el remito.')
@@ -42,9 +52,28 @@ export function RemitoActions({ controlId, variant = 'icon' }: Props) {
     }
   }
 
-  async function handlePrint(e: React.MouseEvent) {
+  async function markPrinted() {
+    try {
+      await markRemitoPrinted(controlId)
+      setIsPrinted(true)
+      queryClient.invalidateQueries({ queryKey: ['stock-controls'] })
+    } catch (err) {
+      setError(
+        `El remito se mandó a imprimir pero no se pudo marcar como impreso: ${
+          err instanceof Error ? err.message : 'error desconocido'
+        }`
+      )
+    }
+  }
+
+  function handlePrintClick(e: React.MouseEvent) {
     e.stopPropagation()
     if (busy) return
+    if (isPrinted) setConfirmReprint(true)
+    else print()
+  }
+
+  async function print() {
     setBusy('print')
     setError(null)
     try {
@@ -56,6 +85,8 @@ export function RemitoActions({ controlId, variant = 'icon' }: Props) {
       frame.style.display = 'none'
       frame.src = url
       frame.onload = () => {
+        // The browser can't tell whether the paper came out, so opening the print dialog counts as printed.
+        void markPrinted()
         frame.contentWindow?.focus()
         frame.contentWindow?.print()
       }
@@ -88,10 +119,13 @@ export function RemitoActions({ controlId, variant = 'icon' }: Props) {
             )}
           </button>
           <button
-            onClick={handlePrint}
+            onClick={handlePrintClick}
             disabled={!!busy}
-            className="rounded-md p-1 text-zinc-400 hover:bg-blue-50 hover:text-blue-600 disabled:opacity-40"
-            title="Imprimir remito"
+            className={cn(
+              'rounded-md p-1 hover:bg-blue-50 hover:text-blue-600 disabled:opacity-40',
+              isPrinted ? 'text-emerald-600' : 'text-zinc-400'
+            )}
+            title={isPrinted ? 'Remito impreso — imprimir de nuevo' : 'Imprimir remito'}
           >
             {busy === 'print' ? (
               <Loader2 size={13} className="animate-spin" />
@@ -115,7 +149,7 @@ export function RemitoActions({ controlId, variant = 'icon' }: Props) {
             Ver remito
           </button>
           <button
-            onClick={handlePrint}
+            onClick={handlePrintClick}
             disabled={!!busy}
             className="flex h-8 items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
           >
@@ -124,9 +158,32 @@ export function RemitoActions({ controlId, variant = 'icon' }: Props) {
             ) : (
               <Printer size={13} />
             )}
-            Imprimir
+            {isPrinted ? 'Reimprimir' : 'Imprimir'}
           </button>
+          {isPrinted && (
+            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+              Impreso
+            </span>
+          )}
         </>
+      )}
+
+      {confirmReprint && (
+        // Rendered inside a clickable table row: keep the dialog's clicks from opening the detail.
+        <div onClick={(e) => e.stopPropagation()}>
+          <ConfirmDialog
+            open
+            variant="warning"
+            title="Este remito ya se imprimió"
+            description="Alguien ya lo mandó a imprimir. ¿Querés imprimirlo de nuevo?"
+            confirmLabel="Imprimir de nuevo"
+            onClose={() => setConfirmReprint(false)}
+            onConfirm={() => {
+              setConfirmReprint(false)
+              void print()
+            }}
+          />
+        </div>
       )}
 
       {error && (

@@ -217,7 +217,7 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
               </button>
             )}
             {/* Remitos only exist for exits */}
-            {c.type === 'EXIT' && <RemitoActions controlId={c.id} />}
+            {c.type === 'EXIT' && <RemitoActions controlId={c.id} printed={c.remitoPrinted} />}
           </div>
         )
       },
