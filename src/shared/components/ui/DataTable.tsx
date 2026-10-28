@@ -1,4 +1,5 @@
-import type { TableColumn } from '@/shared/types'
+import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
+import type { TableColumn, TableSort } from '@/shared/types'
 import { cn } from '@/shared/lib/utils'
 import { LoadingState } from './LoadingState'
 import { ErrorState } from './ErrorState'
@@ -17,6 +18,16 @@ type Props<T> = {
   className?: string
   rowClassName?: (row: T) => string | undefined
   getRowKey: (row: T) => string
+  // Optional: headers of `sortable` columns become buttons. The caller sorts `data`.
+  sort?: TableSort | null
+  onSortChange?: (key: string) => void
+}
+
+function SortIcon({ active, direction }: { active: boolean; direction?: TableSort['direction'] }) {
+  if (!active) return <ArrowUpDown size={12} className="text-zinc-300" aria-hidden />
+  return direction === 'asc'
+    ? <ArrowUp size={12} className="text-zinc-700" aria-hidden />
+    : <ArrowDown size={12} className="text-zinc-700" aria-hidden />
 }
 
 export function DataTable<T>({
@@ -32,26 +43,47 @@ export function DataTable<T>({
   className,
   rowClassName,
   getRowKey,
+  sort,
+  onSortChange,
 }: Props<T>) {
   return (
     <div className={cn('overflow-x-auto', className)}>
       <table className="w-full min-w-full table-auto border-collapse">
         <thead>
           <tr className="sticky top-0 z-10 border-b border-zinc-200 bg-zinc-50">
-            {columns.map((col) => (
-              <th
-                key={col.key}
-                className={cn(
-                  'whitespace-nowrap px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-zinc-500',
-                  col.align === 'center' && 'text-center',
-                  col.align === 'right' && 'text-right',
-                  col.width
-                )}
-                style={col.width ? { width: col.width } : undefined}
-              >
-                {col.header}
-              </th>
-            ))}
+            {columns.map((col) => {
+              const sortable = col.sortable && onSortChange
+              const active = sort?.key === col.key
+              return (
+                <th
+                  key={col.key}
+                  aria-sort={active ? (sort?.direction === 'asc' ? 'ascending' : 'descending') : undefined}
+                  className={cn(
+                    'whitespace-nowrap px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-zinc-500',
+                    col.align === 'center' && 'text-center',
+                    col.align === 'right' && 'text-right',
+                    col.width
+                  )}
+                  style={col.width ? { width: col.width } : undefined}
+                >
+                  {sortable ? (
+                    <button
+                      type="button"
+                      onClick={() => onSortChange(col.key)}
+                      className={cn(
+                        'inline-flex items-center gap-1 uppercase tracking-wider hover:text-zinc-900',
+                        active && 'text-zinc-900'
+                      )}
+                    >
+                      {col.header}
+                      <SortIcon active={active} direction={sort?.direction} />
+                    </button>
+                  ) : (
+                    col.header
+                  )}
+                </th>
+              )
+            })}
           </tr>
         </thead>
         <tbody className="divide-y divide-zinc-100">

@@ -42,6 +42,9 @@ export type TableColumn<T> = {
   sortable?: boolean
 }
 
+// The table only shows the sort; ordering the rows is up to the caller.
+export type TableSort = { key: string; direction: 'asc' | 'desc' }
+
 // Operational status palette — every status maps to one of these
 export type OperationalStatus =
   | 'active'
