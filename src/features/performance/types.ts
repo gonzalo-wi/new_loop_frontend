@@ -13,6 +13,10 @@ export type ControlMetrics = {
   avgDriverResponseMinutes: number | null
   corrections: number
   faultyControls: number
+  // The faulty controls by cause: one with several causes counts in each, so they may add up to more.
+  rejectedControls: number
+  editedControls: number
+  correctedControls: number
   errorPercent: number | null
   controlsWithIntegrationErrors: number
 }

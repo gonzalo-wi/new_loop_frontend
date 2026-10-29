@@ -1,19 +1,25 @@
 import { useMemo } from 'react'
-import { DataTable } from '@/shared/components/ui'
+import { Timer } from 'lucide-react'
+import { DataTable, Panel } from '@/shared/components/ui'
 import type { TableColumn } from '@/shared/types'
+import type { CsvColumn } from '../lib/csv'
+import type { DateRange } from '../lib/dateRange'
 import { formatCount, formatMinutes } from '../lib/format'
 import type { SortValue } from '../lib/sortRows'
 import { hasDispenserActivity, userLabel } from '../lib/summary'
 import { useSortedRows } from '../hooks/useSortedRows'
 import type { UserPerformance } from '../types'
+import { ExportCsvButton } from './ExportCsvButton'
 import { UserCell } from './UserCell'
 
 type Props = {
   users: UserPerformance[]
+  range: DateRange
   selectedUserId: string | null
-  onSelect: (user: UserPerformance) => void
+  onSelect: (user: UserPerformance, ordered: UserPerformance[]) => void
 }
 
+// The sort value is also what the CSV gets: plain numbers, no units (FR-44).
 type Column = TableColumn<UserPerformance> & { value: (u: UserPerformance) => SortValue }
 
 const num = (value: number) => <span className="tabular-nums">{formatCount(value)}</span>
@@ -68,24 +74,33 @@ const COLUMNS: Column[] = [
     value: (u) => u.dispensers.movementsWithIntegrationErrors, render: (u) => num(u.dispensers.movementsWithIntegrationErrors) },
 ]
 
+const CSV_COLUMNS: CsvColumn<UserPerformance>[] = COLUMNS.map((c) => ({ header: c.header, exportValue: c.value }))
+
 const VALUE_BY_KEY = new Map(COLUMNS.map((c) => [c.key, c.value]))
 const valueOf = (u: UserPerformance, key: string): SortValue => VALUE_BY_KEY.get(key)?.(u) ?? null
 
-export function DispensersTable({ users, selectedUserId, onSelect }: Props) {
+export function DispensersTable({ users, range, selectedUserId, onSelect }: Props) {
   const active = useMemo(() => users.filter((u) => hasDispenserActivity(u.dispensers)), [users])
   const { rows, sort, onSortChange } = useSortedRows(active, valueOf, { key: 'loads', direction: 'desc' })
 
   return (
-    <DataTable
-      columns={COLUMNS}
-      data={rows}
-      sort={sort}
-      onSortChange={onSortChange}
-      getRowKey={(u) => u.userId ?? 'sin-usuario'}
-      onRowClick={(u) => u.userId && onSelect(u)}
-      rowClassName={(u) => (u.userId !== null && u.userId === selectedUserId ? 'bg-blue-50/60' : undefined)}
-      emptyTitle="Sin movimientos de dispensers en el período"
-      emptyDescription="Nadie registró cargas ni descargas en estas fechas."
-    />
+    <Panel
+      title="Carga de dispensers"
+      description="Duración desde el primer serial escaneado hasta registrar. El tiempo entre camiones no cuenta las pausas de una hora o más. Tocá un controlador para ver su detalle."
+      icon={Timer}
+      actions={<ExportCsvButton table="dispensers" range={range} rows={rows} columns={CSV_COLUMNS} />}
+    >
+      <DataTable
+        columns={COLUMNS}
+        data={rows}
+        sort={sort}
+        onSortChange={onSortChange}
+        getRowKey={(u) => u.userId ?? 'sin-usuario'}
+        onRowClick={(u) => u.userId && onSelect(u, rows)}
+        rowClassName={(u) => (u.userId !== null && u.userId === selectedUserId ? 'bg-blue-50/60' : undefined)}
+        emptyTitle="Sin movimientos de dispensers en el período"
+        emptyDescription="Nadie registró cargas ni descargas en estas fechas."
+      />
+    </Panel>
   )
 }

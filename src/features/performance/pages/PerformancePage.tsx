@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { AlertTriangle, ClipboardCheck, Droplets, Gauge, MessageSquareWarning, Timer, Truck } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { AlertTriangle, ClipboardCheck, Droplets, Gauge, MessageSquareWarning, Truck } from 'lucide-react'
 import {
   Combobox,
   DatePicker,
@@ -10,10 +10,17 @@ import {
   Panel,
 } from '@/shared/components/ui'
 import { cn } from '@/shared/lib/utils'
-import { requestErrorMessage, useBranchOptions, usePerformanceFilters, usePerformanceSummary } from '../hooks/usePerformance'
+import type { ID } from '@/shared/types'
+import {
+  requestErrorMessage,
+  useBranchOptions,
+  usePerformanceFilters,
+  usePerformanceSummary,
+  usePreviousSummary,
+} from '../hooks/usePerformance'
 import { currentWeek } from '../lib/dateRange'
-import { formatCount, formatPercent } from '../lib/format'
-import { summaryTotals } from '../lib/summary'
+import { formatCount, formatDelta, formatPercent } from '../lib/format'
+import { summaryTotals, totalsDelta } from '../lib/summary'
 import type { UserPerformance } from '../types'
 import { ControlsTable } from '../components/ControlsTable'
 import { DispensersTable } from '../components/DispensersTable'
@@ -27,15 +34,45 @@ export function PerformancePage() {
   const f = usePerformanceFilters()
   const branches = useBranchOptions(f.isAdmin)
   const { data: summary, isLoading, isError, error, refetch, isFetching } = usePerformanceSummary(f.filters, !f.error)
-  const [selected, setSelected] = useState<UserPerformance | null>(null)
+  const { data: previous } = usePreviousSummary(f.filters, !f.error)
+  // The order of the table the detail was opened from; after a reload, the order the API returned.
+  const [order, setOrder] = useState<ID[] | null>(null)
 
   const totals = useMemo(() => (summary ? summaryTotals(summary.users, summary.coverage) : null), [summary])
+  const delta = useMemo(
+    () => (totals && previous ? totalsDelta(totals, summaryTotals(previous.users, previous.coverage)) : null),
+    [totals, previous]
+  )
+  const selected = summary?.users.find((u) => u.userId !== null && u.userId === f.userId) ?? null
+  const navigable = order ?? summary?.users.flatMap((u) => (u.userId === null ? [] : [u.userId])) ?? []
+  const position = selected?.userId ? navigable.indexOf(selected.userId) : -1
+  const neighbour = (step: number) => {
+    const id = navigable[position + step]
+    return position >= 0 && id ? () => f.setUserId(id) : null
+  }
+
+  // A user or branch in the address that does not exist in this view is dropped (FR-40).
+  const { userId, setUserId, branchId, setBranchId } = f
+  useEffect(() => {
+    if (summary && userId && !selected) setUserId(null)
+  }, [summary, userId, selected, setUserId])
+  useEffect(() => {
+    if (branches.data && branchId && !branches.data.some((b) => b.id === branchId)) setBranchId(ALL_BRANCHES)
+  }, [branches.data, branchId, setBranchId])
+
+  const openDetail = (user: UserPerformance, ordered: UserPerformance[]) => {
+    setOrder(ordered.flatMap((u) => (u.userId === null ? [] : [u.userId])))
+    f.setUserId(user.userId)
+  }
+
   const week = currentWeek(new Date())
   const isThisWeek = f.filters.from === week.from && f.filters.to === week.to
   const branchOptions = [
     { value: ALL_BRANCHES, label: 'Todas las sucursales' },
     ...(branches.data ?? []).map((b) => ({ value: b.id, label: b.name, sublabel: b.code })),
   ]
+  const vsPrevious = (value: number | null | undefined, unit = '') =>
+    value === null || value === undefined ? undefined : `${formatDelta(value)}${unit} vs. período anterior`
 
   return (
     <div className="pb-8">
@@ -62,10 +99,7 @@ export function PerformancePage() {
               <Combobox
                 options={branchOptions}
                 value={f.branchId}
-                onChange={(value) => {
-                  f.setBranchId(value)
-                  setSelected(null)
-                }}
+                onChange={f.setBranchId}
                 placeholder="Todas las sucursales"
                 searchPlaceholder="Buscar sucursal…"
                 className="w-56"
@@ -91,41 +125,32 @@ export function PerformancePage() {
         ) : (
           <div className={cn('space-y-5', isFetching && 'opacity-60')}>
             <div className="grid grid-cols-2 gap-4 xl:grid-cols-6">
-              <MetricBlock label="Controles enviados" icon={ClipboardCheck} value={formatCount(totals.submitted)} />
+              <MetricBlock label="Controles enviados" icon={ClipboardCheck} value={formatCount(totals.submitted)}
+                           note={vsPrevious(delta?.submitted)} />
               <MetricBlock
                 label="Controles mal hechos"
                 icon={AlertTriangle}
                 accent={totals.faulty > 0 ? 'red' : 'default'}
                 value={formatCount(totals.faulty)}
-                note="Rechazados, editados o corregidos"
+                note={vsPrevious(delta?.faulty) ?? 'Rechazados, editados o corregidos'}
               />
-              <MetricBlock label="% de error" icon={Gauge} value={formatPercent(totals.errorPercent)} />
-              <MetricBlock label="Rechazos del chofer" icon={MessageSquareWarning} value={formatCount(totals.rejectionRounds)} />
+              <MetricBlock label="% de error" icon={Gauge} value={formatPercent(totals.errorPercent)}
+                           note={vsPrevious(delta?.errorPoints, ' pts')} />
+              <MetricBlock label="Rechazos del chofer" icon={MessageSquareWarning} value={formatCount(totals.rejectionRounds)}
+                           note={vsPrevious(delta?.rejectionRounds)} />
               <MetricBlock label="Movimientos de dispensers" icon={Droplets} value={formatCount(totals.movements)}
-                           note={`${formatCount(totals.slowLoads)} cargas lentas (+30 min)`} />
+                           note={vsPrevious(delta?.movements) ?? `${formatCount(totals.slowLoads)} cargas lentas (+30 min)`} />
               <MetricBlock
                 label="Repartos sin entrada"
                 icon={Truck}
                 accent={totals.missingEntries > 0 ? 'amber' : 'default'}
                 value={formatCount(totals.missingEntries)}
+                note={vsPrevious(delta?.missingEntries)}
               />
             </div>
 
-            <Panel
-              title="Controles de stock"
-              description="Un control está mal hecho si el chofer lo rechazó, se editó después de enviarlo o un supervisor lo corrigió. Tocá un controlador para ver su detalle."
-              icon={ClipboardCheck}
-            >
-              <ControlsTable users={summary.users} selectedUserId={selected?.userId ?? null} onSelect={setSelected} />
-            </Panel>
-
-            <Panel
-              title="Carga de dispensers"
-              description="Duración desde el primer serial escaneado hasta registrar. El tiempo entre camiones no cuenta las pausas de una hora o más. Tocá un controlador para ver su detalle."
-              icon={Timer}
-            >
-              <DispensersTable users={summary.users} selectedUserId={selected?.userId ?? null} onSelect={setSelected} />
-            </Panel>
+            <ControlsTable users={summary.users} range={f.filters} selectedUserId={selected?.userId ?? null} onSelect={openDetail} />
+            <DispensersTable users={summary.users} range={f.filters} selectedUserId={selected?.userId ?? null} onSelect={openDetail} />
 
             <div className="grid gap-5 xl:grid-cols-2">
               <MissingEntriesPanel coverage={summary.coverage} />
@@ -141,7 +166,15 @@ export function PerformancePage() {
         )}
       </div>
 
-      {selected && <UserDetailModal user={selected} filters={f.filters} onClose={() => setSelected(null)} />}
+      {selected && (
+        <UserDetailModal
+          user={selected}
+          filters={f.filters}
+          onClose={() => f.setUserId(null)}
+          onPrevious={neighbour(-1)}
+          onNext={neighbour(1)}
+        />
+      )}
     </div>
   )
 }

@@ -9,6 +9,8 @@ type Props = {
   data: DailyBarsPoint[]
   series: BarSeries[]
   ariaLabel: string
+  // 'week': each point is a week, labelled by its first day in the range.
+  period?: 'day' | 'week'
 }
 
 const HEIGHT = 200
@@ -26,7 +28,7 @@ function niceMax(value: number) {
 }
 
 /** Grouped bars per day, same hand-made approach as the dispenser statistics chart (no chart library). */
-export function DailyBarsChart({ data, series, ariaLabel }: Props) {
+export function DailyBarsChart({ data, series, ariaLabel, period = 'day' }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState(720)
   const [hover, setHover] = useState<number | null>(null)
@@ -98,7 +100,9 @@ export function DailyBarsChart({ data, series, ariaLabel }: Props) {
 
       {hovered && (
         <div className="pointer-events-none absolute right-2 top-2 rounded-md border border-zinc-200 bg-white px-3 py-2 text-xs shadow-lg">
-          <p className="font-medium text-zinc-900">{format(parseISO(hovered.date), 'dd/MM/yyyy')}</p>
+          <p className="font-medium text-zinc-900">
+            {period === 'week' ? 'Semana del ' : ''}{format(parseISO(hovered.date), 'dd/MM/yyyy')}
+          </p>
           {series.map((s) => (
             <p key={s.key} className="tabular-nums text-zinc-600">
               {s.label}: {(hovered.values[s.key] ?? 0).toLocaleString('es-AR')}
