@@ -6,6 +6,7 @@ import type { SortValue } from '../lib/sortRows'
 import { hasDispenserActivity, userLabel } from '../lib/summary'
 import { useSortedRows } from '../hooks/useSortedRows'
 import type { UserPerformance } from '../types'
+import { UserCell } from './UserCell'
 
 type Props = {
   users: UserPerformance[]
@@ -19,7 +20,7 @@ const num = (value: number) => <span className="tabular-nums">{formatCount(value
 
 const COLUMNS: Column[] = [
   { key: 'user', header: 'Controlador', sortable: true, value: userLabel,
-    render: (u) => <span className="font-medium text-zinc-900">{userLabel(u)}</span> },
+    render: (u) => <UserCell user={u} /> },
   { key: 'loads', header: 'Cargas', align: 'right', sortable: true,
     value: (u) => u.dispensers.loads, render: (u) => num(u.dispensers.loads) },
   { key: 'unloads', header: 'Descargas', align: 'right', sortable: true,

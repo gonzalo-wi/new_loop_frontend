@@ -19,7 +19,7 @@ import { ControlsTable } from '../components/ControlsTable'
 import { DispensersTable } from '../components/DispensersTable'
 import { MissingEntriesPanel } from '../components/MissingEntriesPanel'
 import { ReasonList } from '../components/ReasonList'
-import { UserDetailPanel } from '../components/UserDetailPanel'
+import { UserDetailModal } from '../components/UserDetailModal'
 
 const ALL_BRANCHES = ''
 
@@ -111,13 +111,9 @@ export function PerformancePage() {
               />
             </div>
 
-            {selected && (
-              <UserDetailPanel user={selected} filters={f.filters} onClose={() => setSelected(null)} />
-            )}
-
             <Panel
               title="Controles de stock"
-              description="Un control está mal hecho si el chofer lo rechazó, se editó después de enviarlo o un supervisor lo corrigió. Tocá una fila para ver su evolución."
+              description="Un control está mal hecho si el chofer lo rechazó, se editó después de enviarlo o un supervisor lo corrigió. Tocá un controlador para ver su detalle."
               icon={ClipboardCheck}
             >
               <ControlsTable users={summary.users} selectedUserId={selected?.userId ?? null} onSelect={setSelected} />
@@ -125,7 +121,7 @@ export function PerformancePage() {
 
             <Panel
               title="Carga de dispensers"
-              description="Duración desde el primer serial escaneado hasta registrar. El tiempo entre camiones no cuenta las pausas de una hora o más."
+              description="Duración desde el primer serial escaneado hasta registrar. El tiempo entre camiones no cuenta las pausas de una hora o más. Tocá un controlador para ver su detalle."
               icon={Timer}
             >
               <DispensersTable users={summary.users} selectedUserId={selected?.userId ?? null} onSelect={setSelected} />
@@ -144,6 +140,8 @@ export function PerformancePage() {
           </div>
         )}
       </div>
+
+      {selected && <UserDetailModal user={selected} filters={f.filters} onClose={() => setSelected(null)} />}
     </div>
   )
 }
