@@ -45,6 +45,30 @@ export function summaryTotals(users: UserPerformance[], coverage: CoverageDay[])
   }
 }
 
+export type TotalsDelta = {
+  submitted: number
+  faulty: number
+  // In percentage points; null when either period has no error rate.
+  errorPoints: number | null
+  rejectionRounds: number
+  movements: number
+  missingEntries: number
+}
+
+/** Current minus previous period. A previous period with no activity counts as zeros. */
+export function totalsDelta(current: SummaryTotals, previous: SummaryTotals): TotalsDelta {
+  return {
+    submitted: current.submitted - previous.submitted,
+    faulty: current.faulty - previous.faulty,
+    errorPoints: current.errorPercent === null || previous.errorPercent === null
+      ? null
+      : Math.round((current.errorPercent - previous.errorPercent) * ONE_DECIMAL) / ONE_DECIMAL,
+    rejectionRounds: current.rejectionRounds - previous.rejectionRounds,
+    movements: current.movements - previous.movements,
+    missingEntries: current.missingEntries - previous.missingEntries,
+  }
+}
+
 export function userLabel(user: Pick<UserPerformance, 'username'>): string {
   return user.username ?? 'Sin usuario'
 }
