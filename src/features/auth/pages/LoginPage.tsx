@@ -1,11 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Eye, EyeOff, Loader2, User, Lock, AlertCircle, ArrowRight, Truck } from 'lucide-react'
+import { Eye, EyeOff, Loader2, User, Lock, AlertCircle, ArrowRight, Truck, Clock } from 'lucide-react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { loginService } from '../services/auth.service'
-import { useAuthStore } from '../store/auth.store'
+import { clearSessionExpired, useAuthStore, wasSessionExpired } from '../store/auth.store'
 import { ROUTES } from '@/shared/constants'
 import { inputClassName } from '@/shared/components/ui'
 import { cn } from '@/shared/lib/utils'
@@ -24,6 +25,12 @@ export function LoginPage() {
   const { depart } = useOutletContext<AuthOutletContext>()
   const [showPassword, setShowPassword] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
+  const [sessionExpired] = useState(wasSessionExpired)
+  // Cleared after reading (not while rendering, which StrictMode runs twice), so a reload doesn't repeat it.
+  useEffect(clearSessionExpired, [])
+  // Sessions now end every night: the next user in this tab must not see the previous one's cached data.
+  const queryClient = useQueryClient()
+  useEffect(() => queryClient.clear(), [queryClient])
   const [departing, setDeparting] = useState(false)
 
   const {
@@ -117,6 +124,13 @@ export function LoginPage() {
             <p className="mt-1.5 text-xs text-red-600">{errors.password.message}</p>
           )}
         </div>
+
+        {sessionExpired && !serverError && (
+          <div role="status" className="flex items-start gap-2.5 rounded-lg border border-amber-200 bg-amber-50 px-3.5 py-3 text-sm text-amber-800">
+            <Clock size={16} className="mt-0.5 shrink-0" />
+            <span>Tu sesión venció. Volvé a ingresar.</span>
+          </div>
+        )}
 
         {serverError && (
           <div className="flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700">
