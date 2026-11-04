@@ -59,9 +59,9 @@ export function RemitoActions({ controlId, printed, variant = 'icon' }: Props) {
       queryClient.invalidateQueries({ queryKey: ['stock-controls'] })
     } catch (err) {
       setError(
-        `El remito se mandó a imprimir pero no se pudo marcar como impreso: ${
-          err instanceof Error ? err.message : 'error desconocido'
-        }`
+        `El remito se mandó a imprimir pero no se pudo marcar como impreso. ${
+          err instanceof Error ? err.message : ''
+        }`.trim()
       )
     }
   }

@@ -25,10 +25,14 @@ import { useDebounce } from '@/shared/hooks/useDebounce'
 import { StockControlFormModal } from './StockControlFormModal'
 import { StockControlDetail } from './StockControlDetail'
 import { RemitoActions } from './RemitoActions'
+import { RemitoBatchBar } from './RemitoBatchBar'
+import { hasRemito, selectedInList } from '../lib/remitoSelection'
 import { canCorrectStockControl } from '../permissions'
 import { useAuthStore } from '@/features/auth/store/auth.store'
 
 const PAGE_SIZE = 20
+// Exits are printed in batches from this list, so a whole day of routes must fit on one page.
+const EXIT_PAGE_SIZE = 100
 
 type Props = {
   type: StockControlType
@@ -52,18 +56,20 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
   const [showForm, setShowForm]     = useState(false)
   const [detailControl, setDetailControl] = useState<StockControl | null>(null)
   const [pendingBranchId, setPendingBranchId] = useState('')
+  const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(new Set())
 
   const debouncedSearch = useDebounce(search)
 
+  // A selection belongs to the list it was made in: changing filters, dates or page starts over.
   function resetPage<T>(setter: (v: T) => void) {
-    return (v: T) => { setPage(0); setter(v) }
+    return (v: T) => { setPage(0); setSelectedIds(new Set()); setter(v) }
   }
 
   const { data, isLoading, isError, refetch } = useQuery({
     // Operators look for what was loaded today, so the range applies to the
     // creation date; an EXIT's controlDate is the next delivery day.
     queryKey: ['stock-controls', type, { statusFilter, from, to, page }],
-    queryFn: () => fetchStockControls({ type, createdFrom: from, createdTo: to, page, size: PAGE_SIZE }),
+    queryFn: () => fetchStockControls({ type, createdFrom: from, createdTo: to, page, size: type === 'EXIT' ? EXIT_PAGE_SIZE : PAGE_SIZE }),
     refetchInterval: 30_000,
   })
 
@@ -111,6 +117,17 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
       })
     : controls
 
+  const remitoSelection = selectedInList(filtered, selectedIds)
+
+  function toggleSelected(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
   const differencesCount  = filtered.filter((c) => c.status === 'WITH_DIFFERENCES').length
   const truckOrderedCount = filtered.filter((c) => c.truckOrdered).length
 
@@ -122,7 +139,27 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
 
   const TypeIcon = type === 'EXIT' ? ArrowUpFromLine : ArrowDownToLine
 
+  const selectColumn: TableColumn<StockControl> = {
+    key: 'select',
+    header: '',
+    width: '36px',
+    align: 'center',
+    render: (c) =>
+      hasRemito(c) ? (
+        <input
+          type="checkbox"
+          checked={selectedIds.has(c.id)}
+          onChange={() => toggleSelected(c.id)}
+          // The row opens the detail on click; ticking the box must not.
+          onClick={(e) => e.stopPropagation()}
+          aria-label={`Seleccionar remito del reparto ${c.routeCode}`}
+          className="h-3.5 w-3.5 cursor-pointer rounded border-zinc-300 accent-blue-600"
+        />
+      ) : null,
+  }
+
   const columns: TableColumn<StockControl>[] = [
+    ...(type === 'EXIT' ? [selectColumn] : []),
     {
       key: 'createdAt',
       header: 'Cargado',
@@ -395,6 +432,15 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
           </span>
         </ActionBar>
 
+        {type === 'EXIT' && (
+          <RemitoBatchBar
+            controls={filtered}
+            selection={remitoSelection}
+            onSelect={(ids) => setSelectedIds(new Set(ids))}
+            onClear={() => setSelectedIds(new Set())}
+          />
+        )}
+
         {/* Table */}
         <div>
           <DataTable
@@ -433,7 +479,7 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
         {meta && meta.totalPages > 1 && (
           <div className="flex items-center justify-between border-t border-zinc-100 px-4 py-3">
             <button
-              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              onClick={() => { setSelectedIds(new Set()); setPage((p) => Math.max(0, p - 1)) }}
               disabled={page === 0}
               className="h-8 rounded-md border border-zinc-200 bg-white px-3.5 text-xs font-medium text-zinc-700 shadow-card hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
             >
@@ -445,7 +491,7 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
               <span className="text-zinc-400">({meta.totalElements} registros)</span>
             </span>
             <button
-              onClick={() => setPage((p) => Math.min(meta.totalPages - 1, p + 1))}
+              onClick={() => { setSelectedIds(new Set()); setPage((p) => Math.min(meta.totalPages - 1, p + 1)) }}
               disabled={page >= meta.totalPages - 1}
               className="h-8 rounded-md border border-zinc-200 bg-white px-3.5 text-xs font-medium text-zinc-700 shadow-card hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
             >

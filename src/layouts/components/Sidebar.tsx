@@ -23,6 +23,7 @@ import {
   Settings,
   BarChart3,
   Gauge,
+  CalendarOff,
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { ROUTES } from '@/shared/constants'
@@ -79,6 +80,7 @@ const NAV_GROUPS: NavGroup[] = [
     roles: BACK_OFFICE_ROLES,
     items: [
       { to: ROUTES.BRANCHES, icon: Building2, label: 'Sucursales' },
+      { to: ROUTES.HOLIDAYS, icon: CalendarOff, label: 'Feriados' },
     ],
   },
   {

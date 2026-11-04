@@ -23,6 +23,7 @@ export const ROUTES = {
   ORDERS: '/orders',
   DISPENSERS: '/dispensers',
   APP_VERSION: '/app-version',
+  HOLIDAYS: '/holidays',
   STATISTICS: '/statistics',
   STATISTICS_DISPENSERS: '/statistics/dispensers',
   STATISTICS_PERFORMANCE: '/statistics/performance',
