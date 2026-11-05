@@ -159,7 +159,6 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
   }
 
   const columns: TableColumn<StockControl>[] = [
-    ...(type === 'EXIT' ? [selectColumn] : []),
     {
       key: 'createdAt',
       header: 'Cargado',
@@ -259,6 +258,8 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
         )
       },
     },
+    // Right after the print button, so choosing what to print happens where printing already is.
+    ...(type === 'EXIT' ? [selectColumn] : []),
   ]
 
   return (
@@ -436,7 +437,6 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
           <RemitoBatchBar
             controls={filtered}
             selection={remitoSelection}
-            onSelect={(ids) => setSelectedIds(new Set(ids))}
             onClear={() => setSelectedIds(new Set())}
           />
         )}
