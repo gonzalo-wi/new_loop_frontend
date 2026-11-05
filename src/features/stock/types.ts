@@ -43,6 +43,9 @@ export type StockControl = {
   driverRejectionReason?: string | null
   /** Exits only: set once someone sends the remito to the printer from the panel. */
   remitoPrinted: boolean
+  /** Set by Aguas when it confirms an exit; the remito exists only once both are set. */
+  aguasFormulario?: string | null
+  aguasNroRemito?: number | null
   createdAt: string
   updatedAt: string
 }

@@ -128,8 +128,56 @@ export async function fetchRemitoPdf(controlId: string): Promise<Blob> {
 }
 
 export async function markRemitoPrinted(controlId: string): Promise<StockControl> {
-  const { data } = await api.post<ApiResponse<StockControl>>(`/stock-controls/${controlId}/remito/printed`)
-  return data.data
+  try {
+    const { data } = await api.post<ApiResponse<StockControl>>(`/stock-controls/${controlId}/remito/printed`)
+    return data.data
+  } catch {
+    // The backend's reason is in English; the operator only needs to know to retry.
+    throw new Error('Actualizá la lista y, si sigue sin marcar, volvé a imprimirlo.')
+  }
+}
+
+// The batch 409 lists every failing route as "route <code>: <reason>"; the
+// operator needs the codes to find them in the list.
+async function extractBatchMessage(err: unknown): Promise<string> {
+  const response = (err as { response?: { status?: number; data?: unknown } })?.response
+  if (response?.status === 409 && response.data instanceof Blob) {
+    try {
+      const parsed = JSON.parse(await response.data.text()) as { message?: string }
+      const routes = [...(parsed.message ?? '').matchAll(/route (\S+):/g)].map((m) => m[1])
+      if (routes.length > 0) {
+        return `No se imprimió ningún remito: los repartos ${routes.join(', ')} todavía no tienen remito (falta la confirmación de Aguas). Sacalos de la selección y probá de nuevo.`
+      }
+    } catch {
+      // Body wasn't JSON — fall through to the generic message.
+    }
+    return 'No se imprimió ningún remito: alguno de los seleccionados ya no tiene remito disponible. Actualizá la lista y probá de nuevo.'
+  }
+  return 'No se pudieron obtener los remitos.'
+}
+
+/** Every remito in one PDF, one per page, in the given order. */
+export async function fetchRemitosPdf(controlIds: string[]): Promise<Blob> {
+  try {
+    const { data } = await api.post<Blob>('/stock-controls/remitos', { ids: controlIds }, {
+      responseType: 'blob',
+      // A full day of remitos takes longer to render than the client's default timeout allows.
+      timeout: 60_000,
+    })
+    return data
+  } catch (err) {
+    throw new Error(await extractBatchMessage(err))
+  }
+}
+
+export async function markRemitosPrinted(controlIds: string[]): Promise<StockControl[]> {
+  try {
+    const { data } = await api.post<ApiResponse<StockControl[]>>('/stock-controls/remitos/printed', { ids: controlIds })
+    return data.data
+  } catch {
+    // The backend's reason is in English; the operator only needs to know to retry.
+    throw new Error('Actualizá la lista y, si siguen sin marcar, volvé a imprimirlos.')
+  }
 }
 
 export async function updateStockControl(

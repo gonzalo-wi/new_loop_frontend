@@ -21,6 +21,7 @@ const ROUTE_LABELS: Record<string, string> = {
   '/dispensers':    'Dispensers',
   '/orderable-products': 'Pedibles',
   '/app-version':   'App móvil',
+  '/holidays':      'Feriados',
   '/statistics/dispensers': 'Estadísticas · Dispensers',
   '/statistics/performance': 'Estadísticas · Desempeño',
   '/statistics':    'Estadísticas',
