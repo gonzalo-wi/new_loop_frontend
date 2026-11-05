@@ -20,6 +20,7 @@ import { AppVersionPage } from '@/features/app-version/pages/AppVersionPage'
 import { HolidaysPage } from '@/features/holidays/pages/HolidaysPage'
 import { DispenserStatisticsPage } from '@/features/statistics/pages/DispenserStatisticsPage'
 import { PerformancePage } from '@/features/performance/pages/PerformancePage'
+import { RouteStatisticsPage } from '@/features/route-statistics/pages/RouteStatisticsPage'
 import { ROUTES } from '@/shared/constants'
 
 export const router = createBrowserRouter([
@@ -46,6 +47,7 @@ export const router = createBrowserRouter([
       { path: 'statistics', element: <Navigate to={ROUTES.STATISTICS_DISPENSERS} replace /> },
       { path: 'statistics/dispensers', element: <DispenserStatisticsPage /> },
       { path: 'statistics/performance', element: <PerformancePage /> },
+      { path: 'statistics/routes', element: <RouteStatisticsPage /> },
     ],
   },
   {
