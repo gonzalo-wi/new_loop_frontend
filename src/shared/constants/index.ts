@@ -27,6 +27,7 @@ export const ROUTES = {
   STATISTICS: '/statistics',
   STATISTICS_DISPENSERS: '/statistics/dispensers',
   STATISTICS_PERFORMANCE: '/statistics/performance',
+  STATISTICS_ROUTES: '/statistics/routes',
 } as const
 
 export const ROLE_LABELS: Record<UserRole, string> = {

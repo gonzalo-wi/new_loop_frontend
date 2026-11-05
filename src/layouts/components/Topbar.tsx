@@ -24,6 +24,7 @@ const ROUTE_LABELS: Record<string, string> = {
   '/holidays':      'Feriados',
   '/statistics/dispensers': 'Estadísticas · Dispensers',
   '/statistics/performance': 'Estadísticas · Desempeño',
+  '/statistics/routes': 'Estadísticas · Repartos',
   '/statistics':    'Estadísticas',
 }
 
