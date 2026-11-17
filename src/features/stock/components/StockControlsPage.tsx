@@ -27,7 +27,7 @@ import { StockControlDetail } from './StockControlDetail'
 import { RemitoActions } from './RemitoActions'
 import { RemitoBatchBar } from './RemitoBatchBar'
 import { hasRemito, selectedInList } from '../lib/remitoSelection'
-import { canCorrectStockControl } from '../permissions'
+import { canCorrectStockControl, canManageStockControls } from '../permissions'
 import { useAuthStore } from '@/features/auth/store/auth.store'
 
 const PAGE_SIZE = 20
@@ -46,6 +46,7 @@ const TODAY = localISODate()
 export function StockControlsPage({ type, title, description, createLabel }: Props) {
   const queryClient = useQueryClient()
   const role = useAuthStore((s) => s.user?.role)
+  const canManage = canManageStockControls(role)
 
   const [search, setSearch]         = useState('')
   const [statusFilter, setStatus]   = useState('')
@@ -223,7 +224,7 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
       width: '110px',
       align: 'right',
       render: (c) => {
-        const canEdit    = c.status === 'CONTROLLED'
+        const canEdit    = canManage && c.status === 'CONTROLLED'
         const canCorrect = canCorrectStockControl(role, c)
         return (
           <div className="flex items-center justify-end gap-1">
@@ -253,13 +254,13 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
               </button>
             )}
             {/* Remitos only exist for exits */}
-            {c.type === 'EXIT' && <RemitoActions controlId={c.id} printed={c.remitoPrinted} />}
+            {c.type === 'EXIT' && canManage && <RemitoActions controlId={c.id} printed={c.remitoPrinted} />}
           </div>
         )
       },
     },
     // Right after the print button, so choosing what to print happens where printing already is.
-    ...(type === 'EXIT' ? [selectColumn] : []),
+    ...(type === 'EXIT' && canManage ? [selectColumn] : []),
   ]
 
   return (
@@ -268,13 +269,15 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
         title={title}
         description={description}
         actions={
-          <ActionButton
-            variant="primary"
-            icon={<Plus size={14} />}
-            onClick={() => { setSelectedControl(null); setShowForm(true) }}
-          >
-            {createLabel}
-          </ActionButton>
+          canManage ? (
+            <ActionButton
+              variant="primary"
+              icon={<Plus size={14} />}
+              onClick={() => { setSelectedControl(null); setShowForm(true) }}
+            >
+              {createLabel}
+            </ActionButton>
+          ) : undefined
         }
       />
 
@@ -433,7 +436,7 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
           </span>
         </ActionBar>
 
-        {type === 'EXIT' && (
+        {type === 'EXIT' && canManage && (
           <RemitoBatchBar
             controls={filtered}
             selection={remitoSelection}
@@ -461,7 +464,7 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
             emptyTitle="Sin registros"
             emptyDescription={`No hay ${type === 'EXIT' ? 'salidas' : 'entradas'} que coincidan con los filtros.`}
             emptyAction={
-              !debouncedSearch && !statusFilter ? (
+              canManage && !debouncedSearch && !statusFilter ? (
                 <ActionButton
                   variant="primary"
                   size="sm"
@@ -502,7 +505,7 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
       </Panel>
 
       {/* Form modal */}
-      {showForm && (
+      {showForm && canManage && (
         <StockControlFormModal
           type={type}
           control={selectedControl}
@@ -517,6 +520,7 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
         <StockControlDetail
           control={detailControl}
           onClose={() => setDetailControl(null)}
+          canPrintRemito={canManage}
         />
       )}
     </div>

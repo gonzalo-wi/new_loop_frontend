@@ -7,9 +7,11 @@ import { RemitoActions } from './RemitoActions'
 type Props = {
   control: StockControl
   onClose: () => void
+  /** False for read-only users: they can't download or print remitos. */
+  canPrintRemito: boolean
 }
 
-export function StockControlDetail({ control, onClose }: Props) {
+export function StockControlDetail({ control, onClose, canPrintRemito }: Props) {
   const statusCfg = STOCK_CONTROL_STATUS_CONFIG[control.status] ?? { label: control.status, cls: 'text-zinc-600 bg-zinc-100 border-zinc-200' }
   const isEntry   = control.type === 'ENTRY'
   const isExit    = !isEntry
@@ -49,7 +51,7 @@ export function StockControlDetail({ control, onClose }: Props) {
         </div>
 
         {/* Remito toolbar — exits only */}
-        {isExit && (
+        {isExit && canPrintRemito && (
           <div className="flex items-center gap-2 border-b border-zinc-100 bg-zinc-50 px-6 py-2.5">
             <RemitoActions controlId={control.id} printed={control.remitoPrinted} variant="button" />
             <span className="ml-auto text-[11px] text-zinc-400">

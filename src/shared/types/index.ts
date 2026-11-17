@@ -64,3 +64,5 @@ export type UserRole =
   | 'controller'
   | 'delivery_driver'
   | 'supervisor'
+  | 'viewer'
+  | 'clarkista'
