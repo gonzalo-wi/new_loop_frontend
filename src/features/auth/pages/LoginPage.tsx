@@ -6,8 +6,8 @@ import { Eye, EyeOff, Loader2, User, Lock, AlertCircle, ArrowRight, Truck, Clock
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { loginService } from '../services/auth.service'
+import { homePathFor } from '../lib/panelAccess'
 import { clearSessionExpired, useAuthStore, wasSessionExpired } from '../store/auth.store'
-import { ROUTES } from '@/shared/constants'
 import { inputClassName } from '@/shared/components/ui'
 import { cn } from '@/shared/lib/utils'
 import type { AuthOutletContext } from '@/layouts/AuthLayout'
@@ -49,7 +49,7 @@ export function LoginPage() {
       setDeparting(true)
       depart(() => {
         setAuth(response.user, response.token)
-        navigate(ROUTES.DASHBOARD, { replace: true })
+        navigate(homePathFor(response.user.role), { replace: true })
       })
     } catch (err: unknown) {
       // Try to extract backend error message

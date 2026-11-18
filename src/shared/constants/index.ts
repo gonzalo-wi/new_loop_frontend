@@ -35,6 +35,8 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   controller: 'Controlador',
   delivery_driver: 'Repartidor',
   supervisor: 'Supervisor',
+  viewer: 'Visualizador',
+  clarkista: 'Clarkista',
 }
 
 // Backend uses uppercase role strings; frontend uses lowercase kebab values
@@ -43,6 +45,8 @@ export const BACKEND_ROLE_MAP: Record<string, UserRole> = {
   CONTROLADOR:          'controller',
   REPARTIDOR:           'delivery_driver',
   SUPERVISOR:           'supervisor',
+  VISUALIZADOR:         'viewer',
+  CLARKISTA:            'clarkista',
 }
 
 export const FRONTEND_ROLE_MAP: Record<UserRole, string> = {
@@ -50,6 +54,8 @@ export const FRONTEND_ROLE_MAP: Record<UserRole, string> = {
   controller:      'CONTROLADOR',
   delivery_driver: 'REPARTIDOR',
   supervisor:      'SUPERVISOR',
+  viewer:          'VISUALIZADOR',
+  clarkista:       'CLARKISTA',
 }
 
 export const PAGE_SIZES = [20, 50, 100] as const

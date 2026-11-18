@@ -18,7 +18,7 @@ const fancyInput =
   'h-10 w-full rounded-lg border border-zinc-200 bg-white shadow-card px-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 transition-all duration-150 hover:border-zinc-300 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 disabled:bg-zinc-100 disabled:text-zinc-400'
 
 const USER_ROLES = [
-  'admin', 'controller', 'delivery_driver', 'supervisor',
+  'admin', 'controller', 'delivery_driver', 'supervisor', 'viewer', 'clarkista',
 ] as const
 
 const ROLE_OPTIONS = (Object.entries(ROLE_LABELS) as [UserRole, string][]).map(

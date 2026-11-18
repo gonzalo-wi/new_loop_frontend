@@ -46,6 +46,8 @@ type NavGroup = { label: string; icon?: React.ElementType; roles?: UserRole[]; i
 // BACK_OFFICE_ROLES is a subset of OPERATIONAL_ROLES (admin/supervisor see both tiers).
 const OPERATIONAL_ROLES: UserRole[] = ['admin', 'supervisor', 'controller']
 const BACK_OFFICE_ROLES: UserRole[] = ['admin', 'supervisor']
+// Viewers (read-only, per plant) only follow entries and exits.
+const STOCK_READER_ROLES: UserRole[] = [...OPERATIONAL_ROLES, 'viewer']
 
 // Groups with an empty label render their items flat (no collapsible header).
 const NAV_GROUPS: NavGroup[] = [
@@ -59,8 +61,8 @@ const NAV_GROUPS: NavGroup[] = [
     icon: Truck,
     roles: OPERATIONAL_ROLES,
     items: [
-      { to: ROUTES.STOCK_ENTRIES, icon: ArrowDownToLine,  label: 'Entradas' },
-      { to: ROUTES.STOCK_EXITS,   icon: ArrowUpFromLine,  label: 'Salidas' },
+      { to: ROUTES.STOCK_ENTRIES, icon: ArrowDownToLine,  label: 'Entradas', roles: STOCK_READER_ROLES },
+      { to: ROUTES.STOCK_EXITS,   icon: ArrowUpFromLine,  label: 'Salidas',  roles: STOCK_READER_ROLES },
       { to: ROUTES.DELIVERIES,    icon: Route,            label: 'Repartos', roles: BACK_OFFICE_ROLES },
       { to: ROUTES.ORDERS,        icon: ClipboardCheck,   label: 'Pedidos' },
       { to: ROUTES.DISPENSERS,    icon: Droplets,         label: 'Dispensers' },
