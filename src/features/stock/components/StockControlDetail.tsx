@@ -7,7 +7,7 @@ import { RemitoActions } from './RemitoActions'
 type Props = {
   control: StockControl
   onClose: () => void
-  /** False for read-only users: they can't download or print remitos. */
+  /** False for roles that can't download or print remitos (see canPrintRemitos). */
   canPrintRemito: boolean
 }
 

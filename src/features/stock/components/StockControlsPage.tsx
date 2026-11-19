@@ -27,7 +27,7 @@ import { StockControlDetail } from './StockControlDetail'
 import { RemitoActions } from './RemitoActions'
 import { RemitoBatchBar } from './RemitoBatchBar'
 import { hasRemito, selectedInList } from '../lib/remitoSelection'
-import { canCorrectStockControl, canManageStockControls } from '../permissions'
+import { canCorrectStockControl, canManageStockControls, canPrintRemitos } from '../permissions'
 import { useAuthStore } from '@/features/auth/store/auth.store'
 
 const PAGE_SIZE = 20
@@ -47,6 +47,7 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
   const queryClient = useQueryClient()
   const role = useAuthStore((s) => s.user?.role)
   const canManage = canManageStockControls(role)
+  const canPrint  = canPrintRemitos(role)
 
   const [search, setSearch]         = useState('')
   const [statusFilter, setStatus]   = useState('')
@@ -254,13 +255,13 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
               </button>
             )}
             {/* Remitos only exist for exits */}
-            {c.type === 'EXIT' && canManage && <RemitoActions controlId={c.id} printed={c.remitoPrinted} />}
+            {c.type === 'EXIT' && canPrint && <RemitoActions controlId={c.id} printed={c.remitoPrinted} />}
           </div>
         )
       },
     },
     // Right after the print button, so choosing what to print happens where printing already is.
-    ...(type === 'EXIT' && canManage ? [selectColumn] : []),
+    ...(type === 'EXIT' && canPrint ? [selectColumn] : []),
   ]
 
   return (
@@ -436,7 +437,7 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
           </span>
         </ActionBar>
 
-        {type === 'EXIT' && canManage && (
+        {type === 'EXIT' && canPrint && (
           <RemitoBatchBar
             controls={filtered}
             selection={remitoSelection}
@@ -520,7 +521,7 @@ export function StockControlsPage({ type, title, description, createLabel }: Pro
         <StockControlDetail
           control={detailControl}
           onClose={() => setDetailControl(null)}
-          canPrintRemito={canManage}
+          canPrintRemito={canPrint}
         />
       )}
     </div>
